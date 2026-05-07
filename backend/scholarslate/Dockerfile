@@ -16,6 +16,8 @@ COPY .mvn .mvn
 RUN ./mvnw dependency:go-offline -q
 
 # Copy source code và build
+# ARG CACHEBUST dùng để phá Docker layer cache khi cần force rebuild
+ARG CACHEBUST=2
 COPY src ./src
 RUN ./mvnw package -DskipTests -q
 
