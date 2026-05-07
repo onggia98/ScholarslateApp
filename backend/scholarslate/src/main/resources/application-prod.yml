@@ -34,10 +34,8 @@ spring:
   flyway:
     enabled: true
     locations: classpath:db/migration
-    # Flyway dùng connection riêng, không có connection-init-sql
-    url: ${JDBC_DATABASE_URL}
-    user: ${JDBC_DATABASE_USERNAME}
-    password: ${JDBC_DATABASE_PASSWORD}
+    # Flyway dùng main datasource (HikariCP) — không cấu hình url/user/password riêng
+    # vì Spring Boot 4.x dedicated Flyway datasource có thể không kích hoạt auto-config
 
   cache:
     type: caffeine
