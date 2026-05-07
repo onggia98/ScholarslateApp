@@ -1,0 +1,10 @@
+# Loại bỏ các file không cần thiết để giảm build context
+target/
+.git/
+.gitignore
+*.md
+.DS_Store
+.idea/
+*.iml
+.mvn/wrapper/maven-wrapper.jar
+src/test/

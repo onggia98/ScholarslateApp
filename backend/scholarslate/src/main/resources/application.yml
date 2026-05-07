@@ -1,0 +1,68 @@
+server:
+  port: 8081
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5433/papertracker
+    username: papertracker
+    password: ${DB_PASSWORD:papertracker123}   # set trong application-local.yml hoặc env var
+    hikari:
+      maximum-pool-size: 20
+      # Set ef_search global cho tất cả connections (thay thế SET LOCAL trong từng query)
+      connection-init-sql: "SET hnsw.ef_search = 128"
+  jpa:
+    hibernate:
+      ddl-auto: validate       # Flyway quản lý schema, Hibernate chỉ validate
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    # Flyway dùng datasource riêng, KHÔNG có connection-init-sql
+    # Tránh lỗi "unrecognized configuration parameter hnsw.ef_search"
+    # khi pgvector chưa được CREATE EXTENSION (chạy trước V1 migration)
+    url: jdbc:postgresql://localhost:5433/papertracker
+    user: papertracker
+    password: ${DB_PASSWORD:papertracker123}
+
+  cache:
+    type: caffeine
+    caffeine:
+      spec: maximumSize=500,expireAfterWrite=3600s   # 1 giờ — recommendation cache
+
+jwt:
+  # Phải đủ 32 ký tự (256 bit) cho HMAC-SHA256
+  # Đổi thành key mạnh hơn khi deploy: openssl rand -base64 32
+  secret: ${JWT_SECRET:papertracker-secret-key-change-in-production!!}
+  expiration-ms: 86400000   # 24 giờ
+
+# ── AI Services ───────────────────────────────────────────────────────────────
+ai:
+  groq:
+    # Lấy key tại https://console.groq.com → API Keys
+    api-key: ${GROQ_API_KEY:}
+    model: llama-3.1-8b-instant
+    max-summary-length: 2000
+
+  huggingface:
+    # Lấy key tại https://huggingface.co/settings/tokens
+    api-key: ${HUGGINGFACE_API_KEY:}
+    # BAAI/bge-small-en-v1.5: feature-extraction pipeline, 384 dims (tương thích vector(384))
+    # all-MiniLM-L6-v2 bị HF classify là sentence-similarity → gây lỗi khi dùng pipeline/feature-extraction
+    model: BAAI/bge-small-en-v1.5
+    batch-size: 32
+    retry-wait-on-503-ms: 30000   # 30s chờ model cold start
+
+# ── Scheduler ─────────────────────────────────────────────────────────────────
+scheduler:
+  main:
+    cron: "0 0 6 * * *"           # Chạy 06:00 hàng ngày
+
+  retry:
+    fixed-delay-ms: 1800000       # 30 phút giữa các lần retry
+
+  arxiv:
+    max-results-per-keyword: 10   # Tối đa 10 paper/keyword
+    request-delay-ms: 350         # 350ms delay giữa các request (rate limit arXiv)
+
+  groq:
+    call-delay-ms: 2000           # 2s delay giữa các Groq call (free tier ~30 RPM)
+    transient-retry-delay-ms: 5000  # 5s chờ trước khi retry 5xx

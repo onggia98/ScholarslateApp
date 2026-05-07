@@ -1,0 +1,71 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5433/papertracker
+    username: papertracker
+    password: papertracker123
+    hikari:
+      maximum-pool-size: 20
+      # Set ef_search global cho tất cả connections — thay thế SET LOCAL trong từng query
+      connection-init-sql: "SET hnsw.ef_search = 128"
+
+  jpa:
+    hibernate:
+      # Flyway quản lý schema — Hibernate chỉ validate, KHÔNG tự tạo/sửa bảng
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: false
+
+jwt:
+  # Thay bằng chuỗi base64 ngẫu nhiên 256-bit thực sự khi deploy
+  # Generate bằng: openssl rand -base64 32
+  secret: your-256-bit-base64-encoded-secret-key-change-this
+  expiration-ms: 86400000   # 24 giờ
+
+scheduler:
+  arxiv:
+    max-results-per-keyword: 10
+    request-delay-ms: 350
+    timeout-seconds: 30
+    sort-by: submittedDate
+    sort-order: descending
+  groq:
+    call-delay-ms: 2000
+    rate-limit-rpm: 28
+    transient-retry-delay-ms: 5000
+  retry:
+    max-attempts: 3
+
+ai:
+  huggingface:
+    api-key: your-huggingface-api-key
+    model: sentence-transformers/all-MiniLM-L6-v2
+    batch-size: 32
+    retry-wait-on-503-ms: 30000
+  groq:
+    api-key: your-groq-api-key
+    model: llama3-8b-8192
+    max-summary-length: 2000
+
+recommendation:
+  distance-threshold: 0.5
+  max-results: 10
+  cache-ttl-hours: 1
+
+duplicate-detection:
+  distance-threshold: 0.05
+  candidate-window-days: 90
+
+limits:
+  max-topics-per-user: 10
+  max-keywords-per-topic: 5
+
+trend-stats:
+  max-history-years: 2

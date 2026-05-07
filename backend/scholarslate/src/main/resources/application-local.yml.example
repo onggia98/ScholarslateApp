@@ -1,0 +1,18 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# TEMPLATE — copy file này thành application-local.yml và điền secrets thật
+# ──────────────────────────────────────────────────────────────────────────────
+
+spring:
+  datasource:
+    password: YOUR_DB_PASSWORD
+  flyway:
+    password: YOUR_DB_PASSWORD
+
+jwt:
+  secret: YOUR_JWT_SECRET_MIN_32_CHARS   # openssl rand -base64 32
+
+ai:
+  groq:
+    api-key: YOUR_GROQ_API_KEY           # https://console.groq.com → API Keys
+  huggingface:
+    api-key: YOUR_HUGGINGFACE_TOKEN      # https://huggingface.co/settings/tokens

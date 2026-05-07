@@ -1,0 +1,17 @@
+# ============================================================
+# railway.toml — Cấu hình deploy cho Railway
+# Docs: https://docs.railway.com/reference/config-as-code
+# ============================================================
+
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+# Health check để Railway biết app đã sẵn sàng nhận traffic
+healthcheckPath = "/api/actuator/health"
+healthcheckTimeout = 120       # 2 phút — Spring Boot khởi động + Flyway migrate
+
+# Tự động restart nếu app crash
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 3
