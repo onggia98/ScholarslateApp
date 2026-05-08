@@ -83,7 +83,7 @@ scheduler:
 
   arxiv:
     max-results-per-keyword: 10
-    request-delay-ms: 350
+    request-delay-ms: 1500        # 1.5s delay — arXiv rate limit ~1 req/s
 
   groq:
     call-delay-ms: 2000

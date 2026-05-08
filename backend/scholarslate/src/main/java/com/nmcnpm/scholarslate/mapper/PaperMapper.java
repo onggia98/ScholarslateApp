@@ -5,6 +5,7 @@ import com.nmcnpm.scholarslate.entity.Paper;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Mapper thủ công cho Paper → PaperResponse.
@@ -18,6 +19,12 @@ public class PaperMapper {
     public PaperResponse toResponse(Paper paper) {
         if (paper == null) return null;
 
+        // Extract topic names from the lazy-loaded collection (must be within a transaction)
+        List<String> topicNames = paper.getTopics() == null ? List.of()
+                : paper.getTopics().stream()
+                        .map(t -> t.getName())
+                        .collect(Collectors.toList());
+
         return PaperResponse.builder()
                 .id(paper.getId())
                 .arxivId(paper.getArxivId())
@@ -30,9 +37,12 @@ public class PaperMapper {
                 .qualityScore(paper.getQualityScore())
                 .isDuplicate(paper.getIsDuplicate())
                 .processingStatus(paper.getProcessingStatus())
+                .retryCount(paper.getRetryCount())
+                .lastError(paper.getLastError())
+                .lastRetryAt(paper.getLastRetryAt())
                 .publishedAt(paper.getPublishedAt())
                 .createdAt(paper.getCreatedAt())
-                .lastError(paper.getLastError())
+                .topics(topicNames)
                 .build();
     }
 

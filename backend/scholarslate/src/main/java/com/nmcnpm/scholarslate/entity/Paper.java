@@ -8,6 +8,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -112,4 +114,18 @@ public class Paper {
     @Column(name = "updated_at", nullable = false,
             columnDefinition = "TIMESTAMP WITH TIME ZONE")
     private OffsetDateTime updatedAt;
+
+    /**
+     * Topics liên kết với paper — join qua bảng PAPER_TOPIC.
+     * FetchType.LAZY để tránh N+1 khi chỉ cần paper info.
+     * PaperService fetch riêng khi cần topic names.
+     */
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "paper_topic",
+            joinColumns = @JoinColumn(name = "paper_id"),
+            inverseJoinColumns = @JoinColumn(name = "topic_id")
+    )
+    @Builder.Default
+    private List<Topic> topics = new ArrayList<>();
 }

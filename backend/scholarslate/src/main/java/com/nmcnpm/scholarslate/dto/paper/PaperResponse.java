@@ -35,9 +35,11 @@ public class PaperResponse {
     private Float qualityScore;      // → quality_score
     private Boolean isDuplicate;     // → is_duplicate
     private String processingStatus; // → processing_status
+    private Integer retryCount;      // → retry_count
+    private String lastError;        // → last_error
+    private OffsetDateTime lastRetryAt;  // → last_retry_at
     private OffsetDateTime publishedAt; // → published_at
     private OffsetDateTime createdAt;   // → created_at
-    private String lastError;        // → last_error
 
     /** Danh sách tên topic liên kết với paper — populated bởi PaperService */
     private List<String> topics;
