@@ -105,6 +105,26 @@ export async function removeFavorite(paperId: string): Promise<void> {
   return request('/papers/' + encodeURIComponent(paperId) + '/favorite', { method: 'DELETE' });
 }
 
+// ── User Profile ──────────────────────────────────────────────────────────────
+
+export interface UserProfile {
+  id: string;
+  email: string;
+  role: string;
+  created_at: string;
+}
+
+export async function fetchProfile(): Promise<UserProfile> {
+  return request('/users/me');
+}
+
+export async function changePassword(currentPassword: string, newPassword: string): Promise<void> {
+  return request('/users/me/password', {
+    method: 'PATCH',
+    body: JSON.stringify({ current_password: currentPassword, new_password: newPassword }),
+  });
+}
+
 // ── Topics ────────────────────────────────────────────────────────────────────
 
 export async function fetchTopics(): Promise<Topic[]> {

@@ -32,13 +32,15 @@ public class JwtUtil {
     }
 
     /**
-     * Tạo JWT token chứa userId và role.
+     * Tạo JWT token chứa userId, email và role.
      * user_id KHÔNG lấy từ client — luôn lấy từ SecurityContextHolder.
+     * email claim để frontend hiển thị tên user mà không cần gọi API profile.
      */
-    public String generateToken(UUID userId, String role) {
+    public String generateToken(UUID userId, String email, String role) {
         Date now = new Date();
         return Jwts.builder()
                 .subject(userId.toString())
+                .claim("email", email)
                 .claim("role", role)
                 .issuedAt(now)
                 .expiration(new Date(now.getTime() + expirationMs))
