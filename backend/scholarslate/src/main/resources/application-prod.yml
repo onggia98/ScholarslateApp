@@ -23,6 +23,9 @@ spring:
       idle-timeout: 600000
       connection-init-sql: "SET hnsw.ef_search = 128"
 
+  jackson:
+    property-naming-strategy: SNAKE_CASE   # Serialize/deserialize JSON với snake_case
+
   jpa:
     hibernate:
       ddl-auto: validate             # Flyway quản lý schema

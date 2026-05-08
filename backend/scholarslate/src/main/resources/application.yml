@@ -10,6 +10,8 @@ spring:
       maximum-pool-size: 20
       # Set ef_search global cho tất cả connections (thay thế SET LOCAL trong từng query)
       connection-init-sql: "SET hnsw.ef_search = 128"
+  jackson:
+    property-naming-strategy: SNAKE_CASE   # Serialize/deserialize JSON với snake_case
   jpa:
     hibernate:
       ddl-auto: validate       # Flyway quản lý schema, Hibernate chỉ validate
