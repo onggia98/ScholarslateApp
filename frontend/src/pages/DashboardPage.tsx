@@ -157,7 +157,7 @@ function PaperCard({ paper, onToggleFavorite, focused, onFocusConsumed }: { pape
               <a href={paper.paper_url} target="_blank" rel="noopener noreferrer" className="hover:underline decoration-slate-300 underline-offset-2">{paper.title}</a>
             </h3>
             <div className="flex flex-wrap gap-1.5 mb-3">
-              {paper.topics?.map(t => <Badge key={t} tone="indigo" icon={Tag}>{t}</Badge>)}
+              {[...new Set(paper.topics ?? [])].map(t => <Badge key={t} tone="indigo" icon={Tag}>{t}</Badge>)}
               {paper.processing_status === 'PENDING' ? <Badge tone="blue" icon={Loader2}>Processing…</Badge> : null}
             </div>
             <div className="mb-3">
@@ -1174,9 +1174,10 @@ export default function DashboardPage() {
   const onSubmitQuery = (q: string) => { setSearchQuery(q); setActive('search'); };
 
   const openPaper = (paperId: string) => {
-    const paper = papers.find(p => p.id === paperId);
-    if (!paper) return;
-    setQuery(''); setFilter('all'); setStatusFilter('all'); setTopicFilter(null); setActive('feed'); setMobileNav(false);
+    // Navigate to feed unconditionally — paper may not be in local state yet
+    // (pagination, status filter). Clear all filters so the paper is visible.
+    setQuery(''); setFilter('all'); setStatusFilter('all'); setTopicFilter(null);
+    setActive('feed'); setMobileNav(false);
     setNotifications(ns => ns.map(n => n.paper_id === paperId ? { ...n, is_read: true } : n));
     setFocusPaperId(null);
     requestAnimationFrame(() => requestAnimationFrame(() => setFocusPaperId(paperId)));

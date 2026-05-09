@@ -19,10 +19,12 @@ public class PaperMapper {
     public PaperResponse toResponse(Paper paper) {
         if (paper == null) return null;
 
-        // Extract topic names from the lazy-loaded collection (must be within a transaction)
+        // Extract topic names — distinct() guards against duplicate topic names
+        // (e.g. two users created a topic with the same name linked to the same paper)
         List<String> topicNames = paper.getTopics() == null ? List.of()
                 : paper.getTopics().stream()
                         .map(t -> t.getName())
+                        .distinct()
                         .collect(Collectors.toList());
 
         return PaperResponse.builder()
