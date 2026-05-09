@@ -4,10 +4,10 @@ import {
   FileSearch, LayoutGrid, Heart, Bell, Search, TrendingUp, Settings2, Plus, X,
   ChevronDown, Menu, RefreshCw, AlertTriangle, AlertCircle, Copy, Hash, Calendar,
   Users, Tag, Sparkles, FileText, Loader2, CheckCheck, ArrowRight, Inbox, SearchX,
-  Share2, MoreHorizontal, LogOut, Trash2, User, KeyRound, ShieldCheck,
+  Share2, MoreHorizontal, LogOut, Trash2, User, KeyRound, ShieldCheck, BookOpen,
 } from 'lucide-react';
 import {
-  fetchPapers, fetchPaperById, searchPapers, fetchFavorites, addFavorite, removeFavorite,
+  fetchPapers, fetchPaperById, fetchRecommendations, searchPapers, fetchFavorites, addFavorite, removeFavorite,
   fetchProfile, changePassword,
   type UserProfile,
   fetchTopics, createTopic, updateTopic, deleteTopic,
@@ -85,7 +85,7 @@ function Spinner({ label }: { label: string }) {
 
 // ── PaperCard ────────────────────────────────────────────────────────────────
 
-function PaperCard({ paper, onToggleFavorite, focused, onFocusConsumed }: { paper: Paper; onToggleFavorite: (id: string) => void; focused?: boolean; onFocusConsumed?: () => void }) {
+function PaperCard({ paper, onToggleFavorite, focused, onFocusConsumed, onOpenDetail }: { paper: Paper; onToggleFavorite: (id: string) => void; focused?: boolean; onFocusConsumed?: () => void; onOpenDetail?: (paper: Paper) => void }) {
   const [expanded, setExpanded] = useState(false);
   const [flash, setFlash] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -206,6 +206,12 @@ function PaperCard({ paper, onToggleFavorite, focused, onFocusConsumed }: { pape
                 className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg bg-slate-900 text-white text-sm font-medium hover:bg-slate-800">
                 <FileText className="w-4 h-4" />Read PDF
               </a>
+              {onOpenDetail ? (
+                <button onClick={() => onOpenDetail(paper)}
+                  className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg border border-slate-200 text-slate-700 text-sm font-medium hover:bg-slate-50">
+                  <BookOpen className="w-4 h-4" />Details
+                </button>
+              ) : null}
               <button onClick={() => setExpanded(!expanded)}
                 className="inline-flex items-center gap-1 h-9 px-2 text-sm text-slate-500 hover:text-slate-900">
                 {expanded ? 'Show less' : 'Show more'}<ChevronDown className={'w-4 h-4 transition-transform ' + (expanded ? 'rotate-180' : '')} />
@@ -247,6 +253,160 @@ function PaperCard({ paper, onToggleFavorite, focused, onFocusConsumed }: { pape
         </div>
       </div>
     </article>
+  );
+}
+
+// ── RecCard ── mini card used inside PaperDetailModal ────────────────────────
+
+function RecCard({ paper }: { paper: Paper }) {
+  const score = scoreColor(paper.quality_score);
+  return (
+    <div className="flex items-start gap-3 p-3 rounded-xl border border-slate-200 hover:bg-slate-50 transition-colors">
+      <div className={'flex flex-col items-center justify-center w-12 flex-shrink-0 rounded-lg border py-1.5 ' + score.bg + ' ' + score.border}>
+        <div className={'text-[9px] font-semibold uppercase tracking-wider ' + score.text}>AI</div>
+        <div className={'text-base font-bold leading-none ' + score.text}>{paper.quality_score != null ? paper.quality_score.toFixed(1) : '—'}</div>
+      </div>
+      <div className="min-w-0 flex-1">
+        <a href={paper.paper_url} target="_blank" rel="noopener noreferrer"
+          className="text-sm font-semibold text-slate-900 hover:underline leading-snug line-clamp-2 block">{paper.title}</a>
+        <div className="mt-1 flex flex-wrap items-center gap-x-2 text-[11px] text-slate-500">
+          <span>{authorString(paper.authors)}</span>
+          <span className="text-slate-300">·</span>
+          <span>{formatDate(paper.published_at)}</span>
+        </div>
+        {paper.summary ? <p className="mt-1 text-[12px] text-slate-600 leading-relaxed line-clamp-2">{paper.summary}</p> : null}
+      </div>
+    </div>
+  );
+}
+
+// ── PaperDetailModal ── UC14: chi tiết + recommendation ──────────────────────
+
+function PaperDetailModal({ paper, onClose, onToggleFavorite }: {
+  paper: Paper;
+  onClose: () => void;
+  onToggleFavorite: (id: string) => void;
+}) {
+  const [recs, setRecs] = useState<Paper[]>([]);
+  const [recsLoading, setRecsLoading] = useState(true);
+  const [recsError, setRecsError] = useState(false);
+  const score = scoreColor(paper.quality_score);
+
+  // Fetch recommendations — only for DONE papers with embedding
+  useEffect(() => {
+    if (paper.processing_status !== 'DONE') { setRecsLoading(false); return; }
+    setRecsLoading(true); setRecsError(false);
+    fetchRecommendations(paper.id)
+      .then(data => { setRecs(data); setRecsLoading(false); })
+      .catch(() => { setRecsError(true); setRecsLoading(false); });
+  }, [paper.id]);
+
+  // Close on Escape key
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [onClose]);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40"
+      onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden">
+
+        {/* ── Header ── */}
+        <div className="flex items-start gap-4 p-6 border-b border-slate-200 flex-shrink-0">
+          <div className={'hidden sm:flex flex-col items-center justify-center w-14 flex-shrink-0 rounded-lg border py-2 ' + score.bg + ' ' + score.border}>
+            <div className={'text-[10px] font-semibold uppercase tracking-wider ' + score.text}>AI</div>
+            <div className={'text-xl font-bold leading-none ' + score.text}>{paper.quality_score != null ? paper.quality_score.toFixed(1) : '—'}</div>
+            <div className={'text-[9px] opacity-70 mt-0.5 ' + score.text}>/ 10</div>
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-slate-500 mb-1.5">
+              <span className="font-mono text-slate-600">{paper.arxiv_id}</span>
+              <span className="text-slate-300">·</span>
+              <span>{formatDate(paper.published_at)}</span>
+              <span className="text-slate-300">·</span>
+              <span>{timeAgo(paper.published_at)}</span>
+            </div>
+            <h2 className="text-[17px] font-semibold text-slate-900 leading-snug mb-1.5">{paper.title}</h2>
+            <p className="text-xs text-slate-500 mb-2">{paper.authors}</p>
+            <div className="flex flex-wrap gap-1.5">
+              {[...new Set(paper.topics ?? [])].map(t => <Badge key={t} tone="indigo" icon={Tag}>{t}</Badge>)}
+            </div>
+          </div>
+          <button onClick={onClose} title="Close (Esc)"
+            className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:text-slate-900 hover:bg-slate-50 transition-colors">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* ── Scrollable body ── */}
+        <div className="overflow-y-auto flex-1 p-6 space-y-5">
+
+          {/* Abstract */}
+          <div>
+            <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-2">Abstract</div>
+            <p className="text-sm text-slate-700 leading-relaxed">{paper.abstract}</p>
+          </div>
+
+          {/* AI Summary */}
+          {paper.summary ? (
+            <div className="rounded-xl bg-slate-50 border border-slate-200 p-4">
+              <div className="flex items-center gap-1.5 mb-2">
+                <Sparkles className="w-3.5 h-3.5 text-slate-700" />
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-700">AI Summary</span>
+                <span className="text-[10px] text-slate-500 ml-1">· llama-3.1-8b-instant</span>
+                <span className={'ml-auto inline-flex items-center gap-1 text-[11px] font-medium ' + score.text}>
+                  <span className={'w-1.5 h-1.5 rounded-full ' + score.dot} />Quality {paper.quality_score?.toFixed(1)}
+                </span>
+              </div>
+              <p className="text-sm text-slate-700 leading-relaxed">{paper.summary}</p>
+            </div>
+          ) : null}
+
+          {/* Actions */}
+          <div className="flex flex-wrap items-center gap-2 pt-1">
+            <button onClick={() => onToggleFavorite(paper.id)}
+              className={'inline-flex items-center gap-1.5 h-9 px-3 rounded-lg border text-sm font-medium transition-colors ' + (paper.is_favorite ? 'bg-rose-50 border-rose-200 text-rose-600 hover:bg-rose-100' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50')}>
+              <Heart className={'w-4 h-4 ' + (paper.is_favorite ? 'fill-rose-500 text-rose-500' : '')} />
+              {paper.is_favorite ? 'Saved' : 'Favorite'}
+            </button>
+            <a href={paper.pdf_url} target="_blank" rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg bg-slate-900 text-white text-sm font-medium hover:bg-slate-800">
+              <FileText className="w-4 h-4" />Read PDF
+            </a>
+            <a href={paper.paper_url} target="_blank" rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg border border-slate-200 text-slate-700 text-sm font-medium hover:bg-slate-50">
+              <ArrowRight className="w-4 h-4" />arXiv page
+            </a>
+          </div>
+
+          {/* Recommendations — UC14 */}
+          {paper.processing_status === 'DONE' && (
+            <div className="border-t border-slate-100 pt-5">
+              <div className="flex items-center gap-2 mb-3">
+                <Sparkles className="w-4 h-4 text-indigo-500" />
+                <span className="text-sm font-semibold text-slate-900">Similar papers</span>
+                <span className="text-xs text-slate-400 ml-1">top‑10 · cosine similarity · cached 1h</span>
+              </div>
+              {recsLoading ? (
+                <div className="flex items-center justify-center gap-2 py-8 text-sm text-slate-400">
+                  <Loader2 className="w-4 h-4 animate-spin" />Finding similar papers…
+                </div>
+              ) : recsError ? (
+                <p className="text-sm text-slate-400 py-4 text-center">Could not load recommendations.</p>
+              ) : recs.length === 0 ? (
+                <p className="text-sm text-slate-400 py-4 text-center">No similar papers found.</p>
+              ) : (
+                <div className="space-y-2">
+                  {recs.map(rec => <RecCard key={rec.id} paper={rec} />)}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -467,8 +627,8 @@ type StatusFilter = 'done' | 'all' | 'pending' | 'failed';
 type SortMode = 'recent' | 'score' | 'oldest';
 type FeedFilter = 'all' | 'today' | 'high' | 'flagged';
 
-function FeedView({ papers, loading, error, sort, onSort, filter, onFilter, statusFilter, onStatusFilter, todayCount, flaggedCount, highCount, onToggleFavorite, topicFilter, focusPaperId, onFocusConsumed, onRefresh }:
-  { papers: Paper[]; loading: boolean; error: string | null; sort: SortMode; onSort: (s: SortMode) => void; filter: FeedFilter; onFilter: (f: FeedFilter) => void; statusFilter: StatusFilter; onStatusFilter: (s: StatusFilter) => void; todayCount: number; flaggedCount: number; highCount: number; onToggleFavorite: (id: string) => void; topicFilter: string | null; focusPaperId: string | null; onFocusConsumed: () => void; onRefresh: () => void }) {
+function FeedView({ papers, loading, error, sort, onSort, filter, onFilter, statusFilter, onStatusFilter, todayCount, flaggedCount, highCount, onToggleFavorite, topicFilter, focusPaperId, onFocusConsumed, onRefresh, onOpenDetail }:
+  { papers: Paper[]; loading: boolean; error: string | null; sort: SortMode; onSort: (s: SortMode) => void; filter: FeedFilter; onFilter: (f: FeedFilter) => void; statusFilter: StatusFilter; onStatusFilter: (s: StatusFilter) => void; todayCount: number; flaggedCount: number; highCount: number; onToggleFavorite: (id: string) => void; topicFilter: string | null; focusPaperId: string | null; onFocusConsumed: () => void; onRefresh: () => void; onOpenDetail: (paper: Paper) => void }) {
   const tabs: { id: FeedFilter; label: string; count?: number }[] = [
     { id: 'all', label: 'All' }, { id: 'today', label: 'Today', count: todayCount },
     { id: 'high', label: 'High score', count: highCount },
@@ -508,7 +668,7 @@ function FeedView({ papers, loading, error, sort, onSort, filter, onFilter, stat
         {loading ? <Spinner label="Loading papers…" />
           : error ? <ErrorBox message={error} />
           : papers.length === 0 ? <EmptyState icon={Inbox} title="No papers match your filters" body="Try clearing the search or switching to All." />
-          : papers.map(p => <PaperCard key={p.id} paper={p} onToggleFavorite={onToggleFavorite} focused={focusPaperId === p.id} onFocusConsumed={onFocusConsumed} />)}
+          : papers.map(p => <PaperCard key={p.id} paper={p} onToggleFavorite={onToggleFavorite} focused={focusPaperId === p.id} onFocusConsumed={onFocusConsumed} onOpenDetail={onOpenDetail} />)}
       </div>
     </>
   );
@@ -516,7 +676,7 @@ function FeedView({ papers, loading, error, sort, onSort, filter, onFilter, stat
 
 // ── Favorites View ────────────────────────────────────────────────────────────
 
-function FavoritesView({ papers, loading, error, onRemoveFavorite }: { papers: Paper[]; loading: boolean; error: string | null; onRemoveFavorite: (id: string) => void }) {
+function FavoritesView({ papers, loading, error, onRemoveFavorite, onOpenDetail }: { papers: Paper[]; loading: boolean; error: string | null; onRemoveFavorite: (id: string) => void; onOpenDetail: (paper: Paper) => void }) {
   return (
     <>
       <PageHeader title="Favorites" subtitle={<>{papers.length} saved paper{papers.length === 1 ? '' : 's'}</>} />
@@ -524,7 +684,7 @@ function FavoritesView({ papers, loading, error, onRemoveFavorite }: { papers: P
         {loading ? <Spinner label="Loading favorites…" />
           : error ? <ErrorBox message={error} />
           : papers.length === 0 ? <EmptyState icon={Heart} title="No favorites yet" body="Tap the heart on any paper in the feed to save it here." />
-          : papers.map(p => <PaperCard key={p.id} paper={{ ...p, is_favorite: true }} onToggleFavorite={onRemoveFavorite} />)}
+          : papers.map(p => <PaperCard key={p.id} paper={{ ...p, is_favorite: true }} onToggleFavorite={onRemoveFavorite} onOpenDetail={onOpenDetail} />)}
       </div>
     </>
   );
@@ -576,7 +736,7 @@ function NotificationsView({ items, loading, error, onMarkAllRead, onMarkOneRead
 
 // ── Search View ───────────────────────────────────────────────────────────────
 
-function SearchView({ onToggleFavorite, initialQuery }: { onToggleFavorite: (id: string) => void; initialQuery?: string }) {
+function SearchView({ onToggleFavorite, initialQuery, onOpenDetail }: { onToggleFavorite: (id: string) => void; initialQuery?: string; onOpenDetail: (paper: Paper) => void }) {
   const [q, setQ] = useState(initialQuery || '');
   const [results, setResults] = useState<Paper[]>([]);
   const [loading, setLoading] = useState(false);
@@ -624,7 +784,7 @@ function SearchView({ onToggleFavorite, initialQuery }: { onToggleFavorite: (id:
           </div>
           <div className="space-y-4 pb-12">
             {results.length === 0 ? <EmptyState icon={SearchX} title="No matches" body={`No papers found for "${searched}".`} />
-              : results.map(p => <PaperCard key={p.id} paper={p} onToggleFavorite={onToggleFavorite} />)}
+              : results.map(p => <PaperCard key={p.id} paper={p} onToggleFavorite={onToggleFavorite} onOpenDetail={onOpenDetail} />)}
           </div>
         </>
       )}
@@ -1066,6 +1226,7 @@ export default function DashboardPage() {
   const [notifError, setNotifError] = useState<string | null>(null);
   const [topicsManagerOpen, setTopicsManagerOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
+  const [detailPaper, setDetailPaper] = useState<Paper | null>(null);
 
   // ── UI state ──
   const [active, setActive] = useState('feed');
@@ -1152,8 +1313,9 @@ export default function DashboardPage() {
     const inFeed = papers.find(p => p.id === id);
     const inFavs = favorites.find(p => p.id === id);
     const wasFav = !!(inFeed?.is_favorite || inFavs);
-    // Optimistic update in both lists
+    // Optimistic update in all lists (including open detail modal)
     setPapers(ps => ps.map(p => p.id === id ? { ...p, is_favorite: !wasFav } : p));
+    setDetailPaper(prev => prev?.id === id ? { ...prev, is_favorite: !wasFav } : prev);
     try {
       if (wasFav) {
         await removeFavorite(id);
@@ -1166,6 +1328,7 @@ export default function DashboardPage() {
     } catch (err) {
       // Rollback optimistic update
       setPapers(ps => ps.map(p => p.id === id ? { ...p, is_favorite: wasFav } : p));
+      setDetailPaper(prev => prev?.id === id ? { ...prev, is_favorite: wasFav } : prev);
       if ((err as { code?: number })?.code === 401) handleAuthError();
     }
   };
@@ -1299,17 +1462,17 @@ export default function DashboardPage() {
                 todayCount={tabCounts.today} flaggedCount={tabCounts.flagged} highCount={tabCounts.high}
                 onToggleFavorite={toggleFav} topicFilter={topicFilter}
                 focusPaperId={focusPaperId} onFocusConsumed={() => setFocusPaperId(null)}
-                onRefresh={reloadPapers} />
+                onRefresh={reloadPapers} onOpenDetail={setDetailPaper} />
             )}
             {active === 'favorites' && (
-              <FavoritesView papers={favorites} loading={favLoading} error={favError} onRemoveFavorite={removeFromFavorites} />
+              <FavoritesView papers={favorites} loading={favLoading} error={favError} onRemoveFavorite={removeFromFavorites} onOpenDetail={setDetailPaper} />
             )}
             {active === 'notifications' && (
               <NotificationsView items={notifications} loading={notifLoading} error={notifError}
                 onMarkAllRead={markAllRead} onMarkOneRead={markOneRead} onOpenPaper={openPaper} />
             )}
             {active === 'search' && (
-              <SearchView onToggleFavorite={toggleFav} initialQuery={searchQuery} />
+              <SearchView onToggleFavorite={toggleFav} initialQuery={searchQuery} onOpenDetail={setDetailPaper} />
             )}
             {active === 'trends' && <TrendsView onAuthError={handleAuthError} />}
           </div>
@@ -1318,6 +1481,9 @@ export default function DashboardPage() {
       <TopicsManager open={topicsManagerOpen} onClose={() => setTopicsManagerOpen(false)}
         topics={topics} onChange={setTopics} onAuthError={handleAuthError} />
       <AccountModal open={accountOpen} onClose={() => setAccountOpen(false)} onAuthError={handleAuthError} />
+      {detailPaper && (
+        <PaperDetailModal paper={detailPaper} onClose={() => setDetailPaper(null)} onToggleFavorite={toggleFav} />
+      )}
     </div>
   );
 }

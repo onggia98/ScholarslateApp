@@ -77,6 +77,15 @@ export async function fetchPaperById(id: string): Promise<Paper> {
   return request('/papers/' + encodeURIComponent(id));
 }
 
+// UC14 — Recommendation top-10 theo paper_id, cached 1h phía backend
+export async function fetchRecommendations(id: string): Promise<Paper[]> {
+  const data = await request<Paper[] | PagedResponse<Paper>>(
+    '/papers/' + encodeURIComponent(id) + '/recommendations'
+  );
+  if (Array.isArray(data)) return data;
+  return (data as PagedResponse<Paper>).content ?? [];
+}
+
 export async function searchPapers(q: string): Promise<Paper[]> {
   const data = await request<Paper[] | PagedResponse<Paper>>(
     '/papers/search?q=' + encodeURIComponent(q)
