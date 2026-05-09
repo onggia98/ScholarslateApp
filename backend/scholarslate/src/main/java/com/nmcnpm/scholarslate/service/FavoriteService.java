@@ -30,15 +30,18 @@ public class FavoriteService {
     @Transactional(readOnly = true)
     public PagedResponse<PaperResponse> getFavorites(UUID userId, int page, int size) {
         var pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        // Favorites luôn có is_favorite = true — không cần query thêm
         return PagedResponse.of(
                 favoriteRepository.findByUserIdOrderByCreatedAtDesc(userId, pageable)
-                        .map(fav -> paperMapper.toResponse(fav.getPaper())));
+                        .map(fav -> paperMapper.toResponse(fav.getPaper(), true)));
     }
 
     @Transactional
     public void addFavorite(UUID paperId, UUID userId) {
+        // Idempotent — nếu đã tồn tại thì bỏ qua, không ném lỗi.
+        // Frontend dùng optimistic update nên không cần server báo lỗi khi trùng.
         if (favoriteRepository.existsByUserIdAndPaperId(userId, paperId)) {
-            throw AppException.conflict("Paper already in favorites");
+            return;
         }
 
         Paper paper = paperRepository.findById(paperId)

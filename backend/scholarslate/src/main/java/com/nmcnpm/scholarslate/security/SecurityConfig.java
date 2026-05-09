@@ -19,8 +19,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.filter.CorsFilter;
 
 import java.util.List;
 
@@ -39,21 +39,8 @@ public class SecurityConfig {
             // Tắt CSRF — không cần với stateless JWT API
             .csrf(AbstractHttpConfigurer::disable)
 
-            // CORS — Spring Security detect CorsFilter bean tự động
-            .cors(cors -> cors.configurationSource(request -> {
-                CorsConfiguration config = new CorsConfiguration();
-                // FRONTEND_URL được set qua env var khi deploy (Railway/Vercel URL)
-                String frontendUrl = System.getenv("FRONTEND_URL");
-                List<String> origins = frontendUrl != null && !frontendUrl.isBlank()
-                    ? List.of("http://localhost:5173", "http://localhost:3000", frontendUrl)
-                    : List.of("http://localhost:5173", "http://localhost:3000");
-                config.setAllowedOrigins(origins);
-                config.setAllowedMethods(List.of("GET","POST","PUT","DELETE","PATCH","OPTIONS"));
-                config.setAllowedHeaders(List.of("*"));
-                config.setAllowCredentials(true);
-                config.setMaxAge(3600L);
-                return config;
-            }))
+            // CORS — dùng CorsConfigurationSource bean bên dưới (nguồn duy nhất)
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
             // Stateless — không tạo session
             .sessionManagement(session ->
@@ -101,16 +88,19 @@ public class SecurityConfig {
     }
 
     /**
-     * CorsFilter bean — Spring Security tự động detect và áp dụng trước các security filter.
+     * CORS configuration duy nhất — tránh duplicate giữa securityFilterChain và CorsFilter bean.
      * FRONTEND_URL env var được set trên Railway/Vercel để cho phép production domain.
+     * Ví dụ: FRONTEND_URL=https://your-app.vercel.app
      */
     @Bean
-    public CorsFilter corsFilter() {
+    public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
+
         String frontendUrl = System.getenv("FRONTEND_URL");
-        List<String> origins = frontendUrl != null && !frontendUrl.isBlank()
+        List<String> origins = (frontendUrl != null && !frontendUrl.isBlank())
             ? List.of("http://localhost:5173", "http://localhost:3000", frontendUrl)
             : List.of("http://localhost:5173", "http://localhost:3000");
+
         config.setAllowedOrigins(origins);
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
@@ -119,7 +109,7 @@ public class SecurityConfig {
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
-        return new CorsFilter(source);
+        return source;
     }
 
     @Bean

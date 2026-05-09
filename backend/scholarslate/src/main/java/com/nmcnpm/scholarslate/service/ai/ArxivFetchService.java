@@ -19,7 +19,7 @@ import java.util.List;
 
 /**
  * Fetch paper từ arXiv Atom/XML API.
- * Rate limit: 3 req/s → delay 350ms giữa các request.
+ * Rate limit: ~1 req/s → delay 1500ms giữa các request (override qua scheduler.arxiv.request-delay-ms).
  * Timeout: 30 giây mỗi request.
  * Bắt buộc sortBy=submittedDate&sortOrder=descending để lấy paper mới nhất.
  */

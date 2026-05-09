@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 @Repository
@@ -27,4 +28,11 @@ public interface FavoriteRepository extends JpaRepository<Favorite, UUID> {
     @Modifying
     @Query("DELETE FROM Favorite f WHERE f.user.id = :userId AND f.paper.id = :paperId")
     int deleteByUserIdAndPaperId(@Param("userId") UUID userId, @Param("paperId") UUID paperId);
+
+    /**
+     * Lấy tất cả paper_id đã được user favorite — dùng để populate isFavorite trong PaperResponse.
+     * Trả về Set<UUID> để kiểm tra membership O(1) khi map danh sách paper lớn.
+     */
+    @Query("SELECT f.paper.id FROM Favorite f WHERE f.user.id = :userId")
+    Set<UUID> findFavoritedPaperIdsByUserId(@Param("userId") UUID userId);
 }

@@ -43,4 +43,10 @@ public class PaperResponse {
 
     /** Danh sách tên topic liên kết với paper — populated bởi PaperService */
     private List<String> topics;
+
+    /**
+     * true nếu user đang request đã lưu paper này vào favorites.
+     * false mặc định (unauthenticated hoặc chưa có trong favorites).
+     */
+    private Boolean isFavorite;  // → is_favorite (SNAKE_CASE)
 }

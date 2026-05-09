@@ -4,6 +4,7 @@ import com.nmcnpm.scholarslate.dto.common.PagedResponse;
 import com.nmcnpm.scholarslate.dto.paper.PaperResponse;
 import com.nmcnpm.scholarslate.exception.AppException;
 import com.nmcnpm.scholarslate.mapper.PaperMapper;
+import com.nmcnpm.scholarslate.repository.FavoriteRepository;
 import com.nmcnpm.scholarslate.repository.PaperRepository;
 import com.nmcnpm.scholarslate.util.VectorUtils;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -21,50 +23,66 @@ import java.util.UUID;
 public class PaperService {
 
     private final PaperRepository paperRepository;
+    private final FavoriteRepository favoriteRepository;
     private final PaperMapper paperMapper;
 
     /**
      * Danh sách paper DONE — có thể filter theo topicId hoặc keyword search (UC05).
      * Mặc định sort theo published_at DESC.
+     *
+     * @param userId ID của user đang request — dùng để populate is_favorite trong response.
+     *               null được chấp nhận (admin context hoặc public).
      */
     @Transactional(readOnly = true)
-    public PagedResponse<PaperResponse> getPapers(UUID topicId, String keyword,
+    public PagedResponse<PaperResponse> getPapers(UUID userId, UUID topicId, String keyword,
                                                    int page, int size) {
+        // Fetch tất cả paper_id đã favorite của user một lần — O(1) lookup khi map
+        Set<UUID> favIds = userId != null
+                ? favoriteRepository.findFavoritedPaperIdsByUserId(userId)
+                : Set.of();
+
         var pageable = PageRequest.of(page, size, Sort.by("publishedAt").descending());
 
         if (StringUtils.hasText(keyword)) {
             // Native query already has ORDER BY — strip sort from Pageable to avoid
             // Spring Data JPA appending "ORDER BY publishedat" (camelCase → column not found)
-            var unsorted = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize());
+            var unsorted = PageRequest.of(page, size);
             return PagedResponse.of(
                     paperRepository.fullTextSearch(keyword, unsorted)
-                            .map(paperMapper::toResponse));
+                            .map(p -> paperMapper.toResponse(p, favIds.contains(p.getId()))));
         }
 
         if (topicId != null) {
             return PagedResponse.of(
                     paperRepository.findDonePapersByTopicId(topicId, pageable)
-                            .map(paperMapper::toResponse));
+                            .map(p -> paperMapper.toResponse(p, favIds.contains(p.getId()))));
         }
 
         return PagedResponse.of(
                 paperRepository.findByProcessingStatusAndIsDuplicateFalse("DONE", pageable)
-                        .map(paperMapper::toResponse));
+                        .map(p -> paperMapper.toResponse(p, favIds.contains(p.getId()))));
     }
 
     /**
      * Chi tiết một paper (UC06).
+     *
+     * @param userId ID của user đang request — dùng để populate is_favorite.
      */
     @Transactional(readOnly = true)
-    public PaperResponse getPaper(UUID paperId) {
-        return paperRepository.findById(paperId)
-                .map(paperMapper::toResponse)
+    public PaperResponse getPaper(UUID paperId, UUID userId) {
+        var paper = paperRepository.findById(paperId)
                 .orElseThrow(() -> AppException.notFound("Paper not found"));
+
+        boolean isFav = userId != null
+                && favoriteRepository.existsByUserIdAndPaperId(userId, paperId);
+
+        return paperMapper.toResponse(paper, isFav);
     }
 
     /**
      * Recommendation top-10 paper liên quan (UC14).
      * Dùng HNSW cosine distance < 0.5, cached 1h tại Controller.
+     * is_favorite không cần thiết cho recommendations (chỉ hiển thị để đọc).
      */
     @Transactional(readOnly = true)
     public List<PaperResponse> getRecommendations(UUID paperId) {
@@ -96,5 +114,4 @@ public class PaperService {
                         "count", row[1]))
                 .toList();
     }
-
 }

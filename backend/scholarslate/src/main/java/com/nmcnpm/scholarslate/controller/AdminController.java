@@ -3,16 +3,11 @@ package com.nmcnpm.scholarslate.controller;
 import com.nmcnpm.scholarslate.dto.common.ApiResponse;
 import com.nmcnpm.scholarslate.dto.common.PagedResponse;
 import com.nmcnpm.scholarslate.dto.paper.PaperResponse;
-import com.nmcnpm.scholarslate.exception.AppException;
-import com.nmcnpm.scholarslate.mapper.PaperMapper;
-import com.nmcnpm.scholarslate.repository.PaperRepository;
 import com.nmcnpm.scholarslate.scheduler.MainScheduler;
 import com.nmcnpm.scholarslate.scheduler.RetryScheduler;
+import com.nmcnpm.scholarslate.service.AdminService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -20,6 +15,7 @@ import java.util.UUID;
 /**
  * UC17 — Admin endpoints: xem và reset paper FAILED.
  * Yêu cầu role ADMIN — bảo vệ bởi @PreAuthorize + SecurityConfig.
+ * Business logic và @Transactional nằm trong AdminService.
  */
 @RestController
 @RequestMapping("/api/admin")
@@ -27,8 +23,7 @@ import java.util.UUID;
 @PreAuthorize("hasRole('ADMIN')")
 public class AdminController {
 
-    private final PaperRepository paperRepository;
-    private final PaperMapper paperMapper;
+    private final AdminService adminService;
     private final MainScheduler mainScheduler;
     private final RetryScheduler retryScheduler;
 
@@ -37,21 +32,14 @@ public class AdminController {
     public ApiResponse<PagedResponse<PaperResponse>> getFailedPapers(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        var pageable = PageRequest.of(page, size, Sort.by("updatedAt").descending());
-        return ApiResponse.ok(PagedResponse.of(
-                paperRepository.findByProcessingStatus("FAILED", pageable)
-                        .map(paperMapper::toResponse)));
+        return ApiResponse.ok(adminService.getFailedPapers(page, size));
     }
 
-    // UC17 — Reset paper FAILED về PENDING để retry lại
+    // UC17 — Reset 1 paper FAILED về retryCount=0 để RetryScheduler pick up lại
     @PostMapping("/papers/{id}/reset")
-    @Transactional
     public ApiResponse<Void> resetFailedPaper(@PathVariable UUID id) {
-        int updated = paperRepository.resetFailedPaper(id);
-        if (updated == 0) {
-            throw AppException.notFound("Paper not found or not in FAILED status");
-        }
-        return ApiResponse.ok("Paper reset to PENDING");
+        adminService.resetFailedPaper(id);
+        return ApiResponse.ok("Paper reset — RetryScheduler will reprocess it within 30 minutes");
     }
 
     /**
@@ -67,7 +55,6 @@ public class AdminController {
     /**
      * Force-chạy Retry Scheduler ngay lập tức — không cần chờ 30 phút.
      * Hữu ích sau khi sửa lỗi (e.g., đổi embedding URL) để re-process các paper FAILED.
-     * Chạy async trong virtual thread.
      */
     @PostMapping("/pipeline/retry")
     public ApiResponse<Void> triggerRetry() {
@@ -76,13 +63,12 @@ public class AdminController {
     }
 
     /**
-     * Reset toàn bộ FAILED papers về retryCount=0 để chúng có thể được retry lại.
+     * Reset toàn bộ FAILED papers về retryCount=0 để RetryScheduler có thể retry lại.
      * Dùng sau khi sửa lỗi hệ thống (e.g., API key hết hạn, endpoint thay đổi).
      */
     @PostMapping("/papers/reset-all-failed")
-    @Transactional
     public ApiResponse<Void> resetAllFailedPapers() {
-        int count = paperRepository.resetAllFailedPapers();
+        int count = adminService.resetAllFailedPapers();
         return ApiResponse.ok("Reset " + count + " FAILED paper(s) — call /pipeline/retry to reprocess");
     }
 }

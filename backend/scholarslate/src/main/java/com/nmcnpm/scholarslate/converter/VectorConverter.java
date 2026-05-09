@@ -4,9 +4,12 @@ import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
 /**
- * Convert giữa float[] (Java) và kiểu vector(384) (PostgreSQL pgvector).
- * PostgreSQL lưu vector dạng chuỗi "[0.1,0.2,...,0.384]".
- * Không cần thêm library ngoài — hoạt động với mọi phiên bản Hibernate.
+ * LEGACY — không được dùng trực tiếp nữa.
+ * Codebase hiện dùng VectorUserType (@Type annotation) thay thế vì AttributeConverter<float[], String>
+ * gửi setString() qua JDBC → PostgreSQL báo lỗi type mismatch với kiểu vector.
+ * VectorUserType dùng PGobject.setType("vector") để bind đúng OID.
+ *
+ * Class này giữ lại để tham khảo nhưng KHÔNG được đặt @Converter(autoApply=true).
  */
 @Converter
 public class VectorConverter implements AttributeConverter<float[], String> {
