@@ -113,9 +113,13 @@ function PaperCard({ paper, onToggleFavorite, focused, onFocusConsumed }: { pape
         const scroller = el.closest('.feed-scroll') || el.parentElement;
         if (scroller && 'scrollTo' in scroller) (scroller as HTMLElement).scrollTo({ top: (el as HTMLElement).offsetTop - 16, behavior: 'smooth' });
       }
+      // After highlight fades, only clear the flash — keep card expanded for reading
       const t = setTimeout(() => { setFlash(false); onFocusConsumed?.(); }, 1800);
       return () => clearTimeout(t);
-    } else { setExpanded(false); setFlash(false); }
+    } else {
+      // Only clear flash; do NOT collapse — user may be reading the expanded card
+      setFlash(false);
+    }
   }, [focused]);
 
   return (
