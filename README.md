@@ -129,7 +129,7 @@ npm run dev
 
 ```
 Email:    admin@papertracker.local
-Password: xem file backend/scholarslate/src/main/resources/db/migration/V5__seed_admin.sql
+Password: *******
 ```
 
 ---
