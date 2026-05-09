@@ -101,7 +101,31 @@ function Spinner({ label }: { label: string }) {
 function PaperCard({ paper, onToggleFavorite, focused, onFocusConsumed }: { paper: Paper; onToggleFavorite: (id: string) => void; focused?: boolean; onFocusConsumed?: () => void }) {
   const [expanded, setExpanded] = useState(false);
   const [flash, setFlash] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
+  const moreRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLElement>(null);
+
+  // Close More dropdown on outside click
+  useEffect(() => {
+    if (!moreOpen) return;
+    const handler = (e: MouseEvent) => {
+      if (moreRef.current && !moreRef.current.contains(e.target as Node)) setMoreOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [moreOpen]);
+
+  const handleShare = async () => {
+    try {
+      await navigator.clipboard.writeText(paper.paper_url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Fallback: open the URL if clipboard not available
+      window.open(paper.paper_url, '_blank');
+    }
+  };
   const score = scoreColor(paper.quality_score);
   const isFailed = paper.processing_status === 'FAILED';
 
@@ -200,7 +224,36 @@ function PaperCard({ paper, onToggleFavorite, focused, onFocusConsumed }: { pape
                 {expanded ? 'Show less' : 'Show more'}<ChevronDown className={'w-4 h-4 transition-transform ' + (expanded ? 'rotate-180' : '')} />
               </button>
               <div className="ml-auto flex items-center gap-1">
-                <IconBtn icon={Share2} label="Share" /><IconBtn icon={MoreHorizontal} label="More" />
+                {/* Share — copy paper link to clipboard */}
+                <button onClick={handleShare} title={copied ? 'Copied!' : 'Copy link'}
+                  className={'relative inline-flex items-center justify-center w-9 h-9 rounded-lg border transition-colors ' + (copied ? 'bg-emerald-50 border-emerald-200 text-emerald-600' : 'bg-white border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-50')}>
+                  {copied ? <CheckCheck className="w-[18px] h-[18px]" /> : <Share2 className="w-[18px] h-[18px]" />}
+                </button>
+                {/* More (⋯) — dropdown with extra actions */}
+                <div className="relative" ref={moreRef}>
+                  <button onClick={() => setMoreOpen(o => !o)} title="More actions"
+                    className={'inline-flex items-center justify-center w-9 h-9 rounded-lg border transition-colors ' + (moreOpen ? 'bg-slate-900 text-white border-slate-900' : 'bg-white border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-50')}>
+                    <MoreHorizontal className="w-[18px] h-[18px]" />
+                  </button>
+                  {moreOpen && (
+                    <div className="absolute right-0 bottom-full mb-1 w-52 bg-white border border-slate-200 rounded-xl shadow-lg py-1 z-20">
+                      <button onClick={() => { navigator.clipboard.writeText(paper.arxiv_id); setMoreOpen(false); }}
+                        className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-slate-900">
+                        <Copy className="w-4 h-4 flex-shrink-0" />Copy arXiv ID
+                      </button>
+                      <a href={'https://arxiv.org/abs/' + paper.arxiv_id} target="_blank" rel="noopener noreferrer"
+                        onClick={() => setMoreOpen(false)}
+                        className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-slate-900">
+                        <ArrowRight className="w-4 h-4 flex-shrink-0" />Open on arXiv.org
+                      </a>
+                      <a href={paper.pdf_url} target="_blank" rel="noopener noreferrer"
+                        onClick={() => setMoreOpen(false)}
+                        className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-slate-900">
+                        <FileText className="w-4 h-4 flex-shrink-0" />Download PDF
+                      </a>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
