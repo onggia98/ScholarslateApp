@@ -1,0 +1,44 @@
+@import "tailwindcss";
+
+/* Reset #root styles from Vite default template */
+#root {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  text-align: left;
+  border: none;
+}
+
+/* ── Global button / link hover effects ─────────────────────────────────────
+   Tailwind v4 preflight resets cursor to default on buttons.
+   Re-apply pointer + smooth brightness dim on hover for all interactive elements.
+   brightness(0.93) là mức dim nhẹ — đủ thấy nhưng không lấn át hover color.
+   Disabled buttons dùng not-allowed cursor và không có dim effect.
+──────────────────────────────────────────────────────────────────────────── */
+@layer base {
+  button,
+  [role="button"],
+  summary {
+    cursor: pointer;
+    transition: filter 150ms ease, opacity 150ms ease;
+  }
+
+  button:not(:disabled):hover,
+  [role="button"]:not([aria-disabled="true"]):hover {
+    filter: brightness(0.93);
+  }
+
+  button:disabled {
+    cursor: not-allowed;
+  }
+
+  /* Links that look like buttons */
+  a {
+    cursor: pointer;
+    transition: filter 150ms ease;
+  }
+
+  a:hover {
+    filter: brightness(0.88);
+  }
+}

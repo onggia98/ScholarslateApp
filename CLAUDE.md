@@ -11,7 +11,7 @@ cd backend/scholarslate && ./mvnw spring-boot:run
 docker exec -it papertracker-postgres psql -U papertracker -d papertracker
 
 ## Admin credentials
-Email: admin@papertracker.local | Password: admin123
+Email: admin@papertracker.local (password xem trong V5__seed_admin.sql)
 
 ## API Base URL
 http://localhost:8081/api

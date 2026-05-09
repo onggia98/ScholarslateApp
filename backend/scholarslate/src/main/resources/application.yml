@@ -63,7 +63,7 @@ scheduler:
 
   arxiv:
     max-results-per-keyword: 10   # Tối đa 10 paper/keyword
-    request-delay-ms: 350         # 350ms delay giữa các request (rate limit arXiv)
+    request-delay-ms: 1500        # 1.5s delay giữa các request (arXiv rate limit: ~1 req/s)
 
   groq:
     call-delay-ms: 2000           # 2s delay giữa các Groq call (free tier ~30 RPM)

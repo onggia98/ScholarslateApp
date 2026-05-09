@@ -1,0 +1,642 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Scholarslate — Sign in</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@remix-run/router@1.21.0/dist/router.umd.min.js"></script>
+<script src="https://unpkg.com/react-router@6.28.0/dist/umd/react-router.production.min.js"></script>
+<script src="https://unpkg.com/react-router-dom@6.28.0/dist/umd/react-router-dom.production.min.js"></script>
+<script type="module">
+  import * as Lucide from "https://esm.sh/lucide-react@0.460.0?deps=react@18.3.1";
+  window.Lucide = Lucide;
+  window.dispatchEvent(new Event('lucide-ready'));
+</script>
+<style>
+  html, body { background: #f8fafc; }
+  /* Subtle dotted backdrop on the right pane */
+  .dot-grid {
+    background-image: radial-gradient(rgba(15,23,42,0.07) 1px, transparent 1px);
+    background-size: 18px 18px;
+  }
+  @keyframes floatY {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+  .float-y { animation: floatY 6s ease-in-out infinite; }
+  @keyframes shake {
+    10%, 90% { transform: translateX(-1px); }
+    20%, 80% { transform: translateX(2px); }
+    30%, 50%, 70% { transform: translateX(-3px); }
+    40%, 60% { transform: translateX(3px); }
+  }
+  .shake { animation: shake 0.4s; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel" data-presets="env,react">
+const { useState, useMemo, useEffect, useRef } = React;
+const { BrowserRouter, Routes, Route, useNavigate } = ReactRouterDOM;
+
+function useLucide() {
+  const [ready, setReady] = useState(!!window.Lucide);
+  useEffect(() => {
+    if (window.Lucide) return;
+    const onReady = () => setReady(true);
+    window.addEventListener('lucide-ready', onReady);
+    return () => window.removeEventListener('lucide-ready', onReady);
+  }, []);
+  return ready ? window.Lucide : null;
+}
+
+/* ---------- Validation helpers ---------- */
+function validateEmail(v) {
+  if (!v) return 'Email is required.';
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) return 'Enter a valid email address.';
+  return null;
+}
+function validatePassword(v, { min = 8 } = {}) {
+  if (!v) return 'Password is required.';
+  if (v.length < min) return `Must be at least ${min} characters.`;
+  return null;
+}
+function passwordStrength(v) {
+  if (!v) return { score: 0, label: '', color: 'bg-slate-200', text: 'text-slate-400' };
+  let s = 0;
+  if (v.length >= 8) s++;
+  if (v.length >= 12) s++;
+  if (/[A-Z]/.test(v) && /[a-z]/.test(v)) s++;
+  if (/\d/.test(v)) s++;
+  if (/[^A-Za-z0-9]/.test(v)) s++;
+  const map = [
+    { label: 'Too short', color: 'bg-rose-400', text: 'text-rose-600' },
+    { label: 'Weak', color: 'bg-rose-400', text: 'text-rose-600' },
+    { label: 'Fair', color: 'bg-amber-400', text: 'text-amber-600' },
+    { label: 'Good', color: 'bg-lime-500', text: 'text-lime-700' },
+    { label: 'Strong', color: 'bg-emerald-500', text: 'text-emerald-700' },
+    { label: 'Excellent', color: 'bg-emerald-500', text: 'text-emerald-700' },
+  ];
+  return { score: s, ...map[Math.min(s, 5)] };
+}
+
+/* ---------- Field ---------- */
+function Field({ L, id, label, type = 'text', value, onChange, placeholder, autoComplete, error, icon: Icon, hint, rightSlot, autoFocus }) {
+  const [show, setShow] = useState(false);
+  const isPassword = type === 'password';
+  const realType = isPassword ? (show ? 'text' : 'password') : type;
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-1.5">
+        <label htmlFor={id} className="text-[13px] font-medium text-slate-700">{label}</label>
+        {rightSlot}
+      </div>
+      <div className="relative">
+        {Icon ? <Icon className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" /> : null}
+        <input
+          id={id}
+          type={realType}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          autoComplete={autoComplete}
+          autoFocus={autoFocus}
+          className={
+            "w-full h-11 rounded-lg border bg-white text-sm text-slate-900 placeholder-slate-400 transition-colors " +
+            (Icon ? "pl-9 " : "pl-3 ") +
+            (isPassword ? "pr-10 " : "pr-3 ") +
+            (error
+              ? "border-rose-300 focus:border-rose-400 focus:ring-2 focus:ring-rose-500/15 "
+              : "border-slate-200 focus:border-slate-400 focus:ring-2 focus:ring-slate-900/10 ") +
+            "focus:outline-none"
+          }
+        />
+        {isPassword ? (
+          <button
+            type="button"
+            onClick={() => setShow(!show)}
+            className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 inline-flex items-center justify-center rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100"
+            aria-label={show ? 'Hide password' : 'Show password'}
+            tabIndex={-1}
+          >
+            {show ? <L.EyeOff className="w-4 h-4" /> : <L.Eye className="w-4 h-4" />}
+          </button>
+        ) : null}
+      </div>
+      {error ? (
+        <p className="mt-1.5 text-[12px] text-rose-600 flex items-center gap-1">
+          <L.AlertCircle className="w-3 h-3 flex-shrink-0" />
+          {error}
+        </p>
+      ) : hint ? (
+        <p className="mt-1.5 text-[12px] text-slate-500">{hint}</p>
+      ) : null}
+    </div>
+  );
+}
+
+/* ---------- Sign In ---------- */
+function SignInForm({ L, onSwitch, onSubmit, loading, banner }) {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [remember, setRemember] = useState(true);
+  const [errors, setErrors] = useState({});
+  const [touched, setTouched] = useState(false);
+
+  const validate = () => {
+    const e = {};
+    const em = validateEmail(email); if (em) e.email = em;
+    const pw = validatePassword(password, { min: 1 }); if (pw) e.password = pw;
+    return e;
+  };
+
+  const handleSubmit = (ev) => {
+    ev.preventDefault();
+    const e = validate();
+    setErrors(e);
+    setTouched(true);
+    if (Object.keys(e).length === 0) onSubmit({ email, password, remember });
+  };
+
+  const liveErrors = touched ? errors : {};
+
+  return (
+    <form onSubmit={handleSubmit} noValidate className="space-y-4">
+      <Field
+        L={L}
+        id="signin-email"
+        label="Email"
+        type="email"
+        autoComplete="email"
+        value={email}
+        onChange={setEmail}
+        placeholder="you@lab.io"
+        error={liveErrors.email}
+        icon={L.Mail}
+        autoFocus
+      />
+      <Field
+        L={L}
+        id="signin-password"
+        label="Password"
+        type="password"
+        autoComplete="current-password"
+        value={password}
+        onChange={setPassword}
+        placeholder="••••••••"
+        error={liveErrors.password}
+        icon={L.Lock}
+        rightSlot={
+          <button
+            type="button"
+            disabled
+            title="Not in scope for this project — contact admin"
+            className="text-[12px] text-slate-400 cursor-not-allowed"
+          >
+            Forgot password?
+          </button>
+        }
+      />
+
+      <div className="flex items-center justify-between">
+        <label className="inline-flex items-center gap-2 text-sm text-slate-600 cursor-pointer select-none">
+          <span className="relative inline-flex">
+            <input
+              type="checkbox"
+              checked={remember}
+              onChange={(e) => setRemember(e.target.checked)}
+              className="peer appearance-none w-4 h-4 rounded border border-slate-300 bg-white checked:bg-slate-900 checked:border-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/10 transition-colors"
+            />
+            <L.Check className="w-3 h-3 text-white absolute inset-0 m-auto opacity-0 peer-checked:opacity-100 pointer-events-none" />
+          </span>
+          Keep me signed in
+        </label>
+        <span className="text-[11px] text-slate-400">JWT TTL · 24h</span>
+      </div>
+
+      {banner ? (
+        <div className={"rounded-lg border p-3 text-sm flex items-start gap-2 " + (banner.tone === 'error' ? "bg-rose-50 border-rose-200 text-rose-800" : "bg-emerald-50 border-emerald-200 text-emerald-800")}>
+          {banner.tone === 'error' ? <L.AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" /> : <L.CheckCircle2 className="w-4 h-4 mt-0.5 flex-shrink-0" />}
+          <span>{banner.message}</span>
+        </div>
+      ) : null}
+
+      <button
+        type="submit"
+        disabled={loading}
+        className="w-full h-11 rounded-lg bg-slate-900 text-white text-sm font-medium hover:bg-slate-800 disabled:opacity-60 disabled:cursor-not-allowed inline-flex items-center justify-center gap-2 transition-colors"
+      >
+        {loading ? (
+          <>
+            <L.Loader2 className="w-4 h-4 animate-spin" />
+            Signing in…
+          </>
+        ) : (
+          <>
+            Sign in
+            <L.ArrowRight className="w-4 h-4" />
+          </>
+        )}
+      </button>
+
+      <p className="text-center text-sm text-slate-500">
+        New to Scholarslate?{' '}
+        <button type="button" onClick={onSwitch} className="text-slate-900 font-medium hover:underline">
+          Create an account
+        </button>
+      </p>
+    </form>
+  );
+}
+
+/* ---------- Sign Up ---------- */
+function SignUpForm({ L, onSwitch, onSubmit, loading, banner }) {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirm, setConfirm] = useState('');
+  const [accept, setAccept] = useState(false);
+  const [errors, setErrors] = useState({});
+  const [touched, setTouched] = useState(false);
+
+  const strength = useMemo(() => passwordStrength(password), [password]);
+
+  const validate = () => {
+    const e = {};
+    const em = validateEmail(email); if (em) e.email = em;
+    const pw = validatePassword(password, { min: 8 }); if (pw) e.password = pw;
+    if (!confirm) e.confirm = 'Please confirm your password.';
+    else if (confirm !== password) e.confirm = 'Passwords do not match.';
+    if (!accept) e.accept = 'Please accept the terms to continue.';
+    return e;
+  };
+
+  const handleSubmit = (ev) => {
+    ev.preventDefault();
+    const e = validate();
+    setErrors(e);
+    setTouched(true);
+    if (Object.keys(e).length === 0) onSubmit({ email, password });
+  };
+
+  const liveErrors = touched ? errors : {};
+
+  return (
+    <form onSubmit={handleSubmit} noValidate className="space-y-4">
+      <Field
+        L={L}
+        id="signup-email"
+        label="Email"
+        type="email"
+        autoComplete="email"
+        value={email}
+        onChange={setEmail}
+        placeholder="you@lab.io"
+        error={liveErrors.email}
+        icon={L.Mail}
+        hint="Used for sign-in and new-paper notifications."
+        autoFocus
+      />
+      <div>
+        <Field
+          L={L}
+          id="signup-password"
+          label="Password"
+          type="password"
+          autoComplete="new-password"
+          value={password}
+          onChange={setPassword}
+          placeholder="At least 8 characters"
+          error={liveErrors.password}
+          icon={L.Lock}
+        />
+        {/* Strength meter */}
+        <div className="mt-2">
+          <div className="flex items-center gap-1">
+            {[0, 1, 2, 3, 4].map(i => (
+              <div
+                key={i}
+                className={"h-1 flex-1 rounded-full transition-colors " + (i < strength.score ? strength.color : 'bg-slate-200')}
+              />
+            ))}
+          </div>
+          <div className="mt-1.5 flex items-center justify-between text-[11px]">
+            <span className={"font-medium " + (password ? strength.text : 'text-slate-400')}>
+              {password ? strength.label : 'Password strength'}
+            </span>
+            <span className="text-slate-400">
+              BCrypt-hashed · stored never as plaintext
+            </span>
+          </div>
+        </div>
+      </div>
+      <Field
+        L={L}
+        id="signup-confirm"
+        label="Confirm password"
+        type="password"
+        autoComplete="new-password"
+        value={confirm}
+        onChange={setConfirm}
+        placeholder="Re-enter password"
+        error={liveErrors.confirm}
+        icon={L.Lock}
+      />
+
+      <label className="flex items-start gap-2.5 text-sm text-slate-600 cursor-pointer select-none">
+        <span className="relative inline-flex mt-0.5">
+          <input
+            type="checkbox"
+            checked={accept}
+            onChange={(e) => setAccept(e.target.checked)}
+            className="peer appearance-none w-4 h-4 rounded border border-slate-300 bg-white checked:bg-slate-900 checked:border-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/10 transition-colors"
+          />
+          <L.Check className="w-3 h-3 text-white absolute inset-0 m-auto opacity-0 peer-checked:opacity-100 pointer-events-none" />
+        </span>
+        <span className="leading-relaxed">
+          I agree to the <a className="text-slate-900 underline underline-offset-2 hover:no-underline" href="#">Terms</a> and <a className="text-slate-900 underline underline-offset-2 hover:no-underline" href="#">Privacy Policy</a>.
+        </span>
+      </label>
+      {liveErrors.accept ? (
+        <p className="-mt-2 text-[12px] text-rose-600 flex items-center gap-1">
+          <L.AlertCircle className="w-3 h-3" />
+          {liveErrors.accept}
+        </p>
+      ) : null}
+
+      {banner ? (
+        <div className={"rounded-lg border p-3 text-sm flex items-start gap-2 " + (banner.tone === 'error' ? "bg-rose-50 border-rose-200 text-rose-800" : "bg-emerald-50 border-emerald-200 text-emerald-800")}>
+          {banner.tone === 'error' ? <L.AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" /> : <L.CheckCircle2 className="w-4 h-4 mt-0.5 flex-shrink-0" />}
+          <span>{banner.message}</span>
+        </div>
+      ) : null}
+
+      <button
+        type="submit"
+        disabled={loading}
+        className="w-full h-11 rounded-lg bg-slate-900 text-white text-sm font-medium hover:bg-slate-800 disabled:opacity-60 disabled:cursor-not-allowed inline-flex items-center justify-center gap-2 transition-colors"
+      >
+        {loading ? (
+          <>
+            <L.Loader2 className="w-4 h-4 animate-spin" />
+            Creating account…
+          </>
+        ) : (
+          <>
+            Create account
+            <L.ArrowRight className="w-4 h-4" />
+          </>
+        )}
+      </button>
+
+      <p className="text-center text-sm text-slate-500">
+        Already have an account?{' '}
+        <button type="button" onClick={onSwitch} className="text-slate-900 font-medium hover:underline">
+          Sign in
+        </button>
+      </p>
+    </form>
+  );
+}
+
+/* ---------- Right pane decorative ---------- */
+function Showcase({ L }) {
+  const stats = [
+    { label: 'Tracking', value: '7', sub: 'topics' },
+    { label: 'New today', value: '12', sub: 'papers' },
+    { label: 'High score', value: '3', sub: '≥ 8.0' },
+  ];
+
+  return (
+    <div className="hidden lg:flex flex-col w-1/2 relative bg-slate-900 text-slate-100 overflow-hidden">
+      {/* dotted backdrop */}
+      <div className="absolute inset-0 dot-grid opacity-30" />
+      {/* soft accent glow */}
+      <div className="absolute -top-32 -right-32 w-[420px] h-[420px] rounded-full" style={{ background: 'radial-gradient(closest-side, rgba(99,102,241,0.35), transparent)' }} />
+      <div className="absolute bottom-0 -left-20 w-[360px] h-[360px] rounded-full" style={{ background: 'radial-gradient(closest-side, rgba(16,185,129,0.18), transparent)' }} />
+
+      <div className="relative z-10 flex flex-col h-full p-12">
+        {/* Brand */}
+        <div className="flex items-center gap-2.5">
+          <div className="w-9 h-9 rounded-lg bg-white/10 ring-1 ring-white/15 flex items-center justify-center backdrop-blur">
+            <L.FileSearch className="w-[20px] h-[20px] text-white" strokeWidth={2.2} />
+          </div>
+          <div className="leading-tight">
+            <div className="text-[15px] font-semibold tracking-tight">Scholarslate</div>
+            <div className="text-[11px] text-slate-400 -mt-0.5">arXiv tracker · v0.4</div>
+          </div>
+        </div>
+
+        {/* Headline */}
+        <div className="mt-16 max-w-md">
+          <h2 className="text-3xl font-semibold tracking-tight leading-tight text-pretty">
+            The new arXiv firehose,<br/>filtered to what you care about.
+          </h2>
+          <p className="mt-4 text-[15px] text-slate-300 leading-relaxed">
+            Theo dõi tối đa 10 chủ đề nghiên cứu. Mỗi sáng lúc 06:00, hệ thống tự động lấy
+            paper mới, sinh tóm tắt AI kèm điểm chất lượng, và đánh dấu paper trùng lặp —
+            để bạn chỉ đọc đúng những gì thực sự mới.
+          </p>
+        </div>
+
+        {/* Mock card preview */}
+        <div className="mt-10 float-y">
+          <div className="rounded-xl bg-white/5 ring-1 ring-white/10 backdrop-blur p-4 max-w-sm">
+            <div className="flex items-center gap-2 text-[11px] text-slate-400">
+              <L.Hash className="w-3 h-3" />
+              <span className="font-mono">2604.01829</span>
+              <span className="text-slate-500">·</span>
+              <span>2h ago</span>
+              <span className="ml-auto inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-emerald-500/15 text-emerald-300 text-[10px] font-semibold">
+                <span className="w-1 h-1 rounded-full bg-emerald-400" />
+                9.1
+              </span>
+            </div>
+            <div className="mt-2 text-[14px] font-medium leading-snug text-white">
+              Sparse Mixture-of-Experts with Routing-Aware Distillation for Long-Context Reasoning
+            </div>
+            <div className="mt-3 rounded-md bg-white/5 ring-1 ring-white/10 p-2.5">
+              <div className="flex items-center gap-1.5 mb-1">
+                <L.Sparkles className="w-3 h-3 text-indigo-300" />
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-indigo-200">AI Summary</span>
+              </div>
+              <p className="text-[12px] text-slate-300 leading-relaxed">
+                RA-MoE pairs expert routing with attention-trace distillation. Activates ~18% of params per token, cuts inference FLOPs 4.3×.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Stats */}
+        <div className="mt-auto grid grid-cols-3 gap-4 max-w-md pt-8 border-t border-white/10">
+          {stats.map(s => (
+            <div key={s.label}>
+              <div className="text-[11px] uppercase tracking-wider text-slate-400">{s.label}</div>
+              <div className="mt-1 text-2xl font-semibold tracking-tight">{s.value}</div>
+              <div className="text-[11px] text-slate-400">{s.sub}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ---------- App ---------- */
+function App() {
+  const L = useLucide();
+  const navigate = useNavigate();
+  const [mode, setMode] = useState('signin'); // 'signin' | 'signup'
+  const [loading, setLoading] = useState(false);
+  const [banner, setBanner] = useState(null);
+
+  const API_BASE = 'https://scholarslateapp-production.up.railway.app/api';
+
+  const callAuth = async (path, body, successMsg, { remember = true } = {}) => {
+    setLoading(true);
+    setBanner(null);
+    try {
+      const res = await fetch(API_BASE + path, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      let data = null;
+      try { data = await res.json(); } catch (_) {}
+      if (!res.ok || !data || data.success === false) {
+        const msg = (data && data.message) || ('Request failed (' + res.status + ').');
+        setBanner({ tone: 'error', message: msg });
+        setLoading(false);
+        return;
+      }
+      const payload = data.data || {};
+      // "Keep me signed in" → localStorage (persists). Unchecked → sessionStorage (clears on tab close).
+      const store = remember ? localStorage : sessionStorage;
+      const otherStore = remember ? sessionStorage : localStorage;
+      // Clear stale token from the other store so there's only ever one.
+      otherStore.removeItem('token');
+      otherStore.removeItem('role');
+      if (payload.token) store.setItem('token', payload.token);
+      if (payload.role) store.setItem('role', payload.role);
+      setBanner({ tone: 'success', message: successMsg });
+      setTimeout(() => { navigate('/dashboard'); }, 600);
+    } catch (err) {
+      setBanner({ tone: 'error', message: (err && err.message) || 'Network error. Please try again.' });
+      setLoading(false);
+    }
+  };
+
+  const handleSignIn = ({ email, password, remember }) => {
+    callAuth('/auth/login', { email, password }, 'Welcome back. Redirecting to your feed…', { remember });
+  };
+
+  const handleSignUp = ({ email, password }) => {
+    // Sign-up has no "remember me" toggle — default to persistent.
+    callAuth('/auth/register', { email, password }, 'Account created. Signing you in…', { remember: true });
+  };
+
+  if (!L) {
+    return <div className="h-screen w-screen flex items-center justify-center text-slate-400 text-sm">Loading…</div>;
+  }
+
+  return (
+    <div className="min-h-screen w-screen flex bg-slate-50 text-slate-900">
+      {/* Left — auth form */}
+      <div className="w-full lg:w-1/2 flex flex-col">
+        {/* Top brand strip (mobile only) */}
+        <div className="lg:hidden h-16 px-5 flex items-center gap-2.5 border-b border-slate-200 bg-white">
+          <div className="w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center">
+            <L.FileSearch className="w-[18px] h-[18px] text-white" strokeWidth={2.2} />
+          </div>
+          <div className="leading-tight">
+            <div className="text-[15px] font-semibold text-slate-900 tracking-tight">Scholarslate</div>
+            <div className="text-[11px] text-slate-500 -mt-0.5">arXiv tracker · v0.4</div>
+          </div>
+        </div>
+
+        <div className="flex-1 flex items-center justify-center px-5 py-10 lg:py-16">
+          <div className="w-full max-w-[400px]">
+            {/* Tab toggle */}
+            <div className="inline-flex p-1 bg-white border border-slate-200 rounded-lg mb-7">
+              <button
+                onClick={() => { setMode('signin'); setBanner(null); }}
+                className={
+                  "px-4 h-8 rounded-md text-sm font-medium transition-colors " +
+                  (mode === 'signin' ? 'bg-slate-900 text-white' : 'text-slate-600 hover:text-slate-900')
+                }
+              >
+                Sign in
+              </button>
+              <button
+                onClick={() => { setMode('signup'); setBanner(null); }}
+                className={
+                  "px-4 h-8 rounded-md text-sm font-medium transition-colors " +
+                  (mode === 'signup' ? 'bg-slate-900 text-white' : 'text-slate-600 hover:text-slate-900')
+                }
+              >
+                Create account
+              </button>
+            </div>
+
+            {/* Heading */}
+            <h1 className="text-[26px] font-semibold tracking-tight text-slate-900 leading-tight">
+              {mode === 'signin' ? 'Welcome back.' : 'Create your account.'}
+            </h1>
+            <p className="mt-1.5 text-sm text-slate-500">
+              {mode === 'signin'
+                ? 'Sign in to continue tracking your topics.'
+                : 'Start tracking arXiv papers across up to 10 topics.'}
+            </p>
+
+            <div className="mt-7">
+              {mode === 'signin' ? (
+                <SignInForm
+                  L={L}
+                  onSwitch={() => { setMode('signup'); setBanner(null); }}
+                  onSubmit={handleSignIn}
+                  loading={loading}
+                  banner={banner}
+                />
+              ) : (
+                <SignUpForm
+                  L={L}
+                  onSwitch={() => { setMode('signin'); setBanner(null); }}
+                  onSubmit={handleSignUp}
+                  loading={loading}
+                  banner={banner}
+                />
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="mt-10 pt-5 border-t border-slate-200 flex items-center justify-between text-[11px] text-slate-400">
+              <span>© 2026 Scholarslate</span>
+              <span className="inline-flex items-center gap-1">
+                <L.ShieldCheck className="w-3 h-3" />
+                JWT · BCrypt · TLS
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Right — showcase */}
+      <Showcase L={L} />
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <BrowserRouter>
+    <Routes>
+      <Route path="*" element={<App />} />
+    </Routes>
+  </BrowserRouter>
+);
+</script>
+</body>
+</html>
