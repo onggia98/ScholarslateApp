@@ -7,7 +7,7 @@ import {
   Share2, MoreHorizontal, LogOut, Trash2, User, KeyRound, ShieldCheck,
 } from 'lucide-react';
 import {
-  fetchPapers, searchPapers, fetchFavorites, addFavorite, removeFavorite,
+  fetchPapers, fetchPaperById, searchPapers, fetchFavorites, addFavorite, removeFavorite,
   fetchProfile, changePassword,
   type UserProfile,
   fetchTopics, createTopic, updateTopic, deleteTopic,
@@ -1173,12 +1173,25 @@ export default function DashboardPage() {
   const onTopicClick = (name: string | null) => { setTopicFilter(name); setActive('feed'); setMobileNav(false); };
   const onSubmitQuery = (q: string) => { setSearchQuery(q); setActive('search'); };
 
-  const openPaper = (paperId: string) => {
-    // Navigate to feed unconditionally — paper may not be in local state yet
-    // (pagination, status filter). Clear all filters so the paper is visible.
+  const openPaper = async (paperId: string) => {
+    // 1. Navigate to feed and clear all filters immediately
     setQuery(''); setFilter('all'); setStatusFilter('all'); setTopicFilter(null);
     setActive('feed'); setMobileNav(false);
     setNotifications(ns => ns.map(n => n.paper_id === paperId ? { ...n, is_read: true } : n));
+
+    // 2. If paper is not in local state (different page / status), fetch it and inject
+    const alreadyLoaded = papers.some(p => p.id === paperId);
+    if (!alreadyLoaded) {
+      try {
+        const fetched = await fetchPaperById(paperId);
+        const normalized = { ...fetched, processing_status: fetched.processing_status as Paper['processing_status'] };
+        setPapers(prev => prev.some(p => p.id === paperId) ? prev : [normalized, ...prev]);
+      } catch {
+        // Paper not found or error — still navigate to feed
+      }
+    }
+
+    // 3. Focus + scroll after React has re-rendered
     setFocusPaperId(null);
     requestAnimationFrame(() => requestAnimationFrame(() => setFocusPaperId(paperId)));
   };

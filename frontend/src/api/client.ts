@@ -73,6 +73,10 @@ export async function fetchPapers(): Promise<Paper[]> {
   return (data as PagedResponse<Paper>).content ?? [];
 }
 
+export async function fetchPaperById(id: string): Promise<Paper> {
+  return request('/papers/' + encodeURIComponent(id));
+}
+
 export async function searchPapers(q: string): Promise<Paper[]> {
   const data = await request<Paper[] | PagedResponse<Paper>>(
     '/papers/search?q=' + encodeURIComponent(q)
