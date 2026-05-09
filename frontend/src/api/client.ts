@@ -162,6 +162,29 @@ export async function deleteTopic(id: string): Promise<void> {
   return request('/topics/' + encodeURIComponent(id), { method: 'DELETE' });
 }
 
+// ── Admin (UC17) ──────────────────────────────────────────────────────────────
+// All endpoints require role=ADMIN — backend enforces via @PreAuthorize
+
+export async function fetchFailedPapers(page = 0, size = 20): Promise<PagedResponse<Paper>> {
+  return request(`/admin/papers/failed?page=${page}&size=${size}`);
+}
+
+export async function resetFailedPaper(id: string): Promise<void> {
+  return request(`/admin/papers/${encodeURIComponent(id)}/reset`, { method: 'POST' });
+}
+
+export async function resetAllFailedPapers(): Promise<void> {
+  return request('/admin/papers/reset-all-failed', { method: 'POST' });
+}
+
+export async function triggerPipeline(): Promise<void> {
+  return request('/admin/pipeline/trigger', { method: 'POST' });
+}
+
+export async function triggerRetry(): Promise<void> {
+  return request('/admin/pipeline/retry', { method: 'POST' });
+}
+
 // ── Notifications ─────────────────────────────────────────────────────────────
 // Backend uses PATCH (not PUT) for mark-read endpoints
 

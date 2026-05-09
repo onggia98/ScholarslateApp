@@ -608,6 +608,9 @@ function Topbar({ onMobileMenu, query, onQuery, onSubmitQuery, notifications, on
               </div>
               <div className="px-1.5 space-y-0.5">
                 <MenuItem icon={User} label="Account" onClick={onOpenAccount} />
+                {user.role === 'ADMIN' && (
+                  <MenuItem icon={ShieldCheck} label="Admin panel" onClick={() => { setMenuOpen(false); window.location.href = '/admin'; }} />
+                )}
               </div>
               <div className="my-1.5 border-t border-slate-100" />
               <div className="px-1.5">
