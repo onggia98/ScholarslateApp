@@ -484,7 +484,8 @@ function FeedView({ papers, loading, error, sort, onSort, filter, onFilter, stat
   { papers: Paper[]; loading: boolean; error: string | null; sort: SortMode; onSort: (s: SortMode) => void; filter: FeedFilter; onFilter: (f: FeedFilter) => void; statusFilter: StatusFilter; onStatusFilter: (s: StatusFilter) => void; todayCount: number; flaggedCount: number; highCount: number; onToggleFavorite: (id: string) => void; topicFilter: string | null; focusPaperId: string | null; onFocusConsumed: () => void }) {
   const tabs: { id: FeedFilter; label: string; count?: number }[] = [
     { id: 'all', label: 'All' }, { id: 'today', label: 'Today', count: todayCount },
-    { id: 'high', label: 'High score', count: highCount }, { id: 'flagged', label: 'Flagged', count: flaggedCount },
+    { id: 'high', label: 'High score', count: highCount },
+    { id: 'flagged', label: 'Flagged', count: flaggedCount },
   ];
   return (
     <>
@@ -1050,7 +1051,7 @@ export default function DashboardPage() {
 
   // ── Auth guard ──
   const [authChecked, setAuthChecked] = useState(false);
-  const [user, setUser] = useState<UserType>({ email: 'User', initials: 'U' });
+  const [user, setUser] = useState<UserType>({ email: 'User', initials: 'U', role: 'USER' });
 
   useEffect(() => {
     const token = getStoredToken();
