@@ -32,5 +32,8 @@
 .DS_Store
 Thumbs.db
 
+# ── Office temp files (Word, Excel lock files) ────────────────────────────────
+~$*
+
 # ── Docker volumes ────────────────────────────────────────────────────────────
 **/postgres-data/
