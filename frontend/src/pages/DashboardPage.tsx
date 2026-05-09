@@ -39,19 +39,6 @@ function Badge({ children, tone = 'slate' as Tone, icon: Icon, className = '' }:
   );
 }
 
-function IconBtn({ icon: Icon, label, onClick, badge }: { icon: React.ElementType; label: string; onClick?: () => void; badge?: number }) {
-  return (
-    <button onClick={onClick} aria-label={label} title={label}
-      className="relative inline-flex items-center justify-center w-9 h-9 rounded-lg border bg-white border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors">
-      <Icon className="w-[18px] h-[18px]" />
-      {badge != null && badge > 0 ? (
-        <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 inline-flex items-center justify-center rounded-full bg-rose-500 text-white text-[10px] font-semibold ring-2 ring-white">
-          {badge > 99 ? '99+' : badge}
-        </span>
-      ) : null}
-    </button>
-  );
-}
 
 function PageHeader({ title, subtitle, action }: { title: React.ReactNode; subtitle?: React.ReactNode; action?: React.ReactNode }) {
   return (
@@ -480,8 +467,8 @@ type StatusFilter = 'done' | 'all' | 'pending' | 'failed';
 type SortMode = 'recent' | 'score' | 'oldest';
 type FeedFilter = 'all' | 'today' | 'high' | 'flagged';
 
-function FeedView({ papers, loading, error, sort, onSort, filter, onFilter, statusFilter, onStatusFilter, todayCount, flaggedCount, highCount, onToggleFavorite, topicFilter, focusPaperId, onFocusConsumed }:
-  { papers: Paper[]; loading: boolean; error: string | null; sort: SortMode; onSort: (s: SortMode) => void; filter: FeedFilter; onFilter: (f: FeedFilter) => void; statusFilter: StatusFilter; onStatusFilter: (s: StatusFilter) => void; todayCount: number; flaggedCount: number; highCount: number; onToggleFavorite: (id: string) => void; topicFilter: string | null; focusPaperId: string | null; onFocusConsumed: () => void }) {
+function FeedView({ papers, loading, error, sort, onSort, filter, onFilter, statusFilter, onStatusFilter, todayCount, flaggedCount, highCount, onToggleFavorite, topicFilter, focusPaperId, onFocusConsumed, onRefresh }:
+  { papers: Paper[]; loading: boolean; error: string | null; sort: SortMode; onSort: (s: SortMode) => void; filter: FeedFilter; onFilter: (f: FeedFilter) => void; statusFilter: StatusFilter; onStatusFilter: (s: StatusFilter) => void; todayCount: number; flaggedCount: number; highCount: number; onToggleFavorite: (id: string) => void; topicFilter: string | null; focusPaperId: string | null; onFocusConsumed: () => void; onRefresh: () => void }) {
   const tabs: { id: FeedFilter; label: string; count?: number }[] = [
     { id: 'all', label: 'All' }, { id: 'today', label: 'Today', count: todayCount },
     { id: 'high', label: 'High score', count: highCount },
@@ -491,7 +478,7 @@ function FeedView({ papers, loading, error, sort, onSort, filter, onFilter, stat
     <>
       <PageHeader title={topicFilter ? `Feed · ${topicFilter}` : 'Feed'}
         subtitle={<>Latest papers matching your active topics · last fetch <span className="text-slate-700 font-medium">today, 06:00 UTC</span></>}
-        action={<button className="hidden md:inline-flex items-center gap-1.5 h-9 px-3 rounded-lg border border-slate-200 bg-white text-sm text-slate-700 hover:bg-slate-50"><RefreshCw className="w-3.5 h-3.5" />Refresh</button>}
+        action={<button onClick={onRefresh} disabled={loading} className="hidden md:inline-flex items-center gap-1.5 h-9 px-3 rounded-lg border border-slate-200 bg-white text-sm text-slate-700 hover:bg-slate-50 disabled:opacity-50"><RefreshCw className={'w-3.5 h-3.5 ' + (loading ? 'animate-spin' : '')} />Refresh</button>}
       />
       {/* Toolbar */}
       <div className="flex flex-col md:flex-row md:items-center gap-3 mb-5">
@@ -1071,6 +1058,7 @@ export default function DashboardPage() {
   const [favLoading, setFavLoading] = useState(false);
   const [favError, setFavError] = useState<string | null>(null);
   const [favLoaded, setFavLoaded] = useState(false);
+  const [favCount, setFavCount] = useState(0); // badge count — loaded eagerly
   const [topics, setTopics] = useState<Topic[]>([]);
   const [topicsLoading, setTopicsLoading] = useState(true);
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -1120,6 +1108,15 @@ export default function DashboardPage() {
     return () => { cancelled = true; };
   }, [authChecked]);
 
+  // Fetch favorites count eagerly so the sidebar badge is accurate from the start.
+  // Full favorites list is still lazy-loaded when user visits the tab.
+  useEffect(() => {
+    if (!authChecked) return;
+    fetchFavorites().then(data => {
+      setFavCount(data.length);
+    }).catch(() => { /* non-critical — badge just stays 0 */ });
+  }, [authChecked]);
+
   useEffect(() => {
     if (!authChecked) return;
     let cancelled = false;
@@ -1148,14 +1145,26 @@ export default function DashboardPage() {
   }, [active, favLoaded, favLoading]);
 
   // ── Favorites toggle ──
+  // Works from Feed, Search, and Favorites views.
+  // We check both `papers` and `favorites` to determine wasFav,
+  // because search results manage their own Paper state.
   const toggleFav = async (id: string) => {
-    const paper = papers.find(p => p.id === id);
-    const wasFav = !!(paper && paper.is_favorite);
-    setPapers(ps => ps.map(p => p.id === id ? { ...p, is_favorite: !p.is_favorite } : p));
+    const inFeed = papers.find(p => p.id === id);
+    const inFavs = favorites.find(p => p.id === id);
+    const wasFav = !!(inFeed?.is_favorite || inFavs);
+    // Optimistic update in both lists
+    setPapers(ps => ps.map(p => p.id === id ? { ...p, is_favorite: !wasFav } : p));
     try {
-      if (wasFav) { await removeFavorite(id); setFavorites(fs => fs.filter(p => p.id !== id)); }
-      else { await addFavorite(id); if (paper) setFavorites(fs => fs.some(f => f.id === id) ? fs : [...fs, { ...paper, is_favorite: true }]); }
+      if (wasFav) {
+        await removeFavorite(id);
+        setFavorites(fs => fs.filter(p => p.id !== id));
+      } else {
+        await addFavorite(id);
+        const source = inFeed ?? inFavs;
+        if (source) setFavorites(fs => fs.some(f => f.id === id) ? fs : [...fs, { ...source, is_favorite: true }]);
+      }
     } catch (err) {
+      // Rollback optimistic update
       setPapers(ps => ps.map(p => p.id === id ? { ...p, is_favorite: wasFav } : p));
       if ((err as { code?: number })?.code === 401) handleAuthError();
     }
@@ -1217,11 +1226,26 @@ export default function DashboardPage() {
     };
   }, [papers, statusFilter, topicFilter, query]);
 
+  // Keep favCount in sync whenever the full list gets loaded/mutated
+  useEffect(() => { if (favLoaded) setFavCount(favorites.length); }, [favorites.length, favLoaded]);
+
   const navCounts = useMemo(() => ({
     feed: papers.filter(p => p.processing_status === 'DONE').length,
-    favorites: favorites.length,
+    favorites: favCount,
     notifications: unreadNotifs,
-  }), [papers, favorites.length, unreadNotifs]);
+  }), [papers, favCount, unreadNotifs]);
+
+  // ── Reload papers ──
+  const reloadPapers = () => {
+    setPapersLoading(true); setPapersError(null);
+    fetchPapers().then(data => {
+      setPapers(data.map(p => ({ ...p, processing_status: normalizeStatus(p.processing_status) as Paper['processing_status'] })));
+      setPapersLoading(false);
+    }).catch(err => {
+      if (err?.code === 401) { handleAuthError(); return; }
+      setPapersError('Failed to load papers'); setPapersLoading(false);
+    });
+  };
 
   // 'topics' is not a real tab — it opens the manager modal instead
   const navTo = (v: string) => {
@@ -1257,8 +1281,7 @@ export default function DashboardPage() {
   if (!authChecked) return <div className="h-screen w-screen flex items-center justify-center text-slate-400 text-sm">Authenticating…</div>;
 
   return (
-    <div className="h-screen w-screen flex bg-slate-50 text-slate-900" style={{ '--scrollbar-thumb': '#e2e8f0' } as React.CSSProperties}>
-      <style>{`.feed-scroll::-webkit-scrollbar{width:10px}.feed-scroll::-webkit-scrollbar-thumb{background:#e2e8f0;border-radius:8px}.feed-scroll::-webkit-scrollbar-thumb:hover{background:#cbd5e1}.line-clamp-3{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}.line-clamp-2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}`}</style>
+    <div className="h-screen w-screen flex bg-slate-50 text-slate-900">
       <Sidebar active={active} onNavigate={navTo} topics={topics} topicsLoading={topicsLoading}
         onManageTopics={() => setTopicsManagerOpen(true)} mobileOpen={mobileNav} onClose={() => setMobileNav(false)}
         navCounts={navCounts} topicFilter={topicFilter} onTopicClick={onTopicClick} />
@@ -1275,7 +1298,8 @@ export default function DashboardPage() {
                 statusFilter={statusFilter} onStatusFilter={setStatusFilter}
                 todayCount={tabCounts.today} flaggedCount={tabCounts.flagged} highCount={tabCounts.high}
                 onToggleFavorite={toggleFav} topicFilter={topicFilter}
-                focusPaperId={focusPaperId} onFocusConsumed={() => setFocusPaperId(null)} />
+                focusPaperId={focusPaperId} onFocusConsumed={() => setFocusPaperId(null)}
+                onRefresh={reloadPapers} />
             )}
             {active === 'favorites' && (
               <FavoritesView papers={favorites} loading={favLoading} error={favError} onRemoveFavorite={removeFromFavorites} />
