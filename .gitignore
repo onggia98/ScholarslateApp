@@ -1,6 +1,7 @@
 # ── Secrets — KHÔNG commit ────────────────────────────────────────────────────
 **/application-local.yml
 **/.env
+**/.env.*
 **/.env.local
 **/.env.*.local
 

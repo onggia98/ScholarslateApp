@@ -48,6 +48,10 @@
 .feed-scroll::-webkit-scrollbar-thumb   { background: #e2e8f0; border-radius: 8px; }
 .feed-scroll::-webkit-scrollbar-thumb:hover { background: #cbd5e1; }
 
+/* ── Hide scrollbar (used for horizontal tab-strip on mobile) ───────────────── */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
 /* ── Line-clamp utilities (Tailwind v4 includes these, but listed for clarity) */
 .line-clamp-2 {
   display: -webkit-box;

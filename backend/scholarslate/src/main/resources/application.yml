@@ -18,6 +18,7 @@ spring:
   flyway:
     enabled: true
     locations: classpath:db/migration
+    validate-on-migrate: false         # Bỏ qua checksum (migration comments đã được làm sạch)
     # Flyway dùng datasource riêng, KHÔNG có connection-init-sql
     # Tránh lỗi "unrecognized configuration parameter hnsw.ef_search"
     # khi pgvector chưa được CREATE EXTENSION (chạy trước V1 migration)
@@ -32,8 +33,10 @@ spring:
 
 jwt:
   # Phải đủ 32 ký tự (256 bit) cho HMAC-SHA256
-  # Đổi thành key mạnh hơn khi deploy: openssl rand -base64 32
-  secret: ${JWT_SECRET:papertracker-secret-key-change-in-production!!}
+  # Tạo key mạnh: openssl rand -base64 32
+  # Local: set JWT_SECRET trong application-local.yml (không commit)
+  # Production: set JWT_SECRET trong Railway env vars
+  secret: ${JWT_SECRET}
   expiration-ms: 86400000   # 24 giờ
 
 # ── AI Services ───────────────────────────────────────────────────────────────

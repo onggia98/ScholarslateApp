@@ -42,10 +42,10 @@ function Badge({ children, tone = 'slate' as Tone, icon: Icon, className = '' }:
 
 function PageHeader({ title, subtitle, action }: { title: React.ReactNode; subtitle?: React.ReactNode; action?: React.ReactNode }) {
   return (
-    <div className="flex items-end justify-between mb-5 gap-4">
-      <div>
-        <h1 className="text-[22px] font-semibold tracking-tight text-slate-900">{title}</h1>
-        {subtitle ? <p className="text-sm text-slate-500 mt-0.5">{subtitle}</p> : null}
+    <div className="flex items-start sm:items-end justify-between mb-4 sm:mb-5 gap-3">
+      <div className="min-w-0">
+        <h1 className="text-[18px] sm:text-[22px] font-semibold tracking-tight text-slate-900">{title}</h1>
+        {subtitle ? <p className="text-xs sm:text-sm text-slate-500 mt-0.5 line-clamp-2 sm:line-clamp-none">{subtitle}</p> : null}
       </div>
       {action}
     </div>
@@ -153,16 +153,16 @@ function PaperCard({ paper, onToggleFavorite, focused, onFocusConsumed, onOpenDe
       ) : null}
       <div className="p-5">
         <div className="flex items-start gap-4">
-          <div className={'hidden sm:flex flex-col items-center justify-center w-14 flex-shrink-0 rounded-lg border py-2 ' + score.bg + ' ' + score.border}>
+          <div className={'flex flex-col items-center justify-center w-12 sm:w-14 flex-shrink-0 rounded-lg border py-2 ' + score.bg + ' ' + score.border}>
             <div className={'text-[10px] font-semibold uppercase tracking-wider ' + score.text}>AI</div>
-            <div className={'text-xl font-bold leading-none ' + score.text}>{paper.quality_score != null ? paper.quality_score.toFixed(1) : '—'}</div>
+            <div className={'text-lg sm:text-xl font-bold leading-none ' + score.text}>{paper.quality_score != null ? paper.quality_score.toFixed(1) : '—'}</div>
             <div className={'text-[9px] opacity-70 mt-0.5 ' + score.text}>/ 10</div>
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-slate-500 mb-1.5">
               <span className="inline-flex items-center gap-1 font-mono text-slate-600"><Hash className="w-3 h-3" />{paper.arxiv_id}</span>
-              <span className="text-slate-300">·</span>
-              <span className="inline-flex items-center gap-1"><Calendar className="w-3 h-3" />{formatDate(paper.published_at)}</span>
+              <span className="text-slate-300 hidden sm:inline">·</span>
+              <span className="hidden sm:inline-flex items-center gap-1"><Calendar className="w-3 h-3" />{formatDate(paper.published_at)}</span>
               <span className="text-slate-300">·</span>
               <span>{timeAgo(paper.published_at)}</span>
               <span className="text-slate-300">·</span>
@@ -315,9 +315,9 @@ function PaperDetailModal({ paper, onClose, onToggleFavorite }: {
 
         {/* ── Header ── */}
         <div className="flex items-start gap-4 p-6 border-b border-slate-200 flex-shrink-0">
-          <div className={'hidden sm:flex flex-col items-center justify-center w-14 flex-shrink-0 rounded-lg border py-2 ' + score.bg + ' ' + score.border}>
+          <div className={'flex flex-col items-center justify-center w-12 sm:w-14 flex-shrink-0 rounded-lg border py-2 ' + score.bg + ' ' + score.border}>
             <div className={'text-[10px] font-semibold uppercase tracking-wider ' + score.text}>AI</div>
-            <div className={'text-xl font-bold leading-none ' + score.text}>{paper.quality_score != null ? paper.quality_score.toFixed(1) : '—'}</div>
+            <div className={'text-lg sm:text-xl font-bold leading-none ' + score.text}>{paper.quality_score != null ? paper.quality_score.toFixed(1) : '—'}</div>
             <div className={'text-[9px] opacity-70 mt-0.5 ' + score.text}>/ 10</div>
           </div>
           <div className="flex-1 min-w-0">
@@ -586,16 +586,16 @@ function Topbar({ onMobileMenu, query, onQuery, onSubmitQuery, notifications, on
           ) : null}
         </div>
         <div className="hidden sm:block w-px h-6 bg-slate-200 mx-1" />
-        {/* User menu */}
+        {/* User menu — compact avatar on mobile, full button on sm+ */}
         <div className="relative" ref={menuRef}>
           <button onClick={() => setMenuOpen(o => !o)}
-            className={'hidden sm:flex items-center gap-2 pl-1 pr-2 py-1 rounded-lg transition-colors ' + (menuOpen ? 'bg-slate-100' : 'hover:bg-slate-50')}>
-            <span className="w-8 h-8 rounded-full bg-gradient-to-br from-slate-700 to-slate-900 text-white text-xs font-semibold inline-flex items-center justify-center">{user.initials}</span>
-            <span className="text-left leading-tight">
+            className={'flex items-center gap-0 sm:gap-2 pl-1 pr-1 sm:pr-2 py-1 rounded-lg transition-colors ' + (menuOpen ? 'bg-slate-100' : 'hover:bg-slate-50')}>
+            <span className="w-8 h-8 rounded-full bg-gradient-to-br from-slate-700 to-slate-900 text-white text-xs font-semibold inline-flex items-center justify-center flex-shrink-0">{user.initials}</span>
+            <span className="hidden sm:block text-left leading-tight ml-0.5">
               <span className="block text-sm font-medium text-slate-900 max-w-[160px] truncate">{user.email}</span>
               <span className="block text-[11px] text-slate-500">Signed in</span>
             </span>
-            <ChevronDown className={'w-3.5 h-3.5 text-slate-400 transition-transform ' + (menuOpen ? 'rotate-180' : '')} />
+            <ChevronDown className={'hidden sm:block w-3.5 h-3.5 text-slate-400 transition-transform ' + (menuOpen ? 'rotate-180' : '')} />
           </button>
           {menuOpen ? (
             <div className="absolute right-0 top-full mt-2 w-64 bg-white border border-slate-200 rounded-xl shadow-lg py-2 z-30">
@@ -644,27 +644,29 @@ function FeedView({ papers, loading, error, sort, onSort, filter, onFilter, stat
         action={<button onClick={onRefresh} disabled={loading} className="hidden md:inline-flex items-center gap-1.5 h-9 px-3 rounded-lg border border-slate-200 bg-white text-sm text-slate-700 hover:bg-slate-50 disabled:opacity-50"><RefreshCw className={'w-3.5 h-3.5 ' + (loading ? 'animate-spin' : '')} />Refresh</button>}
       />
       {/* Toolbar */}
-      <div className="flex flex-col md:flex-row md:items-center gap-3 mb-5">
-        <div className="flex items-center gap-1 p-1 bg-white border border-slate-200 rounded-lg w-fit">
+      <div className="flex flex-col gap-2 mb-5">
+        {/* Filter tabs — horizontal scroll on mobile */}
+        <div className="flex items-center gap-1 p-1 bg-white border border-slate-200 rounded-lg overflow-x-auto no-scrollbar w-full">
           {tabs.map(t => (
             <button key={t.id} onClick={() => onFilter(t.id)}
-              className={'px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center gap-1.5 ' + (filter === t.id ? 'bg-slate-900 text-white' : 'text-slate-600 hover:text-slate-900')}>
+              className={'flex-shrink-0 px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center gap-1.5 ' + (filter === t.id ? 'bg-slate-900 text-white' : 'text-slate-600 hover:text-slate-900')}>
               {t.label}
               {t.count ? <span className={'text-[11px] px-1.5 rounded ' + (filter === t.id ? 'bg-white/15' : 'bg-slate-100 text-slate-600')}>{t.count}</span> : null}
             </button>
           ))}
         </div>
-        <div className="flex items-center gap-2 md:ml-auto">
-          <span className="text-xs text-slate-500 hidden sm:inline"><span className="font-semibold text-slate-900">{papers.length}</span> papers</span>
+        {/* Sort & status selects */}
+        <div className="flex items-center gap-2">
           <select value={statusFilter} onChange={(e) => onStatusFilter(e.target.value as StatusFilter)}
-            className="h-9 pl-3 pr-8 rounded-lg border border-slate-200 bg-white text-sm text-slate-700 hover:bg-slate-50 focus:outline-none appearance-none">
+            className="flex-1 min-w-0 h-9 pl-3 pr-8 rounded-lg border border-slate-200 bg-white text-sm text-slate-700 hover:bg-slate-50 focus:outline-none appearance-none">
             <option value="done">DONE only</option><option value="all">All statuses</option>
             <option value="pending">PENDING</option><option value="failed">FAILED</option>
           </select>
           <select value={sort} onChange={(e) => onSort(e.target.value as SortMode)}
-            className="h-9 pl-3 pr-8 rounded-lg border border-slate-200 bg-white text-sm text-slate-700 hover:bg-slate-50 focus:outline-none appearance-none">
+            className="flex-1 min-w-0 h-9 pl-3 pr-8 rounded-lg border border-slate-200 bg-white text-sm text-slate-700 hover:bg-slate-50 focus:outline-none appearance-none">
             <option value="recent">Most recent</option><option value="score">Highest score</option><option value="oldest">Oldest first</option>
           </select>
+          <span className="text-xs text-slate-500 hidden sm:inline whitespace-nowrap"><span className="font-semibold text-slate-900">{papers.length}</span> papers</span>
         </div>
       </div>
       <div className="space-y-4 pb-12">
@@ -1194,6 +1196,45 @@ function AccountModal({ open, onClose, onAuthError }: { open: boolean; onClose: 
   );
 }
 
+// ── Mobile Bottom Navigation ──────────────────────────────────────────────────
+
+function MobileBottomNav({ active, onNavigate, navCounts }: {
+  active: string; onNavigate: (v: string) => void; navCounts: Record<string, number>;
+}) {
+  const items: { icon: React.ElementType; label: string; value: string; count?: number }[] = [
+    { icon: LayoutGrid, label: 'Feed',    value: 'feed',          count: navCounts.feed },
+    { icon: Heart,      label: 'Saved',   value: 'favorites',     count: navCounts.favorites },
+    { icon: Bell,       label: 'Inbox',   value: 'notifications', count: navCounts.notifications },
+    { icon: Search,     label: 'Search',  value: 'search' },
+    { icon: TrendingUp, label: 'Trends',  value: 'trends' },
+  ];
+  return (
+    <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur border-t border-slate-200 z-20" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
+      <div className="flex items-stretch h-14">
+        {items.map(item => {
+          const isActive = active === item.value;
+          return (
+            <button key={item.value} onClick={() => onNavigate(item.value)}
+              className={'flex-1 flex flex-col items-center justify-center gap-0.5 relative py-1 transition-colors ' + (isActive ? 'text-slate-900' : 'text-slate-400')}>
+              {/* Active indicator */}
+              {isActive && <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-slate-900 rounded-b-full" />}
+              <div className="relative">
+                <item.icon className="w-[22px] h-[22px]" strokeWidth={isActive ? 2.2 : 1.8} />
+                {item.count ? (
+                  <span className="absolute -top-1.5 -right-2 min-w-[16px] h-4 px-0.5 rounded-full bg-rose-500 text-white text-[9px] font-bold inline-flex items-center justify-center leading-none">
+                    {item.count > 99 ? '99+' : item.count}
+                  </span>
+                ) : null}
+              </div>
+              <span className={'text-[10px] leading-none ' + (isActive ? 'font-semibold' : 'font-medium')}>{item.label}</span>
+            </button>
+          );
+        })}
+      </div>
+    </nav>
+  );
+}
+
 // ── DashboardPage ─────────────────────────────────────────────────────────────
 
 export default function DashboardPage() {
@@ -1457,7 +1498,7 @@ export default function DashboardPage() {
           onOpenPaper={openPaper} onNavigate={navTo} user={user} onLogout={handleLogout}
           onOpenAccount={() => setAccountOpen(true)} />
         <main className="flex-1 overflow-y-auto feed-scroll">
-          <div className="max-w-4xl mx-auto px-4 lg:px-6 py-6">
+          <div className="max-w-4xl mx-auto px-4 lg:px-6 py-6 pb-24 lg:pb-6">
             {active === 'feed' && (
               <FeedView papers={filtered} loading={papersLoading} error={papersError}
                 sort={sort} onSort={setSort} filter={filter} onFilter={setFilter}
@@ -1481,6 +1522,7 @@ export default function DashboardPage() {
           </div>
         </main>
       </div>
+      <MobileBottomNav active={active} onNavigate={navTo} navCounts={navCounts} />
       <TopicsManager open={topicsManagerOpen} onClose={() => setTopicsManagerOpen(false)}
         topics={topics} onChange={setTopics} onAuthError={handleAuthError} />
       <AccountModal open={accountOpen} onClose={() => setAccountOpen(false)} onAuthError={handleAuthError} />
