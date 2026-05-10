@@ -69,7 +69,13 @@ function Field({ id, label, type = 'text', value, onChange, placeholder, autoCom
         {type === 'password' ? <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" /> : null}
         <input
           id={id}
-          type={realType}
+          // iOS Safari validates type="email" even with noValidate (known bug).
+          // Use type="text" + inputMode="email" to get the email keyboard without pattern enforcement.
+          type={type === 'email' ? 'text' : realType}
+          inputMode={type === 'email' ? 'email' : undefined}
+          autoCapitalize={type === 'email' ? 'none' : undefined}
+          autoCorrect={type === 'email' ? 'off' : undefined}
+          spellCheck={type === 'email' ? false : undefined}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
