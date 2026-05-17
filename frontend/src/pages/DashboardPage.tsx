@@ -663,13 +663,13 @@ function FeedView({ papers, loading, error, sort, onSort, filter, onFilter, stat
       />
       {/* Toolbar */}
       <div className="flex flex-col gap-2 mb-5">
-        {/* Filter tabs — horizontal scroll on mobile */}
-        <div className="flex items-center gap-1 p-1 bg-white border border-slate-200 rounded-lg overflow-x-auto no-scrollbar w-full">
+        {/* Filter tabs — equal-width buttons, fit all 4 in one row on any screen */}
+        <div className="flex items-center gap-0.5 sm:gap-1 p-1 bg-white border border-slate-200 rounded-lg w-full">
           {tabs.map(t => (
             <button key={t.id} onClick={() => onFilter(t.id)}
-              className={'flex-shrink-0 px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center gap-1.5 ' + (filter === t.id ? 'bg-slate-900 text-white' : 'text-slate-600 hover:text-slate-900')}>
-              {t.label}
-              {t.count ? <span className={'text-[11px] px-1.5 rounded ' + (filter === t.id ? 'bg-white/15' : 'bg-slate-100 text-slate-600')}>{t.count}</span> : null}
+              className={'flex-1 min-w-0 px-1 sm:px-3 py-1.5 rounded-md text-xs sm:text-sm font-medium transition-colors flex items-center justify-center gap-1 sm:gap-1.5 ' + (filter === t.id ? 'bg-slate-900 text-white' : 'text-slate-600 hover:text-slate-900')}>
+              <span className="truncate">{t.label}</span>
+              {t.count ? <span className={'flex-shrink-0 text-[10px] sm:text-[11px] px-1 sm:px-1.5 rounded ' + (filter === t.id ? 'bg-white/15' : 'bg-slate-100 text-slate-600')}>{t.count}</span> : null}
             </button>
           ))}
         </div>
