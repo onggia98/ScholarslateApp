@@ -1419,8 +1419,14 @@ export default function DashboardPage() {
 
   // ── Derived ──
   const unreadNotifs = useMemo(() => notifications.filter(n => !n.is_read).length, [notifications]);
-  // "Today" = fetched into our system within the last 24h (created_at), NOT arXiv publish date
-  const isToday = (p: Paper) => Date.now() - new Date(p.created_at).getTime() < 24 * 60 * 60 * 1000;
+  // "Today" = papers the scheduler fetched on today's calendar date (created_at date === today)
+  const isToday = (p: Paper) => {
+    const d = new Date(p.created_at);
+    const now = new Date();
+    return d.getFullYear() === now.getFullYear() &&
+      d.getMonth() === now.getMonth() &&
+      d.getDate() === now.getDate();
+  };
 
   const filtered = useMemo(() => {
     let list = papers.slice();
