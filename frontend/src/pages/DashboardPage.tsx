@@ -1419,7 +1419,8 @@ export default function DashboardPage() {
 
   // ── Derived ──
   const unreadNotifs = useMemo(() => notifications.filter(n => !n.is_read).length, [notifications]);
-  const isToday = (p: Paper) => Date.now() - new Date(p.published_at).getTime() < 24 * 60 * 60 * 1000;
+  // "Today" = fetched into our system within the last 24h (created_at), NOT arXiv publish date
+  const isToday = (p: Paper) => Date.now() - new Date(p.created_at).getTime() < 24 * 60 * 60 * 1000;
 
   const filtered = useMemo(() => {
     let list = papers.slice();

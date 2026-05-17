@@ -17,6 +17,7 @@ export interface Paper {
   last_error: string | null;
   topics: string[];
   is_favorite: boolean;
+  created_at: string; // when the paper was fetched into our system (used for "Today" filter)
 }
 
 export interface Topic {
