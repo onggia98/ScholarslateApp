@@ -543,46 +543,64 @@ function Topbar({ onMobileMenu, query, onQuery, onSubmitQuery, notifications, on
             {unreadCount > 0 ? <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 inline-flex items-center justify-center rounded-full bg-rose-500 text-white text-[10px] font-semibold ring-2 ring-white">{unreadCount > 99 ? '99+' : unreadCount}</span> : null}
           </button>
           {notifOpen ? (
-            <div className="absolute right-0 top-full mt-2 w-[380px] max-w-[calc(100vw-1.5rem)] bg-white border border-slate-200 rounded-xl shadow-lg z-30 overflow-hidden">
-              <div className="px-4 py-3 flex items-center justify-between border-b border-slate-100">
-                <span className="text-sm font-semibold text-slate-900">Notifications</span>
-                <button onClick={onMarkAllRead} disabled={unreadCount === 0}
-                  className="text-[12px] text-slate-600 hover:text-slate-900 font-medium disabled:text-slate-300 inline-flex items-center gap-1">
-                  <CheckCheck className="w-3.5 h-3.5" />Mark all read
-                </button>
-              </div>
-              <div className="px-3 pt-2 pb-1 flex items-center gap-1 border-b border-slate-100">
-                {(['all', 'unread'] as const).map(tab => (
-                  <button key={tab} onClick={() => setNotifTab(tab)}
-                    className={'px-2.5 py-1 rounded-md text-[12px] font-medium ' + (notifTab === tab ? 'bg-slate-100 text-slate-900' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50')}>
-                    {tab === 'all' ? 'All' : `Unread${unreadCount > 0 ? ` (${unreadCount})` : ''}`}
-                  </button>
-                ))}
-              </div>
-              <div className="max-h-[380px] overflow-y-auto py-1">
-                {visibleNotifs.length === 0 ? <div className="py-10 text-center text-sm text-slate-400">No notifications.</div>
-                  : visibleNotifs.map(n => (
-                    <button key={n.id} onClick={() => { if (!n.is_read) onMarkOneRead(n.id); setNotifOpen(false); if (n.paper_id) onOpenPaper(n.paper_id); }}
-                      className={'w-full flex items-start gap-3 px-4 py-3 text-left hover:bg-slate-50 ' + (!n.is_read ? 'bg-blue-50/40' : '')}>
-                      <span className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-100 to-indigo-200 inline-flex items-center justify-center flex-shrink-0"><FileText className="w-4 h-4 text-indigo-700" /></span>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-[13px] text-slate-800 leading-snug line-clamp-2">{n.message}</p>
-                        <div className="mt-1 flex items-center gap-2 text-[11px] text-slate-500">
-                          <span className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 font-medium">{n.type}</span>
-                          <span className="text-slate-300">·</span><span>{timeAgo(n.created_at)}</span>
-                        </div>
-                      </div>
-                      {!n.is_read ? <span className="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0 mt-3" /> : null}
+            <>
+              {/* Mobile backdrop */}
+              <div className="fixed inset-0 z-20 sm:hidden" onClick={() => setNotifOpen(false)} />
+              {/* Panel:
+                  mobile  → fixed, full-width, pinned below header (top-16 = h-16 header)
+                  desktop → absolute dropdown anchored right of bell button */}
+              <div className={
+                'z-30 bg-white border-slate-200 shadow-lg overflow-hidden ' +
+                'fixed inset-x-0 top-16 border-b rounded-none ' +
+                'sm:absolute sm:inset-x-auto sm:right-0 sm:top-full sm:mt-2 sm:w-[380px] sm:border sm:rounded-xl'
+              }>
+                <div className="px-4 py-3 flex items-center justify-between border-b border-slate-100">
+                  <span className="text-sm font-semibold text-slate-900">Notifications</span>
+                  <div className="flex items-center gap-3">
+                    <button onClick={onMarkAllRead} disabled={unreadCount === 0}
+                      className="text-[12px] text-slate-600 hover:text-slate-900 font-medium disabled:text-slate-300 inline-flex items-center gap-1">
+                      <CheckCheck className="w-3.5 h-3.5" />Mark all read
+                    </button>
+                    {/* Close button — mobile only */}
+                    <button onClick={() => setNotifOpen(false)} className="sm:hidden w-7 h-7 inline-flex items-center justify-center rounded-md text-slate-500 hover:bg-slate-100">
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+                <div className="px-3 pt-2 pb-1 flex items-center gap-1 border-b border-slate-100">
+                  {(['all', 'unread'] as const).map(tab => (
+                    <button key={tab} onClick={() => setNotifTab(tab)}
+                      className={'px-2.5 py-1 rounded-md text-[12px] font-medium ' + (notifTab === tab ? 'bg-slate-100 text-slate-900' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50')}>
+                      {tab === 'all' ? 'All' : `Unread${unreadCount > 0 ? ` (${unreadCount})` : ''}`}
                     </button>
                   ))}
+                </div>
+                {/* List: mobile uses more screen height */}
+                <div className="max-h-[calc(100vh-200px)] sm:max-h-[380px] overflow-y-auto py-1">
+                  {visibleNotifs.length === 0 ? <div className="py-10 text-center text-sm text-slate-400">No notifications.</div>
+                    : visibleNotifs.map(n => (
+                      <button key={n.id} onClick={() => { if (!n.is_read) onMarkOneRead(n.id); setNotifOpen(false); if (n.paper_id) onOpenPaper(n.paper_id); }}
+                        className={'w-full flex items-start gap-3 px-4 py-3 text-left hover:bg-slate-50 ' + (!n.is_read ? 'bg-blue-50/40' : '')}>
+                        <span className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-100 to-indigo-200 inline-flex items-center justify-center flex-shrink-0"><FileText className="w-4 h-4 text-indigo-700" /></span>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-[13px] text-slate-800 leading-snug line-clamp-2">{n.message}</p>
+                          <div className="mt-1 flex items-center gap-2 text-[11px] text-slate-500">
+                            <span className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 font-medium">{n.type}</span>
+                            <span className="text-slate-300">·</span><span>{timeAgo(n.created_at)}</span>
+                          </div>
+                        </div>
+                        {!n.is_read ? <span className="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0 mt-3" /> : null}
+                      </button>
+                    ))}
+                </div>
+                <div className="px-4 py-2.5 border-t border-slate-100 bg-slate-50/50 flex justify-end">
+                  <button onClick={() => { setNotifOpen(false); onNavigate('notifications'); }}
+                    className="text-[12px] text-slate-700 font-medium hover:text-slate-900 inline-flex items-center gap-1">
+                    View all<ArrowRight className="w-3 h-3" />
+                  </button>
+                </div>
               </div>
-              <div className="px-4 py-2.5 border-t border-slate-100 bg-slate-50/50 flex justify-end">
-                <button onClick={() => { setNotifOpen(false); onNavigate('notifications'); }}
-                  className="text-[12px] text-slate-700 font-medium hover:text-slate-900 inline-flex items-center gap-1">
-                  View all<ArrowRight className="w-3 h-3" />
-                </button>
-              </div>
-            </div>
+            </>
           ) : null}
         </div>
         <div className="hidden sm:block w-px h-6 bg-slate-200 mx-1" />
