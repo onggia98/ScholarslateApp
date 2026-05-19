@@ -67,8 +67,11 @@ export async function apiRegister(email: string, password: string): Promise<{ to
 
 // ── Papers ────────────────────────────────────────────────────────────────────
 
-export async function fetchPapers(): Promise<Paper[]> {
-  const data = await request<Paper[] | PagedResponse<Paper>>('/papers');
+export async function fetchPapers(page = 0, size = 50): Promise<Paper[]> {
+  // size=50 để load đủ papers trong feed; backend default là 10 nên phải explicit
+  const data = await request<Paper[] | PagedResponse<Paper>>(
+    `/papers?page=${page}&size=${size}`
+  );
   if (Array.isArray(data)) return data;
   return (data as PagedResponse<Paper>).content ?? [];
 }
