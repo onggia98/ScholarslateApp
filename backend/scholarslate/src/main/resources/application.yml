@@ -19,12 +19,9 @@ spring:
     enabled: true
     locations: classpath:db/migration
     validate-on-migrate: false         # Bỏ qua checksum (migration comments đã được làm sạch)
-    # Flyway dùng datasource riêng, KHÔNG có connection-init-sql
-    # Tránh lỗi "unrecognized configuration parameter hnsw.ef_search"
-    # khi pgvector chưa được CREATE EXTENSION (chạy trước V1 migration)
-    url: jdbc:postgresql://localhost:5433/papertracker
-    user: papertracker
-    password: ${DB_PASSWORD:papertracker123}
+    # KHÔNG đặt url/user/password riêng — Spring Boot 4.x tạo dedicated datasource
+    # làm connection-init-sql "SET hnsw.ef_search=128" không được apply cho Flyway.
+    # Flyway tự dùng HikariCP datasource chính (spring.datasource.*)
 
   cache:
     type: caffeine
