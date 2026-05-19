@@ -37,7 +37,7 @@ public class ArxivFetchService {
 
     public ArxivFetchService(
             @Value("${scheduler.arxiv.max-results-per-keyword:10}") int maxResults,
-            @Value("${scheduler.arxiv.request-delay-ms:350}") long requestDelayMs) {
+            @Value("${scheduler.arxiv.request-delay-ms:1500}") long requestDelayMs) {
         this.restClient = RestClient.builder()
                 .defaultHeader("User-Agent", "PaperTracker/1.0")
                 .build();
@@ -81,7 +81,7 @@ public class ArxivFetchService {
         if (xml == null) return List.of();
 
         try {
-            // Delay 350ms sau mỗi request để tuân thủ rate limit arXiv
+            // Delay requestDelayMs (default 1500ms) sau mỗi request — arXiv rate limit ~1 req/s
             Thread.sleep(requestDelayMs);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
