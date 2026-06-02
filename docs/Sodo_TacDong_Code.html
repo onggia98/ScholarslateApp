@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Sơ Đồ Tác Động Code — ScholarSlate</title>
+<style>
+:root{
+  --p:#1e40af;--pl:#3b82f6;--g:#16a34a;--w:#d97706;--r:#dc2626;
+  --pu:#7c3aed;--t:#0f766e;--cy:#0891b2;--pk:#db2777;
+  --bg:#f1f5f9;--sf:#fff;--bd:#e2e8f0;--tx:#1e293b;--mu:#64748b;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--tx);font-size:14px;}
+
+/* HERO */
+.hero{background:linear-gradient(135deg,#0f172a,#1e3a8a 50%,#0c4a6e);color:#fff;padding:44px 48px 36px;text-align:center;}
+.hero h1{font-size:2rem;font-weight:800;margin-bottom:8px;}
+.hero p{opacity:.8;font-size:.95rem;}
+.hero-chips{margin-top:16px;display:flex;gap:8px;flex-wrap:wrap;justify-content:center;}
+.hero-chips span{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:14px;padding:3px 12px;font-size:12px;}
+
+/* NAV */
+.nav{background:var(--sf);border-bottom:1px solid var(--bd);padding:0 32px;display:flex;gap:4px;overflow-x:auto;position:sticky;top:0;z-index:100;}
+.nav a{display:inline-block;padding:14px 16px;font-size:13px;font-weight:600;color:var(--mu);text-decoration:none;border-bottom:3px solid transparent;white-space:nowrap;transition:all .15s;}
+.nav a:hover,.nav a.on{color:var(--p);border-bottom-color:var(--p);}
+
+/* CONTENT */
+.page{max-width:1200px;margin:0 auto;padding:32px 24px;}
+.section{margin-bottom:56px;}
+.section-title{font-size:1.3rem;font-weight:800;color:var(--p);margin-bottom:6px;}
+.section-sub{font-size:13px;color:var(--mu);margin-bottom:24px;}
+
+/* DIAGRAM CARD */
+.dcard{background:var(--sf);border:1px solid var(--bd);border-radius:14px;padding:28px;margin-bottom:20px;overflow-x:auto;}
+.dcard h3{font-size:.95rem;font-weight:700;color:var(--tx);margin-bottom:18px;display:flex;align-items:center;gap:8px;}
+.dcard h3 .dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+
+/* ── FLOW ROWS ── */
+.flow-row{display:flex;align-items:center;gap:0;flex-wrap:nowrap;overflow-x:auto;padding:8px 0;}
+.fn{border-radius:10px;padding:10px 16px;font-size:12.5px;font-weight:700;text-align:center;white-space:nowrap;min-width:90px;position:relative;}
+.arr{font-size:20px;color:#94a3b8;padding:0 4px;flex-shrink:0;}
+.arr-label{display:flex;flex-direction:column;align-items:center;gap:2px;padding:0 6px;}
+.arr-label .al{font-size:10px;color:#94a3b8;white-space:nowrap;}
+
+/* colors */
+.c-blue  {background:#dbeafe;color:#1d4ed8;border:1.5px solid #93c5fd;}
+.c-green {background:#dcfce7;color:#15803d;border:1.5px solid #86efac;}
+.c-orange{background:#fef3c7;color:#92400e;border:1.5px solid #fcd34d;}
+.c-red   {background:#fee2e2;color:#b91c1c;border:1.5px solid #fca5a5;}
+.c-purple{background:#ede9fe;color:#5b21b6;border:1.5px solid #c4b5fd;}
+.c-teal  {background:#ccfbf1;color:#0f766e;border:1.5px solid #5eead4;}
+.c-gray  {background:#f1f5f9;color:#334155;border:1.5px solid #cbd5e1;}
+.c-cyan  {background:#cffafe;color:#0e7490;border:1.5px solid #67e8f9;}
+.c-pink  {background:#fce7f3;color:#9d174d;border:1.5px solid #f9a8d4;}
+.c-dark  {background:#1e293b;color:#e2e8f0;border:1.5px solid #334155;}
+
+/* ── GRID DIAGRAM ── */
+.grid-dia{display:grid;gap:3px;}
+.layer-row{display:flex;gap:3px;align-items:stretch;}
+.layer-label{writing-mode:vertical-rl;text-orientation:mixed;font-size:10px;font-weight:700;color:var(--mu);letter-spacing:.08em;text-transform:uppercase;padding:6px 4px;background:var(--bg);border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;min-width:22px;}
+.layer-cells{display:flex;gap:3px;flex:1;flex-wrap:wrap;}
+.cell{border-radius:8px;padding:10px 14px;font-size:12px;font-weight:600;flex:1;min-width:100px;text-align:center;cursor:pointer;transition:transform .15s,box-shadow .15s;}
+.cell:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.1);}
+.cell small{display:block;font-weight:400;font-size:10px;opacity:.75;margin-top:2px;}
+
+/* ── DEPENDENCY GRAPH ── */
+.dep-wrap{position:relative;}
+.dep-svg{width:100%;overflow:visible;}
+
+/* ── SEQUENCE ── */
+.seq{display:grid;gap:0;}
+.seq-actors{display:flex;gap:0;}
+.seq-actor{flex:1;text-align:center;padding:10px 6px;font-size:11.5px;font-weight:700;border-radius:8px 8px 0 0;border:1.5px solid;border-bottom:none;}
+.seq-body{border:1.5px solid var(--bd);border-radius:0 0 10px 10px;overflow:hidden;}
+.seq-row{display:flex;align-items:center;border-bottom:1px solid #f1f5f9;}
+.seq-row:last-child{border-bottom:none;}
+.seq-step{flex:1;padding:8px 10px;font-size:11px;text-align:center;border-right:1px dashed #e2e8f0;}
+.seq-step:last-child{border-right:none;}
+.seq-msg{padding:5px 10px;font-size:10.5px;font-weight:600;background:var(--bg);border-radius:6px;display:inline-block;}
+.seq-arrow{font-size:16px;color:#94a3b8;}
+.active-step{background:#eff6ff;}
+
+/* ── PIPELINE ── */
+.pipeline{display:flex;flex-direction:column;gap:4px;}
+.pipe-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;border-radius:10px;border:1.5px solid var(--bd);background:var(--sf);}
+.pipe-num{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;margin-top:1px;}
+.pipe-content{flex:1;}
+.pipe-title{font-weight:700;font-size:13px;}
+.pipe-detail{font-size:11.5px;color:var(--mu);margin-top:3px;line-height:1.5;}
+.pipe-badge{display:inline-block;padding:1px 7px;border-radius:10px;font-size:10px;font-weight:700;margin-left:6px;}
+.pipe-connector{display:flex;justify-content:center;align-items:center;height:20px;color:#94a3b8;font-size:18px;}
+
+/* ── ENTITY REL ── */
+.erd{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;}
+.ent-card{border-radius:10px;border:2px solid;overflow:hidden;}
+.ent-head{padding:8px 12px;font-weight:800;font-size:12.5px;}
+.ent-field{padding:4px 12px;font-size:11px;border-top:1px solid rgba(0,0,0,.06);display:flex;justify-content:space-between;}
+.ent-field .ft{color:var(--mu);font-size:10px;}
+
+/* ── ANNOTATION ── */
+.anno{background:#fffbeb;border:1.5px solid #fcd34d;border-radius:8px;padding:10px 14px;font-size:12px;margin-top:10px;line-height:1.6;}
+.anno strong{color:#92400e;}
+
+/* ── TABS ── */
+.tabs{display:flex;gap:4px;margin-bottom:16px;flex-wrap:wrap;}
+.tab{padding:7px 16px;border-radius:20px;font-size:12.5px;font-weight:600;cursor:pointer;border:1.5px solid var(--bd);background:var(--sf);color:var(--mu);transition:all .15s;}
+.tab.on{background:var(--p);color:#fff;border-color:var(--p);}
+.tab-content{display:none;}.tab-content.on{display:block;}
+
+/* ── LEGEND ── */
+.legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:12px;}
+.leg{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--mu);}
+.leg-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0;}
+
+/* TOOLTIP */
+.has-tip{position:relative;cursor:help;}
+.has-tip:hover .tip{display:block;}
+.tip{display:none;position:absolute;bottom:110%;left:50%;transform:translateX(-50%);background:#1e293b;color:#e2e8f0;padding:6px 10px;border-radius:6px;font-size:11px;white-space:nowrap;z-index:50;pointer-events:none;}
+.tip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:#1e293b;}
+
+@media(max-width:700px){
+  .hero{padding:28px 16px 24px;}
+  .hero h1{font-size:1.4rem;}
+  .page{padding:20px 12px;}
+  .flow-row{flex-wrap:wrap;}
+}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>🗺️ Sơ Đồ Tác Động Code — ScholarSlate</h1>
+  <p>Trực quan hóa cách từng thành phần tương tác với nhau — từ request HTTP đến DB, từ Scheduler đến AI APIs.</p>
+  <div class="hero-chips">
+    <span>8 sơ đồ</span><span>Tương tác hover</span><span>Spring Boot 4 + React 19</span><span>pgvector</span>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav class="nav" id="topnav">
+  <a href="#d1" class="on">1. Kiến trúc tổng thể</a>
+  <a href="#d2">2. Luồng Request HTTP</a>
+  <a href="#d3">3. JWT Auth Flow</a>
+  <a href="#d4">4. AI Pipeline</a>
+  <a href="#d5">5. Entity Relationships</a>
+  <a href="#d6">6. Service Dependencies</a>
+  <a href="#d7">7. Scheduler Flow</a>
+  <a href="#d8">8. Frontend Component Tree</a>
+</nav>
+
+<div class="page">
+
+<!-- ══════════════════════════════════════════════════ -->
+<div class="section" id="d1">
+  <div class="section-title">1. Kiến trúc tổng thể — System Architecture</div>
+  <div class="section-sub">Toàn bộ hệ thống gồm 3 lớp chính: Frontend (Vercel), Backend (Railway), Database (Docker). Hai luồng dữ liệu: user request và background pipeline.</div>
+
+  <div class="dcard">
+    <h3><span class="dot" style="background:#3b82f6"></span> Sơ đồ hệ thống tổng quát</h3>
+
+    <svg viewBox="0 0 900 480" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:900px;display:block;margin:0 auto;">
+      <defs>
+        <marker id="arr" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#94a3b8"/></marker>
+        <marker id="arr-b" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#3b82f6"/></marker>
+        <marker id="arr-g" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#16a34a"/></marker>
+        <marker id="arr-o" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#d97706"/></marker>
+      </defs>
+
+      <!-- USER -->
+      <circle cx="60" cy="80" r="24" fill="#dbeafe" stroke="#93c5fd" stroke-width="2"/>
+      <text x="60" y="74" text-anchor="middle" font-size="18">👤</text>
+      <text x="60" y="118" text-anchor="middle" font-size="11" fill="#1d4ed8" font-weight="700">User</text>
+
+      <!-- VERCEL -->
+      <rect x="130" y="44" width="160" height="72" rx="10" fill="#ede9fe" stroke="#c4b5fd" stroke-width="2"/>
+      <text x="210" y="68" text-anchor="middle" font-size="12" font-weight="800" fill="#5b21b6">React SPA</text>
+      <text x="210" y="84" text-anchor="middle" font-size="10" fill="#7c3aed">Vite + TypeScript + Tailwind</text>
+      <text x="210" y="100" text-anchor="middle" font-size="10" fill="#7c3aed">BrowserRouter · Axios</text>
+      <text x="210" y="128" text-anchor="middle" font-size="10" fill="#7c3aed" font-weight="600">▲ Vercel</text>
+
+      <!-- RAILWAY BACKEND -->
+      <rect x="360" y="20" width="220" height="400" rx="12" fill="#f0f9ff" stroke="#7dd3fc" stroke-width="2"/>
+      <text x="470" y="48" text-anchor="middle" font-size="12" font-weight="800" fill="#0369a1">Spring Boot 4.0.6</text>
+      <text x="470" y="62" text-anchor="middle" font-size="10" fill="#0284c7">Java 21 · Port 8081</text>
+
+      <!-- Security layer -->
+      <rect x="378" y="76" width="184" height="38" rx="7" fill="#fef3c7" stroke="#fcd34d" stroke-width="1.5"/>
+      <text x="470" y="93" text-anchor="middle" font-size="11" font-weight="700" fill="#92400e">Security Filter Chain</text>
+      <text x="470" y="106" text-anchor="middle" font-size="9.5" fill="#b45309">JwtAuthFilter → SecurityConfig</text>
+
+      <!-- Controllers -->
+      <rect x="378" y="124" width="184" height="38" rx="7" fill="#dbeafe" stroke="#93c5fd" stroke-width="1.5"/>
+      <text x="470" y="141" text-anchor="middle" font-size="11" font-weight="700" fill="#1d4ed8">Controllers (7)</text>
+      <text x="470" y="154" text-anchor="middle" font-size="9.5" fill="#2563eb">Auth·Paper·Topic·Fav·Notif·User·Admin</text>
+
+      <!-- Services -->
+      <rect x="378" y="172" width="184" height="38" rx="7" fill="#dcfce7" stroke="#86efac" stroke-width="1.5"/>
+      <text x="470" y="189" text-anchor="middle" font-size="11" font-weight="700" fill="#15803d">Services</text>
+      <text x="470" y="202" text-anchor="middle" font-size="9.5" fill="#16a34a">Auth·Paper·Topic·Fav·Notif·Admin</text>
+
+      <!-- AI Services -->
+      <rect x="378" y="220" width="184" height="38" rx="7" fill="#fce7f3" stroke="#f9a8d4" stroke-width="1.5"/>
+      <text x="470" y="237" text-anchor="middle" font-size="11" font-weight="700" fill="#9d174d">AI Services</text>
+      <text x="470" y="250" text-anchor="middle" font-size="9.5" fill="#be185d">Arxiv·Embedding·Groq·Pipeline</text>
+
+      <!-- Repositories -->
+      <rect x="378" y="268" width="184" height="38" rx="7" fill="#ccfbf1" stroke="#5eead4" stroke-width="1.5"/>
+      <text x="470" y="285" text-anchor="middle" font-size="11" font-weight="700" fill="#0f766e">Repositories (6)</text>
+      <text x="470" y="298" text-anchor="middle" font-size="9.5" fill="#0d9488">Spring Data JPA + Native SQL</text>
+
+      <!-- Schedulers -->
+      <rect x="378" y="316" width="184" height="38" rx="7" fill="#fff7ed" stroke="#fed7aa" stroke-width="1.5"/>
+      <text x="470" y="333" text-anchor="middle" font-size="11" font-weight="700" fill="#c2410c">Schedulers</text>
+      <text x="470" y="346" text-anchor="middle" font-size="9.5" fill="#ea580c">MainScheduler · RetryScheduler</text>
+
+      <text x="470" y="408" text-anchor="middle" font-size="10" fill="#0369a1" font-weight="600">🚂 Railway</text>
+
+      <!-- POSTGRES -->
+      <rect x="650" y="110" width="175" height="140" rx="10" fill="#f0fdf4" stroke="#86efac" stroke-width="2"/>
+      <text x="737" y="136" text-anchor="middle" font-size="12" font-weight="800" fill="#15803d">PostgreSQL 16</text>
+      <text x="737" y="152" text-anchor="middle" font-size="10" fill="#16a34a">Docker · Port 5433</text>
+      <rect x="664" y="162" width="148" height="22" rx="5" fill="#dcfce7" stroke="#86efac" stroke-width="1"/>
+      <text x="738" y="176" text-anchor="middle" font-size="10" fill="#15803d" font-weight="600">+ pgvector extension</text>
+      <rect x="664" y="192" width="68" height="20" rx="5" fill="#dcfce7" stroke="#86efac" stroke-width="1"/>
+      <text x="698" y="206" text-anchor="middle" font-size="10" fill="#15803d">HNSW index</text>
+      <rect x="742" y="192" width="70" height="20" rx="5" fill="#dcfce7" stroke="#86efac" stroke-width="1"/>
+      <text x="777" y="206" text-anchor="middle" font-size="10" fill="#15803d">GIN index</text>
+      <text x="737" y="238" text-anchor="middle" font-size="10" fill="#16a34a">Flyway migrations V1→V5</text>
+
+      <!-- HuggingFace -->
+      <rect x="650" y="270" width="80" height="65" rx="8" fill="#fce7f3" stroke="#f9a8d4" stroke-width="1.5"/>
+      <text x="690" y="295" text-anchor="middle" font-size="10" font-weight="700" fill="#9d174d">HuggingFace</text>
+      <text x="690" y="308" text-anchor="middle" font-size="9" fill="#be185d">bge-small-en</text>
+      <text x="690" y="320" text-anchor="middle" font-size="9" fill="#be185d">384-dim embed</text>
+
+      <!-- Groq -->
+      <rect x="745" y="270" width="80" height="65" rx="8" fill="#fff7ed" stroke="#fed7aa" stroke-width="1.5"/>
+      <text x="785" y="295" text-anchor="middle" font-size="10" font-weight="700" fill="#c2410c">Groq API</text>
+      <text x="785" y="308" text-anchor="middle" font-size="9" fill="#ea580c">llama-3.1</text>
+      <text x="785" y="320" text-anchor="middle" font-size="9" fill="#ea580c">summary+score</text>
+
+      <!-- arXiv -->
+      <rect x="650" y="355" width="175" height="50" rx="8" fill="#ede9fe" stroke="#c4b5fd" stroke-width="1.5"/>
+      <text x="737" y="377" text-anchor="middle" font-size="10" font-weight="700" fill="#5b21b6">arXiv API</text>
+      <text x="737" y="392" text-anchor="middle" font-size="9" fill="#7c3aed">Atom/XML · sortBy=submittedDate</text>
+
+      <!-- ARROWS -->
+      <!-- User → Vercel -->
+      <line x1="84" y1="80" x2="128" y2="80" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arr)"/>
+      <!-- Vercel ↔ Backend -->
+      <line x1="290" y1="65" x2="358" y2="100" stroke="#3b82f6" stroke-width="2" marker-end="url(#arr-b)" stroke-dasharray="none"/>
+      <text x="318" y="76" font-size="9.5" fill="#3b82f6" font-weight="600">REST/JSON</text>
+      <!-- Backend → Postgres -->
+      <line x1="562" y1="285" x2="648" y2="180" stroke="#16a34a" stroke-width="2" marker-end="url(#arr-g)"/>
+      <!-- AI Services → HF -->
+      <line x1="562" y1="239" x2="648" y2="295" stroke="#db2777" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arr)"/>
+      <!-- AI Services → Groq -->
+      <line x1="562" y1="250" x2="743" y2="295" stroke="#ea580c" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arr)"/>
+      <!-- Schedulers → arXiv -->
+      <line x1="562" y1="335" x2="648" y2="375" stroke="#7c3aed" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arr)"/>
+
+      <!-- Layer connectors -->
+      <line x1="470" y1="114" x2="470" y2="122" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arr)"/>
+      <line x1="470" y1="162" x2="470" y2="170" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arr)"/>
+      <line x1="470" y1="210" x2="470" y2="218" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arr)"/>
+      <line x1="470" y1="258" x2="470" y2="266" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arr)"/>
+    </svg>
+
+    <div class="legend">
+      <div class="leg"><div class="leg-dot" style="background:#dbeafe;border:1px solid #93c5fd"></div> Frontend (Vercel)</div>
+      <div class="leg"><div class="leg-dot" style="background:#f0f9ff;border:1px solid #7dd3fc"></div> Backend (Railway)</div>
+      <div class="leg"><div class="leg-dot" style="background:#f0fdf4;border:1px solid #86efac"></div> Database (Docker)</div>
+      <div class="leg"><div class="leg-dot" style="background:#fce7f3;border:1px solid #f9a8d4"></div> AI APIs (HuggingFace / Groq)</div>
+      <div class="leg"><div class="leg-dot" style="background:#ede9fe;border:1px solid #c4b5fd"></div> arXiv API</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════ -->
+<div class="section" id="d2">
+  <div class="section-title">2. Luồng Request HTTP — End-to-end</div>
+  <div class="section-sub">Mỗi request từ browser đi qua chuỗi 7 bước trước khi data được trả về. Màu sắc thể hiện lớp xử lý tương ứng.</div>
+
+  <div class="dcard">
+    <h3><span class="dot" style="background:#0891b2"></span> Request Flow (ví dụ: GET /api/papers?keyword=llm)</h3>
+
+    <div class="flow-row" style="flex-wrap:wrap;gap:6px;">
+      <div class="fn c-purple" style="min-width:110px;">
+        <div>🌐 Browser</div><small>fetch('/api/papers')</small>
+      </div>
+      <div class="arr-label"><span class="arr">→</span><span class="al">Authorization: Bearer JWT</span></div>
+      <div class="fn c-orange" style="min-width:130px;">
+        <div>🔐 JwtAuthFilter</div><small>extract+validate token</small>
+      </div>
+      <div class="arr-label"><span class="arr">→</span><span class="al">set SecurityContext</span></div>
+      <div class="fn c-orange">
+        <div>🛡 SecurityChain</div><small>authorize endpoint</small>
+      </div>
+      <div class="arr-label"><span class="arr">→</span><span class="al">permit</span></div>
+      <div class="fn c-blue">
+        <div>📡 Controller</div><small>@GetMapping</small>
+      </div>
+      <div class="arr-label"><span class="arr">→</span><span class="al">call service</span></div>
+      <div class="fn c-green">
+        <div>⚙️ Service</div><small>@Transactional</small>
+      </div>
+      <div class="arr-label"><span class="arr">→</span><span class="al">JPA query</span></div>
+      <div class="fn c-teal">
+        <div>🗄 Repository</div><small>native SQL</small>
+      </div>
+      <div class="arr-label"><span class="arr">→</span><span class="al">SQL</span></div>
+      <div class="fn c-gray">
+        <div>🐘 PostgreSQL</div><small>GIN full-text search</small>
+      </div>
+    </div>
+
+    <div class="flow-row" style="flex-wrap:wrap;gap:6px;margin-top:16px;">
+      <div class="fn c-gray"><div>🐘 Result</div><small>List&lt;Paper&gt;</small></div>
+      <div class="arr-label"><span class="arr">→</span></div>
+      <div class="fn c-teal"><div>📦 Entity</div><small>Paper.java</small></div>
+      <div class="arr-label"><span class="arr">→</span><span class="al">toResponse()</span></div>
+      <div class="fn c-green"><div>🗂 PaperMapper</div><small>skip embedding</small></div>
+      <div class="arr-label"><span class="arr">→</span><span class="al">set isFavorite</span></div>
+      <div class="fn c-blue"><div>📋 PaperResponse</div><small>DTO</small></div>
+      <div class="arr-label"><span class="arr">→</span><span class="al">ApiResponse.ok()</span></div>
+      <div class="fn c-orange"><div>📬 JSON</div><small>snake_case</small></div>
+      <div class="arr-label"><span class="arr">→</span></div>
+      <div class="fn c-purple"><div>🌐 Browser</div><small>body.data</small></div>
+    </div>
+
+    <div class="anno">
+      <strong>Chi tiết quan trọng:</strong>
+      ① <code>JwtAuthFilter</code> đọc <code>userId</code> từ JWT claim → set làm <code>principal</code> trong SecurityContext — <strong>không</strong> query DB.
+      ② <code>PaperService</code> fetch <code>Set&lt;UUID&gt; favIds</code> một lần → O(1) lookup khi map danh sách paper (tránh N+1).
+      ③ <code>PaperMapper</code> tự động bỏ qua field <code>embedding</code> (không có trong PaperResponse).
+      ④ Jackson <code>SNAKE_CASE</code> strategy tự convert <code>isFavorite</code> → <code>is_favorite</code>, <code>arxivId</code> → <code>arxiv_id</code>.
+    </div>
+  </div>
+
+  <div class="dcard">
+    <h3><span class="dot" style="background:#dc2626"></span> Request bị từ chối — Error Flow</h3>
+    <div class="flow-row" style="gap:6px;flex-wrap:wrap;">
+      <div class="fn c-purple"><div>Browser</div><small>no token</small></div>
+      <div class="arr-label"><span class="arr">→</span></div>
+      <div class="fn c-orange"><div>JwtAuthFilter</div><small>token = null</small></div>
+      <div class="arr-label"><span class="arr">→</span><span class="al">skip setAuth</span></div>
+      <div class="fn c-orange"><div>SecurityChain</div><small>.anyRequest().authenticated()</small></div>
+      <div class="arr-label"><span class="arr">→</span><span class="al">authEntryPoint</span></div>
+      <div class="fn c-red"><div>401 JSON</div><small>{"success":false}</small></div>
+    </div>
+    <div class="flow-row" style="gap:6px;flex-wrap:wrap;margin-top:8px;">
+      <div class="fn c-purple"><div>Browser</div><small>role=USER</small></div>
+      <div class="arr-label"><span class="arr">→</span></div>
+      <div class="fn c-orange"><div>JwtAuthFilter</div><small>ROLE_USER</small></div>
+      <div class="arr-label"><span class="arr">→</span></div>
+      <div class="fn c-orange"><div>SecurityChain</div><small>/admin/** hasRole(ADMIN)</small></div>
+      <div class="arr-label"><span class="arr">→</span><span class="al">accessDeniedHandler</span></div>
+      <div class="fn c-red"><div>403 JSON</div><small>{"success":false}</small></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════ -->
+<div class="section" id="d3">
+  <div class="section-title">3. JWT Auth Flow — Đăng ký / Đăng nhập / Xác thực</div>
+  <div class="section-sub">Toàn bộ vòng đời JWT: từ register → nhận token → gắn vào request → xác thực → controller nhận userId.</div>
+
+  <div class="dcard">
+    <h3><span class="dot" style="background:#7c3aed"></span> Sequence Diagram: Register &amp; Login</h3>
+    <div style="overflow-x:auto;">
+    <table style="min-width:700px;border-collapse:collapse;width:100%;font-size:12px;">
+      <thead>
+        <tr>
+          <th style="background:#ede9fe;color:#5b21b6;padding:10px 14px;border:1px solid #c4b5fd;text-align:center;width:14%">Browser/React</th>
+          <th style="background:#fef3c7;color:#92400e;padding:10px 14px;border:1px solid #fcd34d;text-align:center;width:14%">AuthController</th>
+          <th style="background:#dcfce7;color:#15803d;padding:10px 14px;border:1px solid #86efac;text-align:center;width:14%">AuthService</th>
+          <th style="background:#cffafe;color:#0e7490;padding:10px 14px;border:1px solid #67e8f9;text-align:center;width:14%">UserRepository</th>
+          <th style="background:#fff7ed;color:#c2410c;padding:10px 14px;border:1px solid #fed7aa;text-align:center;width:14%">PasswordEncoder</th>
+          <th style="background:#f0fdf4;color:#15803d;padding:10px 14px;border:1px solid #86efac;text-align:center;width:14%">JwtUtil</th>
+          <th style="background:#f0fdf4;color:#15803d;padding:10px 14px;border:1px solid #86efac;text-align:center;width:16%">PostgreSQL</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="background:#fafafa">
+          <td style="border:1px solid #f1f5f9;padding:8px;text-align:center;"><span style="background:#ede9fe;padding:2px 8px;border-radius:10px;font-weight:700;font-size:11px">POST /register</span></td>
+          <td style="border:1px solid #f1f5f9;padding:8px;text-align:center;color:#92400e">@Valid check</td>
+          <td colspan="5" style="border:1px solid #f1f5f9;"></td>
+        </tr>
+        <tr>
+          <td style="border:1px solid #f1f5f9;padding:8px;"></td>
+          <td style="border:1px solid #f1f5f9;padding:8px;text-align:center;color:#92400e">→ register()</td>
+          <td style="border:1px solid #f1f5f9;padding:8px;text-align:center;color:#15803d">existsByEmail?</td>
+          <td colspan="3" style="border:1px solid #f1f5f9;"></td>
+          <td style="border:1px solid #f1f5f9;padding:8px;text-align:center;color:#15803d">SELECT email</td>
+        </tr>
+        <tr style="background:#fafafa">
+          <td style="border:1px solid #f1f5f9;padding:8px;"></td>
+          <td style="border:1px solid #f1f5f9;padding:8px;"></td>
+          <td style="border:1px solid #f1f5f9;padding:8px;text-align:center;color:#15803d">encode(password)</td>
+          <td style="border:1px solid #f1f5f9;padding:8px;"></td>
+          <td style="border:1px solid #f1f5f9;padding:8px;text-align:center;color:#c2410c">BCrypt(cost=10)</td>
+          <td colspan="2" style="border:1px solid #f1f5f9;"></td>
+        </tr>
+        <tr>
+          <td style="border:1px solid #f1f5f9;padding:8px;"></td>
+          <td style="border:1px solid #f1f5f9;padding:8px;"></td>
+          <td style="border:1px solid #f1f5f9;padding:8px;text-align:center;color:#15803d">save(user)</td>
+          <td style="border:1px solid #f1f5f9;padding:8px;text-align:center;color:#0e7490">INSERT user</td>
+          <td style="border:1px solid #f1f5f9;padding:8px;"></td>
+          <td style="border:1px solid #f1f5f9;padding:8px;"></td>
+          <td style="border:1px solid #f1f5f9;padding:8px;text-align:center;color:#15803d">COMMIT</td>
+        </tr>
+        <tr style="background:#fafafa">
+          <td style="border:1px solid #f1f5f9;padding:8px;"></td>
+          <td style="border:1px solid #f1f5f9;padding:8px;"></td>
+          <td style="border:1px solid #f1f5f9;padding:8px;text-align:center;color:#15803d">generateToken()</td>
+          <td style="border:1px solid #f1f5f9;padding:8px;"></td>
+          <td style="border:1px solid #f1f5f9;padding:8px;"></td>
+          <td style="border:1px solid #f1f5f9;padding:8px;text-align:center;color:#15803d">HMAC-SHA256</td>
+          <td style="border:1px solid #f1f5f9;padding:8px;"></td>
+        </tr>
+        <tr>
+          <td style="border:1px solid #f1f5f9;padding:8px;text-align:center;"><span style="background:#dcfce7;padding:2px 8px;border-radius:10px;font-weight:700;font-size:11px">← JWT token</span></td>
+          <td colspan="6" style="border:1px solid #f1f5f9;padding:8px;text-align:center;color:#94a3b8;font-size:11px">AuthResponse{token, userId, email, role}</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+
+    <div class="anno" style="margin-top:12px;">
+      <strong>Sau khi nhận token:</strong> Frontend lưu vào <code>localStorage.token</code>. Mọi request tiếp theo gắn <code>Authorization: Bearer &lt;token&gt;</code>. <code>JwtAuthFilter</code> decode → lấy <code>userId + role</code> → set SecurityContext → Controller nhận qua <code>@AuthenticationPrincipal UUID userId</code>.
+    </div>
+  </div>
+
+  <div class="dcard">
+    <h3><span class="dot" style="background:#f59e0b"></span> JWT Token Structure &amp; Flow</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start;">
+      <div>
+        <div style="font-size:12px;font-weight:700;color:var(--mu);margin-bottom:8px;">JWT Claims (payload)</div>
+        <div style="background:#0f172a;border-radius:8px;padding:14px;font-family:monospace;font-size:12px;color:#e2e8f0;line-height:1.8;">
+          {<br>
+          &nbsp;&nbsp;<span style="color:#4ade80">"sub"</span>: <span style="color:#fde68a">"uuid-user-id"</span>,<br>
+          &nbsp;&nbsp;<span style="color:#4ade80">"email"</span>: <span style="color:#fde68a">"user@mail.com"</span>,<br>
+          &nbsp;&nbsp;<span style="color:#4ade80">"role"</span>: <span style="color:#fde68a">"USER"</span>,<br>
+          &nbsp;&nbsp;<span style="color:#4ade80">"iat"</span>: <span style="color:#f9a8d4">1716800000</span>,<br>
+          &nbsp;&nbsp;<span style="color:#4ade80">"exp"</span>: <span style="color:#f9a8d4">1716886400</span> <span style="color:#94a3b8">// +24h</span><br>
+          }
+        </div>
+        <div style="margin-top:8px;font-size:11px;color:var(--mu);">
+          Ký bằng HMAC-SHA256 với <code>JWT_SECRET</code> (≥256 bit). Không có refresh token — logout bằng xóa localStorage.
+        </div>
+      </div>
+      <div>
+        <div style="font-size:12px;font-weight:700;color:var(--mu);margin-bottom:8px;">Filter chain xử lý</div>
+        <div class="pipeline">
+          <div class="pipe-step">
+            <div class="pipe-num" style="background:#fef3c7;color:#b45309">1</div>
+            <div class="pipe-content">
+              <div class="pipe-title">extractToken()</div>
+              <div class="pipe-detail">Header "Authorization: Bearer xxx" → substring(7)</div>
+            </div>
+          </div>
+          <div class="pipe-connector">↓</div>
+          <div class="pipe-step">
+            <div class="pipe-num" style="background:#dcfce7;color:#15803d">2</div>
+            <div class="pipe-content">
+              <div class="pipe-title">isTokenValid()</div>
+              <div class="pipe-detail">verifySignature + expiration check — không query DB</div>
+            </div>
+          </div>
+          <div class="pipe-connector">↓</div>
+          <div class="pipe-step">
+            <div class="pipe-num" style="background:#dbeafe;color:#1d4ed8">3</div>
+            <div class="pipe-content">
+              <div class="pipe-title">set SecurityContext</div>
+              <div class="pipe-detail">principal = UUID userId, authority = ROLE_USER/ADMIN</div>
+            </div>
+          </div>
+          <div class="pipe-connector">↓</div>
+          <div class="pipe-step">
+            <div class="pipe-num" style="background:#ede9fe;color:#5b21b6">4</div>
+            <div class="pipe-content">
+              <div class="pipe-title">@AuthenticationPrincipal</div>
+              <div class="pipe-detail">Controller nhận UUID userId trực tiếp — không cần gọi UserDetailsService</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════ -->
+<div class="section" id="d4">
+  <div class="section-title">4. AI Pipeline — Từ keyword đến DONE</div>
+  <div class="section-sub">Pipeline 5 bước xử lý mỗi paper: Embedding → Duplicate check → Groq summary → Topic matching → Notification. Mỗi paper chạy trong transaction riêng (REQUIRES_NEW).</div>
+
+  <div class="dcard">
+    <h3><span class="dot" style="background:#db2777"></span> Full AI Pipeline Flow</h3>
+
+    <div style="display:grid;grid-template-columns:200px 1fr;gap:16px;align-items:start;">
+      <!-- Trigger -->
+      <div>
+        <div style="background:#fff7ed;border:1.5px solid #fed7aa;border-radius:10px;padding:14px;text-align:center;">
+          <div style="font-size:22px;margin-bottom:4px;">⏰</div>
+          <div style="font-weight:800;font-size:12px;color:#c2410c;">MainScheduler</div>
+          <div style="font-size:10px;color:#ea580c;margin-top:4px;">cron: 0 0 6 * * *<br>Daily 06:00</div>
+        </div>
+        <div style="text-align:center;margin:6px 0;font-size:18px;color:#94a3b8;">↓</div>
+        <div style="background:#ede9fe;border:1.5px solid #c4b5fd;border-radius:10px;padding:14px;text-align:center;">
+          <div style="font-size:22px;margin-bottom:4px;">🔑</div>
+          <div style="font-weight:800;font-size:12px;color:#5b21b6;">Active Topics</div>
+          <div style="font-size:10px;color:#7c3aed;margin-top:4px;">keywords → LinkedHashSet<br>dedup across users</div>
+        </div>
+        <div style="text-align:center;margin:6px 0;font-size:18px;color:#94a3b8;">↓</div>
+        <div style="background:#fce7f3;border:1.5px solid #f9a8d4;border-radius:10px;padding:14px;text-align:center;">
+          <div style="font-size:22px;margin-bottom:4px;">📄</div>
+          <div style="font-weight:800;font-size:12px;color:#9d174d;">arXiv API</div>
+          <div style="font-size:10px;color:#be185d;margin-top:4px;">Atom/XML parsing<br>1500ms delay<br>max 10/keyword</div>
+        </div>
+        <div style="text-align:center;margin:6px 0;font-size:18px;color:#94a3b8;">↓</div>
+        <div style="background:#f1f5f9;border:1.5px solid #cbd5e1;border-radius:10px;padding:10px;text-align:center;font-size:11px;color:#475569;">
+          PENDING papers<br>arxivId upsert<br>ON CONFLICT DO NOTHING
+        </div>
+      </div>
+
+      <!-- Pipeline steps -->
+      <div class="pipeline">
+        <div class="pipe-step" style="border-color:#fce7f3;background:#fdf4ff;">
+          <div class="pipe-num" style="background:#fce7f3;color:#9d174d;">1</div>
+          <div class="pipe-content">
+            <div class="pipe-title">🤗 Embedding — HuggingFace</div>
+            <div class="pipe-detail">
+              Input: <code>title + " " + abstract</code> → POST router.huggingface.co/hf-inference/models/BAAI/bge-small-en-v1.5<br>
+              Response 2D: <code>List&lt;Float&gt;</code> → dùng trực tiếp<br>
+              Response 3D: <code>List&lt;List&lt;Float&gt;&gt;</code> → mean pool over token dimension<br>
+              503 cold start → wait 30s → retry 1 lần<br>
+              Kết quả: <code>float[384]</code> → <code>paper.setEmbedding()</code>
+            </div>
+          </div>
+          <div style="background:#fce7f3;border-radius:8px;padding:6px 10px;font-size:11px;color:#9d174d;font-weight:700;">384-dim vector</div>
+        </div>
+        <div class="pipe-connector">↓</div>
+
+        <div class="pipe-step" style="border-color:#fef3c7;background:#fffdf5;">
+          <div class="pipe-num" style="background:#fef3c7;color:#b45309;">2</div>
+          <div class="pipe-content">
+            <div class="pipe-title">🔍 Duplicate Detection — pgvector</div>
+            <div class="pipe-detail">
+              Query: <code>embedding &lt;=&gt; CAST(:emb AS vector) &lt; 0.05</code> (similarity &gt; 95%)<br>
+              Scope: DONE papers, is_duplicate=false, published_at ≥ NOW()-90 days<br>
+              Dùng HNSW index với <code>ef_search=128</code> (set global qua HikariCP)<br>
+              <span style="color:#92400e;font-weight:700;">Nếu trùng:</span> set is_duplicate=true, originalPaper → DONE (bỏ qua bước 3,4)<br>
+              <span style="color:#15803d;font-weight:700;">Không trùng:</span> tiếp tục step 3
+            </div>
+          </div>
+          <div style="background:#fef3c7;border-radius:8px;padding:6px 10px;font-size:11px;color:#b45309;font-weight:700;">cosine &lt;0.05</div>
+        </div>
+        <div class="pipe-connector">↓</div>
+
+        <div class="pipe-step" style="border-color:#fff7ed;background:#fffcf5;">
+          <div class="pipe-num" style="background:#fff7ed;color:#c2410c;">3</div>
+          <div class="pipe-content">
+            <div class="pipe-title">🤖 Groq Summary — llama-3.1-8b-instant</div>
+            <div class="pipe-detail">
+              POST api.groq.com/openai/v1/chat/completions với <code>response_format: json_object</code><br>
+              Prompt: yêu cầu trả <code>{"summary":"...","quality_score":7.5}</code><br>
+              Validate: summary không rỗng ≤2000 chars; score ∈ [0.0, 10.0]<br>
+              HTTP 5xx/timeout → retry 1 lần sau 5s; HTTP 429 → không retry (để RetryScheduler)<br>
+              Delay 2s giữa các calls (free tier ~30 RPM)<br>
+              Fail validate → FAILED + lastError
+            </div>
+          </div>
+          <div style="background:#fff7ed;border-radius:8px;padding:6px 10px;font-size:11px;color:#c2410c;font-weight:700;">summary+score</div>
+        </div>
+        <div class="pipe-connector">↓</div>
+
+        <div class="pipe-step" style="border-color:#ccfbf1;background:#f0fdfa;">
+          <div class="pipe-num" style="background:#ccfbf1;color:#0f766e;">4</div>
+          <div class="pipe-content">
+            <div class="pipe-title">🏷 Topic Matching — phraseto_tsquery + GIN</div>
+            <div class="pipe-detail">
+              Với mỗi active topic, split keywords → anyMatch(kw → matchesTopic(paperId, kw))<br>
+              Query: <code>to_tsvector('english', title||abstract) @@ phraseto_tsquery('english', :keyword)</code><br>
+              Dùng GIN index <code>idx_paper_fts_topic</code> (title+abstract ONLY — không authors)<br>
+              Match → <code>INSERT paper_topic ON CONFLICT DO NOTHING</code><br>
+              Match → tạo notification cho topic owner
+            </div>
+          </div>
+          <div style="background:#ccfbf1;border-radius:8px;padding:6px 10px;font-size:11px;color:#0f766e;font-weight:700;">paper_topic</div>
+        </div>
+        <div class="pipe-connector">↓</div>
+
+        <div class="pipe-step" style="border-color:#dcfce7;background:#f0fdf4;">
+          <div class="pipe-num" style="background:#dcfce7;color:#15803d;">5</div>
+          <div class="pipe-content">
+            <div class="pipe-title">✅ Notification + DONE</div>
+            <div class="pipe-detail">
+              INSERT notification ON CONFLICT (user_id, paper_id, type) DO NOTHING<br>
+              message: "New paper matching your topic '{name}': {title}"<br>
+              Set processingStatus = "DONE" → paperRepository.save()<br>
+              COMMIT transaction (REQUIRES_NEW → độc lập với paper khác)
+            </div>
+          </div>
+          <div style="background:#dcfce7;border-radius:8px;padding:6px 10px;font-size:11px;color:#15803d;font-weight:700;">DONE ✓</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="anno" style="margin-top:14px;">
+      <strong>Transaction isolation:</strong> <code>@Transactional(propagation=REQUIRES_NEW)</code> trên mỗi paper. Outer scheduler <strong>không có</strong> @Transactional — tránh HikariCP pool exhaustion (pool=20, mỗi REQUIRES_NEW mở connection mới). Lỗi paper 5 không rollback paper 1-4 đã COMMIT.
+    </div>
+  </div>
+
+  <div class="dcard">
+    <h3><span class="dot" style="background:#d97706"></span> RetryScheduler — Xử lý lại paper FAILED</h3>
+    <div class="flow-row" style="gap:6px;flex-wrap:wrap;">
+      <div class="fn c-orange"><div>⏱ fixedDelay</div><small>30 phút sau khi batch kết thúc</small></div>
+      <div class="arr-label"><span class="arr">→</span></div>
+      <div class="fn c-orange"><div>Query FAILED</div><small>retryCount &lt; 3</small></div>
+      <div class="arr-label"><span class="arr">→</span><span class="al">cho mỗi paper</span></div>
+      <div class="fn c-blue"><div>retry(paper)</div><small>tăng retryCount++<br>set PENDING</small></div>
+      <div class="arr-label"><span class="arr">→</span></div>
+      <div class="fn c-pink"><div>runPipeline()</div><small>embed→dup→groq→topic→notify</small></div>
+      <div class="arr-label"><span class="arr">→</span></div>
+      <div class="fn c-green"><div>DONE ✓</div></div>
+      <div style="font-size:18px;color:#94a3b8;padding:0 4px;">hoặc</div>
+      <div class="fn c-red"><div>FAILED</div><small>lastError cập nhật</small></div>
+    </div>
+    <div class="anno">
+      <strong>Sau 3 lần fail:</strong> paper giữ FAILED. Admin reset qua <code>POST /admin/papers/{id}/reset</code> (set retryCount=0, xóa lastError) → RetryScheduler pick up lại.
+      <strong>fixedDelay vs fixedRate:</strong> <code>fixedDelay</code> đợi 30 phút SAU KHI kết thúc — đảm bảo không overlap nếu batch mất hơn 30 phút.
+    </div>
+  </div>
+</div>
+<!-- ══════════════════════════════════════════════════ -->
+<div class="section" id="d5">
+  <div class="section-title">5. Entity Relationships — Sơ đồ quan hệ thực thể</div>
+  <div class="section-sub">6 entities, quan hệ chính, constraints và indexes quan trọng. Hover vào mỗi thẻ để xem chi tiết.</div>
+
+  <div class="dcard">
+    <h3><span class="dot" style="background:#16a34a"></span> ERD với Constraints</h3>
+    <div class="erd">
+      <div class="ent-card" style="border-color:#93c5fd;">
+        <div class="ent-head" style="background:#dbeafe;color:#1d4ed8;">👤 USER</div>
+        <div class="ent-field"><span>🔑 id UUID PK</span><span class="ft">gen_random_uuid()</span></div>
+        <div class="ent-field"><span>email VARCHAR(255)</span><span class="ft">UNIQUE ✓</span></div>
+        <div class="ent-field"><span>password_hash VARCHAR</span><span class="ft">BCrypt</span></div>
+        <div class="ent-field"><span>role VARCHAR(10)</span><span class="ft">CHECK IN('USER','ADMIN')</span></div>
+        <div class="ent-field"><span>created_at TIMESTAMPTZ</span><span class="ft">DEFAULT NOW()</span></div>
+      </div>
+      <div class="ent-card" style="border-color:#86efac;">
+        <div class="ent-head" style="background:#dcfce7;color:#15803d;">🏷 TOPIC</div>
+        <div class="ent-field"><span>🔑 id UUID PK</span><span class="ft"></span></div>
+        <div class="ent-field"><span>🔗 user_id FK</span><span class="ft">→ USER CASCADE</span></div>
+        <div class="ent-field"><span>name VARCHAR(255)</span><span class="ft">UNIQUE(user_id,name)</span></div>
+        <div class="ent-field"><span>keywords VARCHAR(255)</span><span class="ft">comma-sep, max 5</span></div>
+        <div class="ent-field"><span>is_active BOOLEAN</span><span class="ft">DEFAULT TRUE</span></div>
+        <div class="ent-field" style="font-size:10px;color:#0f766e;background:#f0fdf4;padding:4px 12px;">IDX: (user_id, is_active)</div>
+      </div>
+      <div class="ent-card" style="border-color:#fcd34d;">
+        <div class="ent-head" style="background:#fef3c7;color:#92400e;">📄 PAPER</div>
+        <div class="ent-field"><span>🔑 id UUID PK</span><span class="ft"></span></div>
+        <div class="ent-field"><span>arxiv_id VARCHAR(50)</span><span class="ft">UNIQUE ✓</span></div>
+        <div class="ent-field"><span>title TEXT</span><span class="ft">NOT NULL</span></div>
+        <div class="ent-field"><span>abstract TEXT</span><span class="ft">"abstract" keyword</span></div>
+        <div class="ent-field"><span>authors TEXT</span><span class="ft"></span></div>
+        <div class="ent-field"><span>paper_url · pdf_url</span><span class="ft">VARCHAR(500)</span></div>
+        <div class="ent-field"><span>summary TEXT</span><span class="ft">Groq LLM output</span></div>
+        <div class="ent-field"><span>embedding vector(384)</span><span class="ft">HNSW index</span></div>
+        <div class="ent-field"><span>quality_score FLOAT</span><span class="ft">CHECK [0,10] OR NULL</span></div>
+        <div class="ent-field"><span>is_duplicate BOOLEAN</span><span class="ft">DEFAULT FALSE</span></div>
+        <div class="ent-field"><span>🔗 original_paper_id</span><span class="ft">self-ref SET NULL</span></div>
+        <div class="ent-field"><span>processing_status</span><span class="ft">PENDING|DONE|FAILED</span></div>
+        <div class="ent-field"><span>retry_count INTEGER</span><span class="ft">DEFAULT 0</span></div>
+        <div class="ent-field"><span>last_error TEXT</span><span class="ft">nullable</span></div>
+        <div class="ent-field"><span>last_retry_at TIMESTAMPTZ</span><span class="ft">nullable</span></div>
+        <div class="ent-field"><span>published_at · created_at · updated_at</span><span class="ft">TIMESTAMPTZ</span></div>
+        <div class="ent-field" style="font-size:10px;color:#92400e;background:#fffbeb;padding:4px 12px;">IDX: HNSW, GIN×2, B-tree×4</div>
+      </div>
+      <div class="ent-card" style="border-color:#5eead4;">
+        <div class="ent-head" style="background:#ccfbf1;color:#0f766e;">🔗 PAPER_TOPIC</div>
+        <div class="ent-field"><span>🔑 paper_id UUID</span><span class="ft">→ PAPER CASCADE</span></div>
+        <div class="ent-field"><span>🔑 topic_id UUID</span><span class="ft">→ TOPIC CASCADE</span></div>
+        <div class="ent-field" style="font-size:10px;color:#0f766e;">PK tổng hợp (paper_id, topic_id)</div>
+        <div class="ent-field"><span>created_at</span><span class="ft"></span></div>
+        <div class="ent-field" style="font-size:10px;color:#0f766e;background:#f0fdfa;padding:4px 12px;">IDX: (topic_id), (paper_id)</div>
+      </div>
+      <div class="ent-card" style="border-color:#f9a8d4;">
+        <div class="ent-head" style="background:#fce7f3;color:#9d174d;">❤️ FAVORITE</div>
+        <div class="ent-field"><span>🔑 id UUID PK</span><span class="ft"></span></div>
+        <div class="ent-field"><span>🔗 user_id FK</span><span class="ft">→ USER CASCADE</span></div>
+        <div class="ent-field"><span>🔗 paper_id FK</span><span class="ft">→ PAPER CASCADE</span></div>
+        <div class="ent-field"><span>created_at</span><span class="ft">sort field</span></div>
+        <div class="ent-field" style="font-size:10px;color:#9d174d;background:#fdf4ff;padding:4px 12px;">UNIQUE(user_id, paper_id) → auto index</div>
+      </div>
+      <div class="ent-card" style="border-color:#fed7aa;">
+        <div class="ent-head" style="background:#fff7ed;color:#c2410c;">🔔 NOTIFICATION</div>
+        <div class="ent-field"><span>🔑 id UUID PK</span><span class="ft"></span></div>
+        <div class="ent-field"><span>🔗 user_id FK</span><span class="ft">→ USER CASCADE</span></div>
+        <div class="ent-field"><span>🔗 paper_id FK</span><span class="ft">→ PAPER CASCADE</span></div>
+        <div class="ent-field"><span>type VARCHAR(20)</span><span class="ft">CHECK = 'NEW_PAPER'</span></div>
+        <div class="ent-field"><span>message TEXT</span><span class="ft"></span></div>
+        <div class="ent-field"><span>is_read BOOLEAN</span><span class="ft">DEFAULT FALSE</span></div>
+        <div class="ent-field" style="font-size:10px;color:#c2410c;background:#fff7ed;padding:4px 12px;">UNIQUE(user_id, paper_id, type)</div>
+      </div>
+    </div>
+
+    <!-- Relation lines description -->
+    <div style="margin-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:12px;">
+      <div style="background:#f8fafc;border-radius:8px;padding:12px;">
+        <div style="font-weight:700;color:var(--mu);margin-bottom:8px;font-size:11px;text-transform:uppercase;">Quan hệ chính</div>
+        <div style="display:flex;flex-direction:column;gap:5px;">
+          <div>USER <span style="color:#94a3b8">─── 1:N ───</span> TOPIC (user_id)</div>
+          <div>USER <span style="color:#94a3b8">─── 1:N ───</span> FAVORITE (user_id)</div>
+          <div>USER <span style="color:#94a3b8">─── 1:N ───</span> NOTIFICATION (user_id)</div>
+          <div>PAPER <span style="color:#94a3b8">─── N:M ───</span> TOPIC (via PAPER_TOPIC)</div>
+          <div>PAPER <span style="color:#94a3b8">─── 1:1 ───</span> PAPER (original_paper_id, self-ref)</div>
+          <div>PAPER <span style="color:#94a3b8">─── 1:N ───</span> FAVORITE (paper_id)</div>
+          <div>PAPER <span style="color:#94a3b8">─── 1:N ───</span> NOTIFICATION (paper_id)</div>
+        </div>
+      </div>
+      <div style="background:#f8fafc;border-radius:8px;padding:12px;">
+        <div style="font-weight:700;color:var(--mu);margin-bottom:8px;font-size:11px;text-transform:uppercase;">Cascade rules</div>
+        <div style="display:flex;flex-direction:column;gap:5px;">
+          <div>Xóa USER → xóa TOPIC, FAVORITE, NOTIFICATION (CASCADE)</div>
+          <div>Xóa TOPIC → xóa PAPER_TOPIC (CASCADE), <strong>PAPER giữ nguyên</strong></div>
+          <div>Xóa PAPER → xóa FAVORITE, NOTIFICATION, PAPER_TOPIC (CASCADE)</div>
+          <div>Xóa PAPER gốc → original_paper_id của duplicate → NULL (SET NULL)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════ -->
+<div class="section" id="d6">
+  <div class="section-title">6. Service Dependencies — Dependency Graph</div>
+  <div class="section-sub">Mỗi service phụ thuộc vào những gì? Sơ đồ cho thấy luồng inject và gọi giữa các beans.</div>
+
+  <div class="dcard">
+    <h3><span class="dot" style="background:#7c3aed"></span> Bean Dependency Map</h3>
+    <div style="overflow-x:auto;">
+    <svg viewBox="0 0 860 520" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:860px;display:block;margin:0 auto;">
+      <defs>
+        <marker id="d" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#94a3b8"/></marker>
+        <marker id="db" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#3b82f6"/></marker>
+        <marker id="dg" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#16a34a"/></marker>
+        <marker id="dp" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#7c3aed"/></marker>
+      </defs>
+
+      <!-- CONTROLLERS row -->
+      <text x="430" y="22" text-anchor="middle" font-size="10" fill="#94a3b8" font-weight="700" letter-spacing="1">CONTROLLERS</text>
+      <rect x="10" y="30" width="100" height="34" rx="7" fill="#dbeafe" stroke="#93c5fd" stroke-width="1.5"/>
+      <text x="60" y="51" text-anchor="middle" font-size="11" font-weight="700" fill="#1d4ed8">AuthCtrl</text>
+      <rect x="122" y="30" width="100" height="34" rx="7" fill="#dbeafe" stroke="#93c5fd" stroke-width="1.5"/>
+      <text x="172" y="51" text-anchor="middle" font-size="11" font-weight="700" fill="#1d4ed8">TopicCtrl</text>
+      <rect x="234" y="30" width="100" height="34" rx="7" fill="#dbeafe" stroke="#93c5fd" stroke-width="1.5"/>
+      <text x="284" y="51" text-anchor="middle" font-size="11" font-weight="700" fill="#1d4ed8">PaperCtrl</text>
+      <rect x="346" y="30" width="100" height="34" rx="7" fill="#dbeafe" stroke="#93c5fd" stroke-width="1.5"/>
+      <text x="396" y="51" text-anchor="middle" font-size="11" font-weight="700" fill="#1d4ed8">FavCtrl</text>
+      <rect x="458" y="30" width="100" height="34" rx="7" fill="#dbeafe" stroke="#93c5fd" stroke-width="1.5"/>
+      <text x="508" y="51" text-anchor="middle" font-size="11" font-weight="700" fill="#1d4ed8">NotifCtrl</text>
+      <rect x="570" y="30" width="100" height="34" rx="7" fill="#dbeafe" stroke="#93c5fd" stroke-width="1.5"/>
+      <text x="620" y="51" text-anchor="middle" font-size="11" font-weight="700" fill="#1d4ed8">UserCtrl</text>
+      <rect x="682" y="30" width="100" height="34" rx="7" fill="#dbeafe" stroke="#93c5fd" stroke-width="1.5"/>
+      <text x="732" y="51" text-anchor="middle" font-size="11" font-weight="700" fill="#1d4ed8">AdminCtrl</text>
+
+      <!-- SERVICES row -->
+      <text x="430" y="110" text-anchor="middle" font-size="10" fill="#94a3b8" font-weight="700" letter-spacing="1">SERVICES</text>
+      <rect x="10" y="118" width="100" height="34" rx="7" fill="#dcfce7" stroke="#86efac" stroke-width="1.5"/>
+      <text x="60" y="139" text-anchor="middle" font-size="11" font-weight="700" fill="#15803d">AuthSvc</text>
+      <rect x="122" y="118" width="100" height="34" rx="7" fill="#dcfce7" stroke="#86efac" stroke-width="1.5"/>
+      <text x="172" y="139" text-anchor="middle" font-size="11" font-weight="700" fill="#15803d">TopicSvc</text>
+      <rect x="234" y="118" width="100" height="34" rx="7" fill="#dcfce7" stroke="#86efac" stroke-width="1.5"/>
+      <text x="284" y="139" text-anchor="middle" font-size="11" font-weight="700" fill="#15803d">PaperSvc</text>
+      <rect x="346" y="118" width="100" height="34" rx="7" fill="#dcfce7" stroke="#86efac" stroke-width="1.5"/>
+      <text x="396" y="139" text-anchor="middle" font-size="11" font-weight="700" fill="#15803d">FavSvc</text>
+      <rect x="458" y="118" width="100" height="34" rx="7" fill="#dcfce7" stroke="#86efac" stroke-width="1.5"/>
+      <text x="508" y="139" text-anchor="middle" font-size="11" font-weight="700" fill="#15803d">NotifSvc</text>
+      <rect x="570" y="118" width="100" height="34" rx="7" fill="#dcfce7" stroke="#86efac" stroke-width="1.5"/>
+      <text x="620" y="139" text-anchor="middle" font-size="11" font-weight="700" fill="#15803d">AdminSvc</text>
+      <rect x="682" y="118" width="164" height="34" rx="7" fill="#fff7ed" stroke="#fed7aa" stroke-width="1.5"/>
+      <text x="764" y="139" text-anchor="middle" font-size="11" font-weight="700" fill="#c2410c">PaperPipelineSvc</text>
+
+      <!-- AI SERVICES row -->
+      <text x="430" y="196" text-anchor="middle" font-size="10" fill="#94a3b8" font-weight="700" letter-spacing="1">AI SERVICES</text>
+      <rect x="570" y="204" width="120" height="34" rx="7" fill="#fce7f3" stroke="#f9a8d4" stroke-width="1.5"/>
+      <text x="630" y="225" text-anchor="middle" font-size="11" font-weight="700" fill="#9d174d">EmbeddingSvc</text>
+      <rect x="704" y="204" width="120" height="34" rx="7" fill="#fce7f3" stroke="#f9a8d4" stroke-width="1.5"/>
+      <text x="764" y="225" text-anchor="middle" font-size="11" font-weight="700" fill="#9d174d">GroqSvc</text>
+
+      <!-- REPOS row -->
+      <text x="430" y="285" text-anchor="middle" font-size="10" fill="#94a3b8" font-weight="700" letter-spacing="1">REPOSITORIES</text>
+      <rect x="10" y="293" width="90" height="34" rx="7" fill="#ccfbf1" stroke="#5eead4" stroke-width="1.5"/>
+      <text x="55" y="314" text-anchor="middle" font-size="10" font-weight="700" fill="#0f766e">UserRepo</text>
+      <rect x="112" y="293" width="90" height="34" rx="7" fill="#ccfbf1" stroke="#5eead4" stroke-width="1.5"/>
+      <text x="157" y="314" text-anchor="middle" font-size="10" font-weight="700" fill="#0f766e">TopicRepo</text>
+      <rect x="214" y="293" width="90" height="34" rx="7" fill="#ccfbf1" stroke="#5eead4" stroke-width="1.5"/>
+      <text x="259" y="314" text-anchor="middle" font-size="10" font-weight="700" fill="#0f766e">PaperRepo</text>
+      <rect x="316" y="293" width="90" height="34" rx="7" fill="#ccfbf1" stroke="#5eead4" stroke-width="1.5"/>
+      <text x="361" y="314" text-anchor="middle" font-size="10" font-weight="700" fill="#0f766e">PaperTopicRepo</text>
+      <rect x="418" y="293" width="90" height="34" rx="7" fill="#ccfbf1" stroke="#5eead4" stroke-width="1.5"/>
+      <text x="463" y="314" text-anchor="middle" font-size="10" font-weight="700" fill="#0f766e">FavRepo</text>
+      <rect x="520" y="293" width="90" height="34" rx="7" fill="#ccfbf1" stroke="#5eead4" stroke-width="1.5"/>
+      <text x="565" y="314" text-anchor="middle" font-size="10" font-weight="700" fill="#0f766e">NotifRepo</text>
+
+      <!-- SECURITY row -->
+      <text x="430" y="375" text-anchor="middle" font-size="10" fill="#94a3b8" font-weight="700" letter-spacing="1">SECURITY</text>
+      <rect x="10" y="383" width="90" height="34" rx="7" fill="#fef3c7" stroke="#fcd34d" stroke-width="1.5"/>
+      <text x="55" y="404" text-anchor="middle" font-size="10" font-weight="700" fill="#92400e">JwtUtil</text>
+      <rect x="112" y="383" width="110" height="34" rx="7" fill="#fef3c7" stroke="#fcd34d" stroke-width="1.5"/>
+      <text x="167" y="404" text-anchor="middle" font-size="10" font-weight="700" fill="#92400e">PasswordEncoder</text>
+      <rect x="234" y="383" width="110" height="34" rx="7" fill="#fef3c7" stroke="#fcd34d" stroke-width="1.5"/>
+      <text x="289" y="404" text-anchor="middle" font-size="10" font-weight="700" fill="#92400e">PaperMapper</text>
+      <rect x="356" y="383" width="110" height="34" rx="7" fill="#fef3c7" stroke="#fcd34d" stroke-width="1.5"/>
+      <text x="411" y="404" text-anchor="middle" font-size="10" font-weight="700" fill="#92400e">TopicMapper</text>
+      <rect x="478" y="383" width="110" height="34" rx="7" fill="#fef3c7" stroke="#fcd34d" stroke-width="1.5"/>
+      <text x="533" y="404" text-anchor="middle" font-size="10" font-weight="700" fill="#92400e">NotifMapper</text>
+
+      <!-- DB -->
+      <rect x="250" y="455" width="360" height="40" rx="10" fill="#f0fdf4" stroke="#86efac" stroke-width="2"/>
+      <text x="430" y="479" text-anchor="middle" font-size="12" font-weight="800" fill="#15803d">🐘 PostgreSQL + pgvector</text>
+
+      <!-- CTRL → SVC arrows (selected key ones) -->
+      <line x1="60" y1="64" x2="60" y2="116" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#db)"/>
+      <line x1="172" y1="64" x2="172" y2="116" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#db)"/>
+      <line x1="284" y1="64" x2="284" y2="116" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#db)"/>
+      <line x1="396" y1="64" x2="396" y2="116" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#db)"/>
+      <line x1="508" y1="64" x2="508" y2="116" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#db)"/>
+      <line x1="620" y1="64" x2="620" y2="116" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#db)"/>
+      <line x1="732" y1="64" x2="764" y2="116" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#db)"/>
+
+      <!-- PipelineSvc → AI Services -->
+      <line x1="764" y1="152" x2="680" y2="202" stroke="#db2777" stroke-width="1.5" marker-end="url(#d)"/>
+      <line x1="764" y1="152" x2="764" y2="202" stroke="#db2777" stroke-width="1.5" marker-end="url(#d)"/>
+
+      <!-- SVC → REPO arrows -->
+      <line x1="60" y1="152" x2="55" y2="291" stroke="#16a34a" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#dg)"/>
+      <line x1="172" y1="152" x2="157" y2="291" stroke="#16a34a" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#dg)"/>
+      <line x1="284" y1="152" x2="259" y2="291" stroke="#16a34a" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#dg)"/>
+      <line x1="396" y1="152" x2="463" y2="291" stroke="#16a34a" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#dg)"/>
+      <line x1="508" y1="152" x2="565" y2="291" stroke="#16a34a" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#dg)"/>
+      <line x1="620" y1="152" x2="259" y2="291" stroke="#16a34a" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#dg)"/>
+
+      <!-- PipelineSvc → Repos -->
+      <line x1="764" y1="152" x2="259" y2="291" stroke="#c2410c" stroke-width="1" stroke-dasharray="3,3" marker-end="url(#d)"/>
+      <line x1="764" y1="152" x2="361" y2="291" stroke="#c2410c" stroke-width="1" stroke-dasharray="3,3" marker-end="url(#d)"/>
+
+      <!-- Repos → DB -->
+      <line x1="259" y1="327" x2="350" y2="453" stroke="#16a34a" stroke-width="1.5" marker-end="url(#dg)"/>
+      <line x1="430" y1="327" x2="430" y2="453" stroke="#16a34a" stroke-width="1.5" marker-end="url(#dg)"/>
+      <line x1="565" y1="327" x2="500" y2="453" stroke="#16a34a" stroke-width="1.5" marker-end="url(#dg)"/>
+
+      <!-- SVC → Security -->
+      <line x1="60" y1="152" x2="55" y2="381" stroke="#d97706" stroke-width="1" stroke-dasharray="3,3" marker-end="url(#d)"/>
+      <line x1="60" y1="152" x2="167" y2="381" stroke="#d97706" stroke-width="1" stroke-dasharray="3,3" marker-end="url(#d)"/>
+      <line x1="284" y1="152" x2="289" y2="381" stroke="#d97706" stroke-width="1" stroke-dasharray="3,3" marker-end="url(#d)"/>
+    </svg>
+    </div>
+
+    <div class="legend" style="margin-top:12px;">
+      <div class="leg"><svg width="24" height="12"><line x1="0" y1="6" x2="20" y2="6" stroke="#3b82f6" stroke-width="2" marker-end="url(#db)"/></svg> Controller → Service (inject)</div>
+      <div class="leg"><svg width="24" height="12"><line x1="0" y1="6" x2="20" y2="6" stroke="#16a34a" stroke-width="2" stroke-dasharray="4,3"/></svg> Service → Repository (inject)</div>
+      <div class="leg"><svg width="24" height="12"><line x1="0" y1="6" x2="20" y2="6" stroke="#db2777" stroke-width="2"/></svg> PipelineService → AI Services</div>
+      <div class="leg"><svg width="24" height="12"><line x1="0" y1="6" x2="20" y2="6" stroke="#d97706" stroke-width="2" stroke-dasharray="3,3"/></svg> Service → Security beans</div>
+    </div>
+  </div>
+</div>
+<!-- ══════════════════════════════════════════════════ -->
+<div class="section" id="d7">
+  <div class="section-title">7. Scheduler Flow — Background Processing</div>
+  <div class="section-sub">Hai scheduler hoạt động song song trên thread pool riêng (pool size=3). MainScheduler chạy theo cron, RetryScheduler chạy fixedDelay.</div>
+
+  <div class="dcard">
+    <h3><span class="dot" style="background:#d97706"></span> Timeline &amp; Coordination giữa 2 Schedulers</h3>
+
+    <div style="overflow-x:auto;">
+    <svg viewBox="0 0 800 280" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:800px;display:block;margin:0 auto;">
+      <!-- Timeline axis -->
+      <line x1="40" y1="240" x2="790" y2="240" stroke="#e2e8f0" stroke-width="2"/>
+      <!-- Time markers -->
+      <text x="40" y="258" text-anchor="middle" font-size="10" fill="#94a3b8">00:00</text>
+      <text x="190" y="258" text-anchor="middle" font-size="10" fill="#94a3b8">06:00 ★</text>
+      <text x="340" y="258" text-anchor="middle" font-size="10" fill="#94a3b8">12:00</text>
+      <text x="490" y="258" text-anchor="middle" font-size="10" fill="#94a3b8">18:00</text>
+      <text x="640" y="258" text-anchor="middle" font-size="10" fill="#94a3b8">24:00</text>
+      <line x1="190" y1="235" x2="190" y2="245" stroke="#d97706" stroke-width="2"/>
+
+      <!-- Main Scheduler bar -->
+      <text x="30" y="48" text-anchor="end" font-size="11" fill="#c2410c" font-weight="700">Main</text>
+      <!-- Trigger at 06:00 -->
+      <rect x="190" y="30" width="180" height="32" rx="6" fill="#fff7ed" stroke="#fed7aa" stroke-width="2"/>
+      <text x="280" y="47" text-anchor="middle" font-size="10" font-weight="700" fill="#c2410c">Fetch arXiv + Pipeline</text>
+      <text x="280" y="58" text-anchor="middle" font-size="9" fill="#ea580c">~20-40 min (API delays)</text>
+      <!-- Arrow -->
+      <line x1="190" y1="46" x2="190" y2="32" stroke="#d97706" stroke-width="1.5" stroke-dasharray="3,2"/>
+
+      <!-- Retry bars -->
+      <text x="30" y="118" text-anchor="end" font-size="11" fill="#7c3aed" font-weight="700">Retry</text>
+      <!-- fixedDelay: at 00:00 + 30min intervals -->
+      <rect x="40" y="100" width="60" height="26" rx="5" fill="#ede9fe" stroke="#c4b5fd" stroke-width="1.5"/>
+      <text x="70" y="116" text-anchor="middle" font-size="9" fill="#5b21b6">retry</text>
+      <rect x="120" y="100" width="60" height="26" rx="5" fill="#ede9fe" stroke="#c4b5fd" stroke-width="1.5"/>
+      <text x="150" y="116" text-anchor="middle" font-size="9" fill="#5b21b6">retry</text>
+      <rect x="200" y="100" width="60" height="26" rx="5" fill="#c4b5fd" stroke="#7c3aed" stroke-width="1.5"/>
+      <text x="230" y="116" text-anchor="middle" font-size="9" font-weight="700" fill="#5b21b6">retry</text>
+      <text x="230" y="93" text-anchor="middle" font-size="8" fill="#7c3aed">picks up FAILED</text>
+      <text x="230" y="84" text-anchor="middle" font-size="8" fill="#7c3aed">from Main run</text>
+      <rect x="280" y="100" width="60" height="26" rx="5" fill="#ede9fe" stroke="#c4b5fd" stroke-width="1.5"/>
+      <text x="310" y="116" text-anchor="middle" font-size="9" fill="#5b21b6">retry</text>
+      <rect x="360" y="100" width="60" height="26" rx="5" fill="#ede9fe" stroke="#c4b5fd" stroke-width="1.5"/>
+      <text x="390" y="116" text-anchor="middle" font-size="9" fill="#5b21b6">retry</text>
+      <text x="490" y="116" text-anchor="middle" font-size="9" fill="#94a3b8">... every 30 min ...</text>
+
+      <!-- Thread pool -->
+      <rect x="620" y="30" width="160" height="120" rx="8" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1.5"/>
+      <text x="700" y="50" text-anchor="middle" font-size="11" font-weight="800" fill="#334155">Thread Pool</text>
+      <text x="700" y="63" text-anchor="middle" font-size="9" fill="#64748b">pool size = 3</text>
+      <rect x="634" y="72" width="132" height="20" rx="4" fill="#fff7ed" stroke="#fed7aa" stroke-width="1"/>
+      <text x="700" y="85" text-anchor="middle" font-size="9" fill="#c2410c">paper-scheduler-1 (Main)</text>
+      <rect x="634" y="98" width="132" height="20" rx="4" fill="#ede9fe" stroke="#c4b5fd" stroke-width="1"/>
+      <text x="700" y="111" text-anchor="middle" font-size="9" fill="#5b21b6">paper-scheduler-2 (Retry)</text>
+      <rect x="634" y="124" width="132" height="20" rx="4" fill="#f1f5f9" stroke="#e2e8f0" stroke-width="1"/>
+      <text x="700" y="137" text-anchor="middle" font-size="9" fill="#94a3b8">paper-scheduler-3 (buffer)</text>
+
+      <!-- Admin trigger -->
+      <rect x="620" y="165" width="160" height="55" rx="8" fill="#fce7f3" stroke="#f9a8d4" stroke-width="1.5"/>
+      <text x="700" y="183" text-anchor="middle" font-size="10" font-weight="700" fill="#9d174d">Admin Manual Trigger</text>
+      <text x="700" y="197" text-anchor="middle" font-size="9" fill="#be185d">Thread.ofVirtual()</text>
+      <text x="700" y="209" text-anchor="middle" font-size="9" fill="#be185d">POST /admin/pipeline/trigger</text>
+    </svg>
+    </div>
+
+    <div class="anno">
+      <strong>Tại sao pool size = 3?</strong> MainScheduler + RetryScheduler = 2 threads đang chạy đồng thời. Thread thứ 3 là buffer cho manual trigger từ admin (chạy qua <code>Thread.ofVirtual()</code> — không dùng pool). Nếu pool size = 1 → MainScheduler block RetryScheduler → retry không chạy trong lúc Main đang fetch.
+    </div>
+  </div>
+
+  <div class="dcard">
+    <h3><span class="dot" style="background:#0891b2"></span> Main Scheduler — Chi tiết luồng xử lý</h3>
+    <div class="flow-row" style="flex-wrap:wrap;gap:6px;">
+      <div class="fn c-orange"><div>cron 06:00</div><small>runDailyFetch()</small></div>
+      <div class="arr-label"><span class="arr">→</span></div>
+      <div class="fn c-green"><div>findByIsActiveTrue()</div><small>TopicRepository</small></div>
+      <div class="arr-label"><span class="arr">→</span><span class="al">split keywords</span></div>
+      <div class="fn c-blue"><div>LinkedHashSet</div><small>dedup keywords</small></div>
+      <div class="arr-label"><span class="arr">→</span><span class="al">per keyword</span></div>
+      <div class="fn c-pink"><div>fetchByKeyword()</div><small>ArxivFetchService<br>+1500ms delay</small></div>
+      <div class="arr-label"><span class="arr">→</span><span class="al">per paper</span></div>
+      <div class="fn c-purple"><div>process(paper)</div><small>REQUIRES_NEW<br>transaction</small></div>
+      <div class="arr-label"><span class="arr">→</span></div>
+      <div class="fn c-teal"><div>DONE/FAILED</div><small>log result</small></div>
+    </div>
+    <div class="anno" style="margin-top:10px;">
+      <strong>LinkedHashSet dedup:</strong> Nếu user A có topic "machine learning" và user B cũng có "machine learning" → chỉ fetch keyword đó 1 lần. Kết quả paper được gán cho cả 2 users qua topic matching (step 4 trong pipeline).
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════ -->
+<div class="section" id="d8">
+  <div class="section-title">8. Frontend Component Tree &amp; Data Flow</div>
+  <div class="section-sub">Cấu trúc React components, cách data chảy từ API xuống UI, và cách user action trigger lại backend.</div>
+
+  <div class="dcard">
+    <h3><span class="dot" style="background:#7c3aed"></span> Component Hierarchy &amp; State Flow</h3>
+    <div style="overflow-x:auto;">
+    <svg viewBox="0 0 820 400" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:820px;display:block;margin:0 auto;">
+      <!-- App -->
+      <rect x="330" y="10" width="160" height="36" rx="8" fill="#1e293b" stroke="#334155" stroke-width="2"/>
+      <text x="410" y="31" text-anchor="middle" font-size="12" font-weight="800" fill="#e2e8f0">App.tsx</text>
+      <text x="410" y="44" text-anchor="middle" font-size="9" fill="#94a3b8">BrowserRouter · Routes</text>
+
+      <!-- Three pages -->
+      <rect x="60" y="90" width="150" height="40" rx="8" fill="#ede9fe" stroke="#c4b5fd" stroke-width="1.5"/>
+      <text x="135" y="108" text-anchor="middle" font-size="11" font-weight="700" fill="#5b21b6">AuthPage.tsx</text>
+      <text x="135" y="122" text-anchor="middle" font-size="9" fill="#7c3aed">/login</text>
+
+      <rect x="280" y="90" width="260" height="40" rx="8" fill="#dbeafe" stroke="#93c5fd" stroke-width="1.5"/>
+      <text x="410" y="108" text-anchor="middle" font-size="11" font-weight="700" fill="#1d4ed8">DashboardPage.tsx</text>
+      <text x="410" y="122" text-anchor="middle" font-size="9" fill="#2563eb">/dashboard · useState(papers,topics,notifs)</text>
+
+      <rect x="610" y="90" width="150" height="40" rx="8" fill="#fee2e2" stroke="#fca5a5" stroke-width="1.5"/>
+      <text x="685" y="108" text-anchor="middle" font-size="11" font-weight="700" fill="#b91c1c">AdminPage.tsx</text>
+      <text x="685" y="122" text-anchor="middle" font-size="9" fill="#dc2626">/admin · ADMIN only</text>
+
+      <!-- App → Pages -->
+      <line x1="410" y1="56" x2="180" y2="88" stroke="#94a3b8" stroke-width="1.5"/>
+      <line x1="410" y1="56" x2="410" y2="88" stroke="#94a3b8" stroke-width="1.5"/>
+      <line x1="410" y1="56" x2="640" y2="88" stroke="#94a3b8" stroke-width="1.5"/>
+
+      <!-- Dashboard sub-components -->
+      <rect x="170" y="180" width="110" height="32" rx="6" fill="#f0f9ff" stroke="#7dd3fc" stroke-width="1.5"/>
+      <text x="225" y="199" text-anchor="middle" font-size="10" font-weight="700" fill="#0284c7">PaperCard</text>
+
+      <rect x="295" y="180" width="100" height="32" rx="6" fill="#f0f9ff" stroke="#7dd3fc" stroke-width="1.5"/>
+      <text x="345" y="199" text-anchor="middle" font-size="10" font-weight="700" fill="#0284c7">Badge</text>
+
+      <rect x="410" y="180" width="100" height="32" rx="6" fill="#f0f9ff" stroke="#7dd3fc" stroke-width="1.5"/>
+      <text x="460" y="199" text-anchor="middle" font-size="10" font-weight="700" fill="#0284c7">EmptyState</text>
+
+      <rect x="525" y="180" width="100" height="32" rx="6" fill="#f0f9ff" stroke="#7dd3fc" stroke-width="1.5"/>
+      <text x="575" y="199" text-anchor="middle" font-size="10" font-weight="700" fill="#0284c7">Spinner/Error</text>
+
+      <!-- Dashboard → Components -->
+      <line x1="360" y1="130" x2="225" y2="178" stroke="#7dd3fc" stroke-width="1.2" stroke-dasharray="3,2"/>
+      <line x1="390" y1="130" x2="345" y2="178" stroke="#7dd3fc" stroke-width="1.2" stroke-dasharray="3,2"/>
+      <line x1="420" y1="130" x2="460" y2="178" stroke="#7dd3fc" stroke-width="1.2" stroke-dasharray="3,2"/>
+      <line x1="450" y1="130" x2="575" y2="178" stroke="#7dd3fc" stroke-width="1.2" stroke-dasharray="3,2"/>
+
+      <!-- api/client -->
+      <rect x="60" y="270" width="700" height="40" rx="8" fill="#fff7ed" stroke="#fed7aa" stroke-width="2"/>
+      <text x="410" y="288" text-anchor="middle" font-size="11" font-weight="800" fill="#c2410c">api/client.ts — Generic request() wrapper</text>
+      <text x="410" y="302" text-anchor="middle" font-size="9" fill="#ea580c">getStoredToken() · Authorization header · unwrap ApiResponse&lt;T&gt;.data · handle 401/204</text>
+
+      <!-- utils -->
+      <rect x="60" y="340" width="220" height="34" rx="6" fill="#fce7f3" stroke="#f9a8d4" stroke-width="1.5"/>
+      <text x="170" y="360" text-anchor="middle" font-size="10" font-weight="700" fill="#9d174d">utils/auth.ts</text>
+      <text x="170" y="370" text-anchor="middle" font-size="8" fill="#be185d">decodeJwt · getStoredToken · emailToInitials</text>
+
+      <rect x="300" y="340" width="220" height="34" rx="6" fill="#fce7f3" stroke="#f9a8d4" stroke-width="1.5"/>
+      <text x="410" y="360" text-anchor="middle" font-size="10" font-weight="700" fill="#9d174d">utils/format.ts</text>
+      <text x="410" y="370" text-anchor="middle" font-size="8" fill="#be185d">timeAgo · authorString · scoreColor · formatDate</text>
+
+      <rect x="540" y="340" width="220" height="34" rx="6" fill="#fce7f3" stroke="#f9a8d4" stroke-width="1.5"/>
+      <text x="650" y="360" text-anchor="middle" font-size="10" font-weight="700" fill="#9d174d">types/index.ts</text>
+      <text x="650" y="370" text-anchor="middle" font-size="8" fill="#be185d">Paper · Topic · Notification · PagedResponse · JwtPayload</text>
+
+      <!-- Pages → API -->
+      <line x1="135" y1="130" x2="200" y2="268" stroke="#f9a8d4" stroke-width="1.2" stroke-dasharray="3,2"/>
+      <line x1="410" y1="130" x2="410" y2="268" stroke="#f9a8d4" stroke-width="1.2" stroke-dasharray="3,2"/>
+      <line x1="685" y1="130" x2="620" y2="268" stroke="#f9a8d4" stroke-width="1.2" stroke-dasharray="3,2"/>
+    </svg>
+    </div>
+  </div>
+
+  <div class="dcard">
+    <h3><span class="dot" style="background:#0369a1"></span> Data Flow: Khi user toggle favorite</h3>
+    <div class="flow-row" style="flex-wrap:wrap;gap:6px;">
+      <div class="fn c-purple"><div>Click ❤️</div><small>PaperCard</small></div>
+      <div class="arr-label"><span class="arr">→</span><span class="al">onToggleFavorite(id)</span></div>
+      <div class="fn c-blue"><div>DashboardPage</div><small>optimistic update<br>setIsFav(!cur)</small></div>
+      <div class="arr-label"><span class="arr">→</span><span class="al">addFavorite()</span></div>
+      <div class="fn c-orange"><div>api/client.ts</div><small>POST /papers/{id}/favorite<br>Bearer token</small></div>
+      <div class="arr-label"><span class="arr">→</span></div>
+      <div class="fn c-orange"><div>FavoriteController</div><small>@AuthenticationPrincipal userId</small></div>
+      <div class="arr-label"><span class="arr">→</span></div>
+      <div class="fn c-green"><div>FavoriteService</div><small>idempotent check</small></div>
+      <div class="arr-label"><span class="arr">→</span></div>
+      <div class="fn c-teal"><div>FavoriteRepo.save()</div><small>INSERT</small></div>
+    </div>
+    <div class="anno" style="margin-top:10px;">
+      <strong>Optimistic update:</strong> UI cập nhật ngay khi user click (không chờ server response) → UX mượt mà. Nếu server fail → revert lại trạng thái cũ. <code>addFavorite()</code> là idempotent (server trả 200 kể cả khi đã favorite) → click nhiều lần an toàn.
+    </div>
+  </div>
+
+  <div class="dcard">
+    <h3><span class="dot" style="background:#0f766e"></span> Dev vs Production — Environment Routing</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div style="background:#f0fdf4;border-radius:10px;padding:16px;border:1.5px solid #86efac;">
+        <div style="font-weight:800;color:#15803d;margin-bottom:10px;font-size:13px;">🔧 Development</div>
+        <div class="flow-row" style="gap:4px;flex-wrap:wrap;">
+          <div class="fn c-purple" style="min-width:80px;padding:7px 10px;font-size:11px;"><div>React</div><small>:5173</small></div>
+          <div class="arr" style="font-size:14px;">→</div>
+          <div class="fn c-gray" style="min-width:80px;padding:7px 10px;font-size:11px;"><div>Vite Proxy</div><small>/api</small></div>
+          <div class="arr" style="font-size:14px;">→</div>
+          <div class="fn c-green" style="min-width:80px;padding:7px 10px;font-size:11px;"><div>Spring</div><small>:8081</small></div>
+        </div>
+        <div style="font-size:11px;color:#16a34a;margin-top:8px;">Không có CORS — cùng origin từ góc nhìn browser</div>
+      </div>
+      <div style="background:#eff6ff;border-radius:10px;padding:16px;border:1.5px solid #93c5fd;">
+        <div style="font-weight:800;color:#1d4ed8;margin-bottom:10px;font-size:13px;">🚀 Production</div>
+        <div class="flow-row" style="gap:4px;flex-wrap:wrap;">
+          <div class="fn c-purple" style="min-width:80px;padding:7px 10px;font-size:11px;"><div>React</div><small>Vercel</small></div>
+          <div class="arr" style="font-size:14px;">→</div>
+          <div class="fn c-blue" style="min-width:80px;padding:7px 10px;font-size:11px;"><div>CORS check</div><small>FRONTEND_URL</small></div>
+          <div class="arr" style="font-size:14px;">→</div>
+          <div class="fn c-green" style="min-width:80px;padding:7px 10px;font-size:11px;"><div>Spring</div><small>Railway</small></div>
+        </div>
+        <div style="font-size:11px;color:#2563eb;margin-top:8px;">VITE_API_BASE_URL set trong .env.production</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- end .page -->
+
+<script>
+// NAV active on scroll
+const navLinks = document.querySelectorAll('.nav a');
+const sections = document.querySelectorAll('.section[id]');
+const obs = new IntersectionObserver(entries=>{
+  entries.forEach(en=>{
+    if(en.isIntersecting){
+      navLinks.forEach(l=>l.classList.remove('on'));
+      const a = document.querySelector(`.nav a[href="#${en.target.id}"]`);
+      if(a) a.classList.add('on');
+    }
+  });
+},{rootMargin:'-10% 0px -80% 0px'});
+sections.forEach(s=>obs.observe(s));
+
+navLinks.forEach(a=>{
+  a.addEventListener('click',e=>{
+    e.preventDefault();
+    document.querySelector(a.getAttribute('href'))?.scrollIntoView({behavior:'smooth',block:'start'});
+  });
+});
+</script>
+</body>
+</html>

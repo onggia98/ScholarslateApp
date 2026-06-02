@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Phân Tích Quá Trình Làm Đồ Án — ScholarSlate / Paper Tracker</title>
+  <style>
+    :root {
+      --primary: #1e40af;
+      --primary-light: #3b82f6;
+      --accent: #0ea5e9;
+      --success: #16a34a;
+      --warn: #d97706;
+      --danger: #dc2626;
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --border: #e2e8f0;
+      --text: #1e293b;
+      --muted: #64748b;
+      --code-bg: #f1f5f9;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      font-size: 15px;
+    }
+
+    /* ── Header ── */
+    .hero {
+      background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #0369a1 100%);
+      color: white;
+      padding: 56px 48px 48px;
+    }
+    .hero-tag {
+      display: inline-block;
+      background: rgba(255,255,255,0.18);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 20px;
+      padding: 4px 14px;
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+    .hero h1 { font-size: 2.4rem; font-weight: 700; margin-bottom: 10px; line-height: 1.25; }
+    .hero p { font-size: 1.05rem; opacity: 0.85; max-width: 640px; }
+    .hero-meta { margin-top: 28px; display: flex; gap: 32px; flex-wrap: wrap; }
+    .hero-meta span { font-size: 13px; opacity: 0.75; }
+    .hero-meta strong { opacity: 1; font-size: 14px; }
+
+    /* ── Layout ── */
+    .layout { display: grid; grid-template-columns: 260px 1fr; max-width: 1280px; margin: 0 auto; }
+
+    /* ── Sidebar ── */
+    aside {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      padding: 32px 0;
+    }
+    .sidebar-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 0 24px 12px;
+    }
+    .nav-section { margin-bottom: 20px; }
+    .nav-section .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--primary);
+      padding: 6px 24px 4px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    aside a {
+      display: block;
+      padding: 7px 24px 7px 32px;
+      color: var(--text);
+      text-decoration: none;
+      font-size: 13.5px;
+      border-left: 3px solid transparent;
+      transition: all 0.15s;
+    }
+    aside a:hover { background: #f0f9ff; color: var(--primary); border-left-color: var(--primary-light); }
+
+    /* ── Main ── */
+    main { padding: 48px 56px; max-width: 960px; }
+
+    section { margin-bottom: 64px; }
+    section:first-of-type { margin-top: 0; }
+
+    h2 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--primary);
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--border);
+      margin-bottom: 28px;
+    }
+    h3 { font-size: 1.1rem; font-weight: 700; color: var(--text); margin: 28px 0 12px; }
+    h4 { font-size: 0.95rem; font-weight: 700; color: var(--muted); margin: 20px 0 8px; text-transform: uppercase; letter-spacing: 0.05em; }
+
+    p { margin-bottom: 14px; color: var(--text); }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px 24px;
+      margin-bottom: 16px;
+    }
+    .card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+    .card-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px 22px;
+      text-align: center;
+    }
+    .stat-card .num { font-size: 2rem; font-weight: 800; color: var(--primary); line-height: 1; }
+    .stat-card .label { font-size: 12px; color: var(--muted); margin-top: 6px; }
+
+    /* ── Tag / Badge ── */
+    .badge {
+      display: inline-block;
+      padding: 2px 9px;
+      border-radius: 12px;
+      font-size: 11.5px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .badge-blue { background: #dbeafe; color: #1d4ed8; }
+    .badge-green { background: #dcfce7; color: #15803d; }
+    .badge-orange { background: #fef3c7; color: #b45309; }
+    .badge-red { background: #fee2e2; color: #b91c1c; }
+    .badge-purple { background: #ede9fe; color: #6d28d9; }
+    .badge-gray { background: #f1f5f9; color: #475569; }
+
+    /* ── Timeline ── */
+    .timeline { position: relative; padding-left: 28px; }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 9px; top: 4px; bottom: 4px;
+      width: 2px;
+      background: var(--border);
+    }
+    .tl-item { position: relative; margin-bottom: 24px; }
+    .tl-dot {
+      position: absolute;
+      left: -24px;
+      top: 5px;
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background: var(--primary);
+      border: 3px solid white;
+      box-shadow: 0 0 0 2px var(--primary);
+    }
+    .tl-dot.done { background: var(--success); box-shadow: 0 0 0 2px var(--success); }
+    .tl-title { font-weight: 700; font-size: 14.5px; color: var(--text); }
+    .tl-sub { font-size: 13px; color: var(--muted); margin-top: 4px; }
+
+    /* ── Code ── */
+    pre {
+      background: #0f172a;
+      color: #e2e8f0;
+      border-radius: 8px;
+      padding: 18px 22px;
+      font-size: 13px;
+      overflow-x: auto;
+      margin: 14px 0 20px;
+      line-height: 1.6;
+    }
+    code {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 1px 6px;
+      font-size: 12.5px;
+      font-family: 'Consolas', 'Courier New', monospace;
+      color: #c026d3;
+    }
+    pre code { background: none; border: none; color: inherit; padding: 0; font-size: 13px; }
+
+    /* ── Table ── */
+    table { width: 100%; border-collapse: collapse; margin: 16px 0 24px; font-size: 13.5px; }
+    th { background: var(--code-bg); font-weight: 700; padding: 10px 14px; text-align: left; border-bottom: 2px solid var(--border); color: var(--text); }
+    td { padding: 9px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #f8fafc; }
+
+    /* ── Flow diagram ── */
+    .flow {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0;
+      margin: 18px 0 24px;
+    }
+    .flow-step {
+      background: #eff6ff;
+      border: 1.5px solid #bfdbfe;
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--primary);
+      white-space: nowrap;
+    }
+    .flow-arrow {
+      font-size: 18px;
+      color: var(--muted);
+      padding: 0 8px;
+    }
+
+    /* ── Callout ── */
+    .callout {
+      border-left: 4px solid var(--primary-light);
+      background: #eff6ff;
+      padding: 14px 18px;
+      border-radius: 0 8px 8px 0;
+      margin: 16px 0;
+      font-size: 13.5px;
+    }
+    .callout.warn { border-color: var(--warn); background: #fffbeb; }
+    .callout.success { border-color: var(--success); background: #f0fdf4; }
+    .callout strong { display: block; margin-bottom: 4px; }
+
+    /* ── Use case grid ── */
+    .uc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; margin: 16px 0; }
+    .uc-item {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 13px;
+      background: var(--surface);
+    }
+    .uc-id { font-size: 11px; font-weight: 700; color: var(--primary); margin-bottom: 3px; }
+
+    /* ── Layer diagram ── */
+    .layer-box {
+      border: 2px solid;
+      border-radius: 10px;
+      padding: 14px 20px;
+      margin: 6px 0;
+      font-size: 13.5px;
+      font-weight: 600;
+    }
+    .layer-controller { border-color: #3b82f6; background: #eff6ff; color: #1d4ed8; }
+    .layer-service     { border-color: #8b5cf6; background: #f5f3ff; color: #5b21b6; }
+    .layer-repo        { border-color: #14b8a6; background: #f0fdfa; color: #0f766e; }
+    .layer-entity      { border-color: #f59e0b; background: #fffbeb; color: #92400e; }
+
+    /* ── Responsive ── */
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: 1fr; }
+      aside { display: none; }
+      main { padding: 28px 20px; }
+      .card-grid, .card-grid-3 { grid-template-columns: 1fr; }
+      .hero { padding: 32px 20px; }
+      .hero h1 { font-size: 1.7rem; }
+    }
+
+    /* ── Print ── */
+    @media print {
+      aside { display: none; }
+      .layout { grid-template-columns: 1fr; }
+      main { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-tag">Đồ Án Cuối Kỳ — NMCNPM</div>
+  <h1>ScholarSlate / Paper Tracker</h1>
+  <p>Phân tích toàn diện quá trình phát triển hệ thống — từ yêu cầu nghiệp vụ đến kiến trúc kỹ thuật và kết quả triển khai thực tế.</p>
+  <div class="hero-meta">
+    <div><span>Học phần</span><br><strong>Nhập môn Công nghệ Phần mềm</strong></div>
+    <div><span>Trường</span><br><strong>Đại học Khoa học Tự nhiên — HCMUS</strong></div>
+    <div><span>Năm học</span><br><strong>HK3 / 2025–2026</strong></div>
+    <div><span>Trạng thái</span><br><strong>✅ Hoàn thành 17/17 Use Cases</strong></div>
+  </div>
+</div>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside>
+    <div class="sidebar-title">Nội dung</div>
+
+    <div class="nav-section">
+      <div class="section-label">I. Tổng quan</div>
+      <a href="#s1">1. Bài toán & mục tiêu</a>
+      <a href="#s2">2. Tech stack</a>
+      <a href="#s3">3. Thống kê dự án</a>
+    </div>
+
+    <div class="nav-section">
+      <div class="section-label">II. Phân tích</div>
+      <a href="#s4">4. Kiến trúc hệ thống</a>
+      <a href="#s5">5. Mô hình dữ liệu</a>
+      <a href="#s6">6. Đặc tả Use Case</a>
+    </div>
+
+    <div class="nav-section">
+      <div class="section-label">III. Thiết kế chi tiết</div>
+      <a href="#s7">7. Pipeline AI</a>
+      <a href="#s8">8. Vector Search</a>
+      <a href="#s9">9. Security</a>
+      <a href="#s10">10. Frontend</a>
+    </div>
+
+    <div class="nav-section">
+      <div class="section-label">IV. Triển khai & Kết quả</div>
+      <a href="#s11">11. Deployment</a>
+      <a href="#s12">12. Thách thức & giải pháp</a>
+      <a href="#s13">13. Kết luận</a>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <section id="s1">
+      <h2>1. Bài toán & Mục tiêu</h2>
+
+      <h3>Vấn đề thực tế</h3>
+      <p>Số lượng bài báo khoa học trên arXiv tăng theo cấp số nhân — hàng nghìn bài mỗi ngày. Nhà nghiên cứu và sinh viên khó theo kịp những công trình mới nhất trong lĩnh vực của mình, phải thủ công tìm kiếm và đọc lọc từng bài.</p>
+
+      <div class="card-grid">
+        <div class="card">
+          <h4>Vấn đề</h4>
+          <p>Không có công cụ tự động theo dõi, tóm tắt, và gợi ý paper phù hợp với từng chủ đề nghiên cứu cá nhân.</p>
+        </div>
+        <div class="card">
+          <h4>Giải pháp</h4>
+          <p><strong>ScholarSlate</strong> tự động fetch paper từ arXiv theo keywords, dùng AI để tóm tắt, tính chất lượng, và gợi ý paper liên quan qua vector similarity.</p>
+        </div>
+      </div>
+
+      <h3>Mục tiêu cụ thể</h3>
+      <table>
+        <thead>
+          <tr><th>Nhóm chức năng</th><th>Mô tả</th><th>Mức độ</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Quản lý tài khoản</td><td>Đăng ký, đăng nhập bằng JWT; phân quyền USER / ADMIN</td><td><span class="badge badge-green">Cơ bản</span></td></tr>
+          <tr><td>Quản lý Topic</td><td>CRUD topic theo keyword; tối đa 10 topic, 5 keyword/topic</td><td><span class="badge badge-green">Cơ bản</span></td></tr>
+          <tr><td>Xem & Tìm kiếm Paper</td><td>Full-text search, lọc theo topic, phân trang</td><td><span class="badge badge-green">Cơ bản</span></td></tr>
+          <tr><td>AI Pipeline</td><td>Embedding (HuggingFace) + Tóm tắt chất lượng (Groq)</td><td><span class="badge badge-blue">Nâng cao</span></td></tr>
+          <tr><td>Recommendation</td><td>Gợi ý paper liên quan real-time bằng vector cosine</td><td><span class="badge badge-blue">Nâng cao</span></td></tr>
+          <tr><td>Duplicate Detection</td><td>Tự động phát hiện paper trùng lặp theo embedding</td><td><span class="badge badge-blue">Nâng cao</span></td></tr>
+          <tr><td>Thống kê xu hướng</td><td>Biểu đồ số lượng paper theo tháng/chủ đề</td><td><span class="badge badge-orange">Thống kê</span></td></tr>
+          <tr><td>Admin</td><td>Quản lý paper FAILED, reset, xem log lỗi</td><td><span class="badge badge-purple">Admin</span></td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <section id="s2">
+      <h2>2. Tech Stack</h2>
+
+      <div class="card-grid">
+        <div class="card">
+          <h4>Backend</h4>
+          <p><span class="badge badge-blue">Spring Boot 4.0.6</span> <span class="badge badge-gray">Java 21</span></p>
+          <p style="margin-top:8px">Spring Data JPA, Spring Security 6 (JWT stateless), Hibernate 7.x, Flyway migrations, Caffeine cache</p>
+        </div>
+        <div class="card">
+          <h4>Database</h4>
+          <p><span class="badge badge-blue">PostgreSQL 16</span> <span class="badge badge-purple">pgvector</span></p>
+          <p style="margin-top:8px">Extension <code>vector(384)</code>, HNSW index, GIN full-text search, B-tree composite indexes</p>
+        </div>
+        <div class="card">
+          <h4>Frontend</h4>
+          <p><span class="badge badge-orange">React 19</span> <span class="badge badge-gray">Vite 6</span> <span class="badge badge-gray">TypeScript 5</span></p>
+          <p style="margin-top:8px">Tailwind CSS v4, React Router, Axios với JWT interceptor tự động</p>
+        </div>
+        <div class="card">
+          <h4>AI Services</h4>
+          <p><span class="badge badge-green">HuggingFace</span> <span class="badge badge-orange">Groq</span></p>
+          <p style="margin-top:8px">BAAI/bge-small-en-v1.5 (384-dim embedding), llama-3.1-8b-instant (summary + quality score)</p>
+        </div>
+      </div>
+
+      <div class="callout">
+        <strong>Lưu ý quan trọng về tech stack thực tế</strong>
+        Dự án ban đầu thiết kế với <strong>MapStruct</strong> và <strong>hypersistence-utils</strong>, nhưng trong quá trình triển khai phát hiện xung đột với Spring Boot 4.x. Giải pháp thực tế: (1) Thay MapStruct bằng <strong>manual @Component mapper</strong>, (2) Thay hypersistence bằng <strong>custom VectorUserType</strong> (implements Hibernate UserType trực tiếp).
+      </div>
+
+      <h3>Dependencies chính (pom.xml thực tế)</h3>
+      <table>
+        <thead><tr><th>Dependency</th><th>Version</th><th>Mục đích</th></tr></thead>
+        <tbody>
+          <tr><td><code>spring-boot-starter-web</code></td><td>4.0.6</td><td>REST API, embedded Tomcat</td></tr>
+          <tr><td><code>spring-boot-starter-security</code></td><td>4.0.6</td><td>JWT stateless auth</td></tr>
+          <tr><td><code>spring-boot-starter-data-jpa</code></td><td>4.0.6</td><td>ORM / Repository pattern</td></tr>
+          <tr><td><code>postgresql</code></td><td>latest</td><td>JDBC driver</td></tr>
+          <tr><td><code>flyway-core</code></td><td>latest</td><td>Schema migration</td></tr>
+          <tr><td><code>jjwt-api/impl/jackson</code></td><td>0.12.6</td><td>JWT generation & validation</td></tr>
+          <tr><td><code>spring-boot-starter-cache</code></td><td>4.0.6</td><td>Caffeine recommendation cache</td></tr>
+          <tr><td><code>lombok</code></td><td>latest</td><td>Boilerplate reduction</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <section id="s3">
+      <h2>3. Thống kê dự án</h2>
+
+      <div class="card-grid-3">
+        <div class="stat-card"><div class="num">17</div><div class="label">Use Cases đã implement</div></div>
+        <div class="stat-card"><div class="num">55+</div><div class="label">Java source files</div></div>
+        <div class="stat-card"><div class="num">5</div><div class="label">Flyway migration scripts</div></div>
+        <div class="stat-card"><div class="num">8</div><div class="label">REST Controllers</div></div>
+        <div class="stat-card"><div class="num">3</div><div class="label">AI External Services</div></div>
+        <div class="stat-card"><div class="num">384</div><div class="label">Vector dimensions</div></div>
+      </div>
+
+      <h3>Cấu trúc package backend</h3>
+      <pre><code>com.nmcnpm.scholarslate/
+├── config/          SchedulerConfig (ThreadPool)
+├── controller/      Auth, Paper, Topic, Favorite,
+│                    Notification, User, Admin (7 files)
+├── converter/       VectorUserType (custom Hibernate type)
+├── dto/             auth/, paper/, topic/, user/,
+│                    notification/, common/
+├── entity/          User, Paper, Topic, Favorite,
+│                    Notification, PaperTopic, PaperTopicId
+├── exception/       AppException, GlobalExceptionHandler
+├── mapper/          PaperMapper, TopicMapper, NotificationMapper
+├── repository/      6 JPA repositories
+├── scheduler/       MainScheduler, RetryScheduler
+├── security/        JwtUtil, JwtAuthFilter, SecurityConfig,
+│                    UserDetailsServiceImpl
+├── service/         AuthService, PaperService, TopicService,
+│                    FavoriteService, NotificationService,
+│                    AdminService, UserService
+│   └── ai/          ArxivFetchService, EmbeddingService,
+│                    GroqService, PaperPipelineService
+└── util/            VectorUtils</code></pre>
+
+      <h3>Frontend pages</h3>
+      <div class="card-grid-3">
+        <div class="card"><strong>AuthPage.tsx</strong><br><small>Đăng ký / Đăng nhập, handle .local TLD cho iOS Safari</small></div>
+        <div class="card"><strong>DashboardPage.tsx</strong><br><small>Danh sách paper, tìm kiếm, lọc topic, yêu thích, notification, thống kê</small></div>
+        <div class="card"><strong>AdminPage.tsx</strong><br><small>Quản lý paper FAILED, reset retry, xem last_error</small></div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <section id="s4">
+      <h2>4. Kiến trúc hệ thống</h2>
+
+      <h3>Kiến trúc phân lớp (Layered Architecture)</h3>
+      <div class="layer-box layer-controller">Controller Layer — REST Endpoints, @RequestMapping, JWT extraction</div>
+      <div style="text-align:center;font-size:18px;color:var(--muted);margin:2px 0;">↕</div>
+      <div class="layer-box layer-service">Service Layer — Business Logic, @Transactional, DTO mapping</div>
+      <div style="text-align:center;font-size:18px;color:var(--muted);margin:2px 0;">↕</div>
+      <div class="layer-box layer-repo">Repository Layer — Spring Data JPA, Native SQL queries</div>
+      <div style="text-align:center;font-size:18px;color:var(--muted);margin:2px 0;">↕</div>
+      <div class="layer-box layer-entity">Entity Layer — JPA Entities, VectorUserType, pgvector</div>
+
+      <h3>Sơ đồ component tổng quan</h3>
+      <div class="card">
+        <div class="flow">
+          <div class="flow-step">React SPA<br><small>(Vercel)</small></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">Spring Boot API<br><small>:8081 (Railway)</small></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">PostgreSQL + pgvector<br><small>Docker :5433</small></div>
+        </div>
+        <div class="flow" style="margin-top:12px">
+          <div class="flow-step">MainScheduler<br><small>06:00 daily</small></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">ArxivFetchService<br><small>arXiv API</small></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">PaperPipelineService<br><small>embed + summary</small></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">HuggingFace + Groq<br><small>AI APIs</small></div>
+        </div>
+      </div>
+
+      <h3>Nguyên tắc thiết kế áp dụng</h3>
+      <table>
+        <thead><tr><th>Nguyên tắc</th><th>Áp dụng trong dự án</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Single Responsibility</strong></td><td>Mỗi service/class chỉ đảm nhiệm một chức năng rõ ràng (ArxivFetchService chỉ fetch, GroqService chỉ gọi Groq API)</td></tr>
+          <tr><td><strong>Dependency Injection</strong></td><td>@RequiredArgsConstructor + @Service/@Component; không dùng @Autowired field injection</td></tr>
+          <tr><td><strong>DTO Pattern</strong></td><td>Entity không bao giờ expose trực tiếp ra API; mapping qua manual mapper, loại bỏ embedding và sensitive fields</td></tr>
+          <tr><td><strong>Repository Pattern</strong></td><td>Spring Data JPA interfaces + native queries cho vector operations</td></tr>
+          <tr><td><strong>Transaction isolation</strong></td><td>REQUIRES_NEW cho từng paper trong pipeline — lỗi 1 paper không rollback paper khác</td></tr>
+          <tr><td><strong>Idempotency</strong></td><td>ON CONFLICT DO NOTHING cho PAPER, PAPER_TOPIC, NOTIFICATION; addFavorite không trả 409</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <section id="s5">
+      <h2>5. Mô hình dữ liệu</h2>
+
+      <h3>ERD tóm tắt</h3>
+      <div class="card">
+        <table>
+          <thead><tr><th>Entity</th><th>PK</th><th>Quan hệ</th><th>Constraints đặc biệt</th></tr></thead>
+          <tbody>
+            <tr><td><strong>USER</strong></td><td>UUID</td><td>1→N Topic, 1→N Favorite, 1→N Notification</td><td>UNIQUE email</td></tr>
+            <tr><td><strong>TOPIC</strong></td><td>UUID</td><td>N→1 User, N→M Paper (qua PAPER_TOPIC)</td><td>UNIQUE (user_id, name)</td></tr>
+            <tr><td><strong>PAPER</strong></td><td>UUID</td><td>N→M Topic, 1→N Favorite, 1→N Notification, self-ref (original_paper_id)</td><td>UNIQUE arxiv_id; vector(384)</td></tr>
+            <tr><td><strong>PAPER_TOPIC</strong></td><td>Composite (paper_id, topic_id)</td><td>N→1 Paper, N→1 Topic</td><td>ON DELETE CASCADE từ Topic</td></tr>
+            <tr><td><strong>FAVORITE</strong></td><td>UUID</td><td>N→1 User, N→1 Paper</td><td>UNIQUE (user_id, paper_id)</td></tr>
+            <tr><td><strong>NOTIFICATION</strong></td><td>UUID</td><td>N→1 User, N→1 Paper</td><td>UNIQUE (user_id, paper_id, type)</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Flyway migration flow</h3>
+      <div class="timeline">
+        <div class="tl-item">
+          <div class="tl-dot done"></div>
+          <div class="tl-title">V1__enable_extensions.sql</div>
+          <div class="tl-sub">Kích hoạt <code>CREATE EXTENSION IF NOT EXISTS vector</code> — pgvector</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot done"></div>
+          <div class="tl-title">V2__create_tables.sql</div>
+          <div class="tl-sub">Tạo 6 bảng chính; trường <code>embedding vector(384)</code> trong PAPER</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot done"></div>
+          <div class="tl-title">V3__add_constraints.sql</div>
+          <div class="tl-sub">Unique constraints, foreign keys, check constraints (quality_score [0,10])</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot done"></div>
+          <div class="tl-title">V4__add_indexes.sql</div>
+          <div class="tl-sub">B-tree, GIN (full-text), HNSW (vector similarity) indexes</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot done"></div>
+          <div class="tl-title">V5__seed_admin.sql</div>
+          <div class="tl-sub">Tạo ADMIN account: <code>admin@papertracker.local</code></div>
+        </div>
+      </div>
+
+      <h3>Index strategy</h3>
+      <table>
+        <thead><tr><th>Index type</th><th>Column(s)</th><th>Use case</th></tr></thead>
+        <tbody>
+          <tr><td><span class="badge badge-blue">HNSW</span></td><td>paper.embedding</td><td>UC14 Recommendation, UC11 Duplicate detection</td></tr>
+          <tr><td><span class="badge badge-green">GIN</span></td><td>title+abstract+authors</td><td>UC05 Tìm kiếm — <code>plainto_tsquery</code></td></tr>
+          <tr><td><span class="badge badge-green">GIN</span></td><td>title+abstract</td><td>UC12 Topic matching — <code>phraseto_tsquery</code></td></tr>
+          <tr><td><span class="badge badge-gray">B-tree</span></td><td>published_at, processing_status, arxiv_id</td><td>UC04 List papers, scheduler queries</td></tr>
+          <tr><td><span class="badge badge-gray">B-tree</span></td><td>topic.user_id, is_active</td><td>Scheduler fetch active topics</td></tr>
+          <tr><td><span class="badge badge-gray">B-tree</span></td><td>notification.user_id, is_read, created_at</td><td>UC08 Notification listing</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <section id="s6">
+      <h2>6. Đặc tả Use Case</h2>
+
+      <h3>Danh sách 17 Use Cases đã implement</h3>
+
+      <h4>Nhóm User</h4>
+      <div class="uc-grid">
+        <div class="uc-item"><div class="uc-id">UC01</div>Đăng ký tài khoản</div>
+        <div class="uc-item"><div class="uc-id">UC02</div>Đăng nhập (JWT)</div>
+        <div class="uc-item"><div class="uc-id">UC03</div>Quản lý Topic (CRUD)</div>
+        <div class="uc-item"><div class="uc-id">UC04</div>Xem danh sách Paper</div>
+        <div class="uc-item"><div class="uc-id">UC05</div>Tìm kiếm Paper (FTS)</div>
+        <div class="uc-item"><div class="uc-id">UC06</div>Xem chi tiết Paper</div>
+        <div class="uc-item"><div class="uc-id">UC07</div>Lưu / bỏ yêu thích</div>
+        <div class="uc-item"><div class="uc-id">UC08</div>Xem & đánh dấu Notification</div>
+        <div class="uc-item"><div class="uc-id">UC08b</div>Mark all read (batch)</div>
+        <div class="uc-item"><div class="uc-id">UC09</div>Xem Paper yêu thích</div>
+        <div class="uc-item"><div class="uc-id">UC15</div>Thống kê xu hướng</div>
+      </div>
+
+      <h4>Nhóm Hệ thống (Background)</h4>
+      <div class="uc-grid">
+        <div class="uc-item"><div class="uc-id">UC10</div>Fetch Paper từ arXiv</div>
+        <div class="uc-item"><div class="uc-id">UC11</div>AI Processing Pipeline</div>
+        <div class="uc-item"><div class="uc-id">UC12</div>Topic Matching (FTS)</div>
+        <div class="uc-item"><div class="uc-id">UC13</div>Tạo Notification tự động</div>
+        <div class="uc-item"><div class="uc-id">UC14</div>Recommendation real-time</div>
+        <div class="uc-item"><div class="uc-id">UC16</div>Retry AI Processing (30 phút)</div>
+      </div>
+
+      <h4>Nhóm Admin</h4>
+      <div class="uc-grid">
+        <div class="uc-item"><div class="uc-id">UC17</div>Admin: xem & reset paper FAILED</div>
+      </div>
+
+      <div class="callout success">
+        <strong>✅ Tỷ lệ hoàn thành: 17/17 (100%)</strong>
+        Toàn bộ use case trong đặc tả được implement đầy đủ ở cả backend (API) và frontend (UI).
+      </div>
+
+      <h3>API endpoint mapping</h3>
+      <table>
+        <thead><tr><th>Endpoint</th><th>Method</th><th>Auth</th><th>UC</th></tr></thead>
+        <tbody>
+          <tr><td><code>/api/auth/register</code></td><td>POST</td><td>Public</td><td>UC01</td></tr>
+          <tr><td><code>/api/auth/login</code></td><td>POST</td><td>Public</td><td>UC02</td></tr>
+          <tr><td><code>/api/topics</code></td><td>GET/POST</td><td>USER</td><td>UC03</td></tr>
+          <tr><td><code>/api/topics/{id}</code></td><td>PUT/DELETE</td><td>USER (owner)</td><td>UC03</td></tr>
+          <tr><td><code>/api/papers</code></td><td>GET</td><td>USER</td><td>UC04, UC05</td></tr>
+          <tr><td><code>/api/papers/{id}</code></td><td>GET</td><td>USER</td><td>UC06 + UC14</td></tr>
+          <tr><td><code>/api/papers/{id}/favorite</code></td><td>POST/DELETE</td><td>USER</td><td>UC07</td></tr>
+          <tr><td><code>/api/papers/favorites</code></td><td>GET</td><td>USER</td><td>UC09</td></tr>
+          <tr><td><code>/api/notifications</code></td><td>GET</td><td>USER</td><td>UC08</td></tr>
+          <tr><td><code>/api/notifications/{id}/read</code></td><td>PATCH</td><td>USER (owner)</td><td>UC08</td></tr>
+          <tr><td><code>/api/notifications/read-all</code></td><td>PATCH</td><td>USER</td><td>UC08b</td></tr>
+          <tr><td><code>/api/papers/stats/trend</code></td><td>GET</td><td>USER</td><td>UC15</td></tr>
+          <tr><td><code>/api/users/me/password</code></td><td>PATCH</td><td>USER</td><td>—</td></tr>
+          <tr><td><code>/api/admin/papers/failed</code></td><td>GET</td><td>ADMIN</td><td>UC17</td></tr>
+          <tr><td><code>/api/admin/papers/{id}/reset</code></td><td>POST</td><td>ADMIN</td><td>UC17</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <section id="s7">
+      <h2>7. Pipeline AI — Thiết kế chi tiết</h2>
+
+      <h3>Luồng xử lý chính (Main Pipeline — 06:00 hàng ngày)</h3>
+      <div class="timeline">
+        <div class="tl-item">
+          <div class="tl-dot done"></div>
+          <div class="tl-title">1. Lấy Active Topics & keywords</div>
+          <div class="tl-sub">Query <code>is_active = true</code>; dedup keywords bằng LinkedHashSet để tránh fetch cùng keyword 2 lần</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot done"></div>
+          <div class="tl-title">2. Fetch từ arXiv API</div>
+          <div class="tl-sub">Delay 1500ms giữa requests (phát hiện 429 ở 350ms trong production). Max 10 paper/keyword. URL bắt buộc <code>sortBy=submittedDate&sortOrder=descending</code></div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot done"></div>
+          <div class="tl-title">3. Upsert paper (ON CONFLICT arxiv_id DO NOTHING)</div>
+          <div class="tl-sub">Paper mới: <code>PENDING</code>, <code>retry_count=0</code>. Paper cũ bị skip idempotently</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot done"></div>
+          <div class="tl-title">4. Embedding (HuggingFace — BAAI/bge-small-en-v1.5)</div>
+          <div class="tl-sub">Batch max 32. HTTP 503 (model cold start): chờ 30s, retry 1 lần</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot done"></div>
+          <div class="tl-title">5. Duplicate Detection (pgvector cosine)</div>
+          <div class="tl-sub">Cosine distance &lt; 0.05 (similarity &gt; 0.95) trong window 90 ngày. Duplicate → <code>is_duplicate=true</code>, <code>DONE</code></div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot done"></div>
+          <div class="tl-title">6. AI Summary (Groq — llama-3.1-8b-instant)</div>
+          <div class="tl-sub">Single call với <code>response_format: json_object</code>. Validate: quality_score ∈ [0,10], summary ≤ 2000 chars. Delay 2s giữa các call</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot done"></div>
+          <div class="tl-title">7. Topic Matching (phraseto_tsquery + GIN)</div>
+          <div class="tl-sub"><code>phraseto_tsquery</code> (không phải <code>plainto</code>) để match chính xác cụm keyword theo thứ tự</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot done"></div>
+          <div class="tl-title">8. Notification Creation</div>
+          <div class="tl-sub">ON CONFLICT DO NOTHING — đảm bảo mỗi (user, paper, type) chỉ có 1 notification</div>
+        </div>
+      </div>
+
+      <h3>Transaction design</h3>
+      <pre><code>// Mỗi paper chạy trong transaction độc lập
+@Transactional(propagation = Propagation.REQUIRES_NEW)
+public boolean process(Paper paper) { ... }
+
+// Outer orchestrator KHÔNG có @Transactional
+// → tránh exhaustion HikariCP pool (max 20 connections)
+public void runDailyFetch() { ... }</code></pre>
+
+      <h3>Retry Scheduler (mỗi 30 phút)</h3>
+      <div class="card">
+        <p>Query: <code>processing_status = 'FAILED' AND retry_count &lt; 3</code></p>
+        <p>Retry pipeline AI (embed → dup check → Groq). Cập nhật <code>last_retry_at = NOW()</code>. Max 3 lần — sau đó giữ FAILED, admin can thiệp qua UC17.</p>
+      </div>
+
+      <h3>Lý do chọn BAAI/bge-small-en-v1.5</h3>
+      <div class="callout warn">
+        <strong>Vấn đề phát hiện trong quá trình làm</strong>
+        Ban đầu thiết kế dùng <code>sentence-transformers/all-MiniLM-L6-v2</code>, nhưng HuggingFace phân loại model này là <em>sentence-similarity</em> pipeline, không phải <em>feature-extraction</em> → gọi API bị lỗi. Chuyển sang <strong>BAAI/bge-small-en-v1.5</strong> — feature-extraction pipeline, cùng 384 dims, không cần thay đổi schema.
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <section id="s8">
+      <h2>8. Vector Search — pgvector</h2>
+
+      <h3>Custom VectorUserType</h3>
+      <p>Vì hypersistence-utils không tương thích Spring Boot 4.x / Hibernate 7.x, nhóm implement thủ công <code>VectorUserType</code> implements <code>UserType&lt;float[]&gt;</code>:</p>
+      <pre><code>// Serialize: float[] → PGobject kiểu "vector"
+// Deserialize: PGobject → float[]
+// Đăng ký qua @TypeDef ở entity Paper hoặc package-info.java</code></pre>
+
+      <h3>Recommendation query</h3>
+      <pre><code>-- ef_search=128 set global qua HikariCP connection-init-sql
+SELECT * FROM paper
+WHERE processing_status = 'DONE'
+  AND is_duplicate = false
+  AND id &lt;&gt; :paperId
+  AND published_at &gt;= NOW() - INTERVAL '1 year'
+  AND embedding &lt;=&gt; CAST(:embedding AS vector) &lt; 0.5
+ORDER BY embedding &lt;=&gt; CAST(:embedding AS vector)
+LIMIT 10</code></pre>
+
+      <h3>Duplicate detection query</h3>
+      <pre><code>SELECT * FROM paper
+WHERE id &lt;&gt; :paperId
+  AND is_duplicate = false
+  AND processing_status = 'DONE'
+  AND published_at &gt;= NOW() - INTERVAL '90 days'
+  AND embedding &lt;=&gt; CAST(:embedding AS vector) &lt; 0.05
+ORDER BY embedding &lt;=&gt; CAST(:embedding AS vector)
+LIMIT 1</code></pre>
+
+      <h3>Caching recommendation</h3>
+      <div class="card">
+        <p><strong>Spring Cache + Caffeine:</strong> key = <code>paper_id</code>, TTL = 1 giờ, max 500 entries.</p>
+        <p>Cache miss → query HNSW. Cache hit → trả ngay, không tốn DB roundtrip.</p>
+        <p><code>connection-init-sql: "SET hnsw.ef_search = 128"</code> — set global cho toàn bộ pool, không cần <code>SET LOCAL</code> trong từng query.</p>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <section id="s9">
+      <h2>9. Security Design</h2>
+
+      <h3>JWT Authentication Flow</h3>
+      <div class="flow">
+        <div class="flow-step">Client Request</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">JwtAuthenticationFilter</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">JwtUtil.validateToken()</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">SecurityContextHolder</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">Controller</div>
+      </div>
+
+      <table>
+        <thead><tr><th>Thành phần</th><th>Chi tiết</th></tr></thead>
+        <tbody>
+          <tr><td>Algorithm</td><td>HMAC-SHA256, JWT secret ≥ 256 bit</td></tr>
+          <tr><td>TTL</td><td>24 giờ; không dùng refresh token</td></tr>
+          <tr><td>Logout</td><td>Client-side — xóa token khỏi localStorage</td></tr>
+          <tr><td>user_id source</td><td>Luôn lấy từ <code>SecurityContextHolder</code>, không nhận từ request body</td></tr>
+          <tr><td>Admin gate</td><td><code>hasRole('ADMIN')</code> trên <code>/api/admin/**</code></td></tr>
+          <tr><td>Password</td><td>BCrypt hashing; đổi mật khẩu yêu cầu xác nhận old password</td></tr>
+          <tr><td>CORS</td><td>Single <code>CorsConfigurationSource</code> bean, đọc <code>FRONTEND_URL</code> từ env</td></tr>
+        </tbody>
+      </table>
+
+      <div class="callout">
+        <strong>Security: JWT_SECRET không có fallback</strong>
+        <code>application.yml</code> chứa <code>secret: ${JWT_SECRET}</code> — không có giá trị default. Nếu env var không set, app sẽ fail-fast khi khởi động. Đây là thiết kế cố ý để tránh chạy production với secret yếu.
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <section id="s10">
+      <h2>10. Frontend Design</h2>
+
+      <h3>Kiến trúc SPA</h3>
+      <div class="card-grid">
+        <div class="card">
+          <h4>Routing</h4>
+          <p>React Router BrowserRouter. <code>vercel.json</code> rewrite <code>/*</code> → <code>/index.html</code> để handle SPA navigation khi reload.</p>
+        </div>
+        <div class="card">
+          <h4>API Client</h4>
+          <p>Axios instance với JWT interceptor tự động gắn <code>Authorization: Bearer &lt;token&gt;</code> cho mọi request.</p>
+        </div>
+        <div class="card">
+          <h4>State Management</h4>
+          <p>React Hooks (useState, useEffect, useCallback) — không dùng Redux/Zustand; đủ cho quy mô đồ án.</p>
+        </div>
+        <div class="card">
+          <h4>Type Safety</h4>
+          <p>TypeScript strict mode; types định nghĩa trong <code>src/types/index.ts</code> mapping hoàn toàn với API response.</p>
+        </div>
+      </div>
+
+      <h3>Vấn đề phát hiện: iOS Safari & email input</h3>
+      <div class="callout warn">
+        <strong>Bug thực tế gặp phải</strong>
+        iOS Safari từ chối <code>type="email"</code> với địa chỉ kết thúc bằng <code>.local</code> (admin@papertracker.local) — TLD không chuẩn theo RFC. Giải pháp: thay bằng <code>type="text" inputMode="email"</code> — vẫn hiện bàn phím email trên mobile nhưng không validate TLD.
+      </div>
+
+      <h3>Response format chuẩn</h3>
+      <pre><code>// Mọi API response đều bọc trong ApiResponse&lt;T&gt;
+{
+  "success": true,
+  "message": "...",
+  "data": { ... }   // Frontend unwrap .data
+}
+
+// Jackson SNAKE_CASE strategy → tất cả field đều snake_case
+// VD: totalElements → total_elements, isRead → is_read
+// @JsonProperty("abstract") cho PaperResponse.abstractText</code></pre>
+    </section>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <section id="s11">
+      <h2>11. Deployment</h2>
+
+      <div class="card-grid">
+        <div class="card">
+          <h4>Backend — Railway</h4>
+          <p>Dockerfile multi-stage build (Maven → JRE). Env vars: <code>JDBC_DATABASE_URL</code>, <code>JDBC_DATABASE_USERNAME</code>, <code>JDBC_DATABASE_PASSWORD</code>, <code>JWT_SECRET</code>, <code>GROQ_API_KEY</code>, <code>HUGGINGFACE_API_KEY</code>, <code>FRONTEND_URL</code>.</p>
+          <p style="margin-top:8px"><span class="badge badge-orange">Trial ~30 ngày từ 07/05/2026</span></p>
+        </div>
+        <div class="card">
+          <h4>Frontend — Vercel</h4>
+          <p>Vite build → static files. <code>vercel.json</code> rewrite rule. <code>.env.production</code> committed với <code>VITE_API_URL</code> trỏ Railway.</p>
+          <p style="margin-top:8px"><span class="badge badge-green">Free tier, permanent</span></p>
+        </div>
+      </div>
+
+      <h3>application-prod.yml (Production profile)</h3>
+      <pre><code>spring:
+  datasource:
+    url: ${JDBC_DATABASE_URL}
+    username: ${JDBC_DATABASE_USERNAME}
+    password: ${JDBC_DATABASE_PASSWORD}
+  flyway:
+    validate-on-migrate: false   # Railway PostgreSQL addon tương thích</code></pre>
+
+      <h3>Lưu ý Flyway trong Spring Boot 4.x</h3>
+      <div class="callout warn">
+        <strong>Vấn đề quan trọng phát hiện</strong>
+        Không được đặt <code>spring.flyway.url/username/password</code> riêng trong Spring Boot 4.x — framework sẽ tạo Flyway datasource riêng, khiến <code>connection-init-sql</code> (SET hnsw.ef_search=128) không được apply cho Flyway connections. Cần để Flyway tự kế thừa <code>spring.datasource.*</code>.
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <section id="s12">
+      <h2>12. Thách thức & Giải pháp</h2>
+
+      <table>
+        <thead><tr><th>#</th><th>Thách thức</th><th>Giải pháp</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>1</td>
+            <td><strong>MapStruct không tương thích Spring Boot 4.x</strong><br>Lỗi component scan conflict</td>
+            <td>Thay bằng manual <code>@Component</code> mapper viết tay. Đơn giản hơn, kiểm soát hoàn toàn logic mapping</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td><strong>hypersistence-utils không tương thích Hibernate 7.x</strong><br>JPA mapping cho <code>vector(384)</code> thất bại</td>
+            <td>Implement <code>VectorUserType</code> custom implements <code>UserType&lt;float[]&gt;</code> trực tiếp qua PGobject</td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td><strong>arXiv API trả 429 Too Many Requests</strong><br>Delay 350ms quá nhanh</td>
+            <td>Tăng delay lên 1500ms sau khi quan sát Railway logs. Thêm exponential backoff retry</td>
+          </tr>
+          <tr>
+            <td>4</td>
+            <td><strong>HuggingFace 503 (model cold start)</strong><br>Model ngủ sau thời gian không dùng</td>
+            <td>Detect HTTP 503, chờ 30s, retry 1 lần. Các lần fail tiếp → FAILED, Retry Scheduler xử lý sau</td>
+          </tr>
+          <tr>
+            <td>5</td>
+            <td><strong>all-MiniLM-L6-v2 lỗi pipeline type</strong><br>HF phân loại là sentence-similarity, không phải feature-extraction</td>
+            <td>Chuyển sang BAAI/bge-small-en-v1.5 — cùng 384 dims, đúng feature-extraction pipeline</td>
+          </tr>
+          <tr>
+            <td>6</td>
+            <td><strong>iOS Safari từ chối .local TLD</strong><br>Login admin@papertracker.local không hoạt động trên iPhone</td>
+            <td><code>type="text" inputMode="email"</code> thay vì <code>type="email"</code></td>
+          </tr>
+          <tr>
+            <td>7</td>
+            <td><strong>Railway 502 sau khi scheduler chạy</strong><br>Backend crash, không tự restart</td>
+            <td>Redeploy thủ công. Nguyên nhân: scheduler trigger OOM khi HuggingFace cold start, cần tăng Railway memory tier</td>
+          </tr>
+          <tr>
+            <td>8</td>
+            <td><strong>Groq model decommissioned</strong><br><code>llama3-8b-8192</code> bị gỡ</td>
+            <td>Cập nhật sang <code>llama-3.1-8b-instant</code> — API tương thích, không thay đổi code gọi</td>
+          </tr>
+          <tr>
+            <td>9</td>
+            <td><strong>Transaction REQUIRES_NEW & connection pool</strong><br>Nguy cơ exhaustion HikariCP (max 20)</td>
+            <td>Outer method không có @Transactional; mỗi paper REQUIRES_NEW; pool size 20 đủ cho batch xử lý tuần tự</td>
+          </tr>
+          <tr>
+            <td>10</td>
+            <td><strong>FetchType.LAZY ngoài transaction</strong><br>LazyInitializationException khi access paper.topics</td>
+            <td>Đảm bảo access trong @Transactional context. Admin page query riêng paper và topics</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <section id="s13">
+      <h2>13. Kết luận</h2>
+
+      <h3>Những gì đạt được</h3>
+      <div class="card-grid">
+        <div class="card">
+          <div style="font-size:1.5rem;margin-bottom:8px">🎯</div>
+          <strong>Hoàn thành 100% use case</strong>
+          <p>17/17 UC được implement đầy đủ backend + frontend, deploy và chạy thực tế trên Railway + Vercel.</p>
+        </div>
+        <div class="card">
+          <div style="font-size:1.5rem;margin-bottom:8px">🤖</div>
+          <strong>AI Integration thực tế</strong>
+          <p>Pipeline AI end-to-end: fetch → embed → dup detect → summary → matching → notify. Không dùng mock hay stub.</p>
+        </div>
+        <div class="card">
+          <div style="font-size:1.5rem;margin-bottom:8px">🔍</div>
+          <strong>Vector Search production-grade</strong>
+          <p>HNSW index với ef_search=128, cosine distance, Caffeine cache 1h — thiết kế đúng chuẩn production.</p>
+        </div>
+        <div class="card">
+          <div style="font-size:1.5rem;margin-bottom:8px">🛡️</div>
+          <strong>Security đúng chuẩn</strong>
+          <p>JWT stateless, không expose entity, user_id từ SecurityContext, CORS theo env var, Admin role gate.</p>
+        </div>
+      </div>
+
+      <h3>Những gì học được</h3>
+      <div class="timeline">
+        <div class="tl-item">
+          <div class="tl-dot done"></div>
+          <div class="tl-title">Spring Boot 4.x có nhiều breaking changes so với 3.x</div>
+          <div class="tl-sub">MapStruct, hypersistence-utils, Flyway config — cần kiểm tra compatibility trước khi chọn dependency</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot done"></div>
+          <div class="tl-title">Rate limits của AI APIs rất thực tế</div>
+          <div class="tl-sub">HuggingFace cold start (20–30s), Groq 30 RPM free tier, arXiv 429 — phải thiết kế retry và delay từ đầu</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot done"></div>
+          <div class="tl-title">Transaction design quan trọng hơn tưởng</div>
+          <div class="tl-sub">REQUIRES_NEW per paper + outer không có @Transactional — tránh connection pool exhaustion và isolation lỗi</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot done"></div>
+          <div class="tl-title">Full-text search: plainto vs phraseto</div>
+          <div class="tl-sub">phraseto_tsquery cho topic matching (cụm từ cần đúng thứ tự), plainto_tsquery cho search tổng quát</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot done"></div>
+          <div class="tl-title">Production environment khác local nhiều hơn tưởng</div>
+          <div class="tl-sub">iOS Safari TLD, Railway env vars, Vercel SPA routing, Flyway datasource config — chỉ phát hiện khi deploy thật</div>
+        </div>
+      </div>
+
+      <h3>Hướng cải tiến nếu có thêm thời gian</h3>
+      <table>
+        <thead><tr><th>Cải tiến</th><th>Lý do chưa làm</th></tr></thead>
+        <tbody>
+          <tr><td>Refresh token + logout blacklist</td><td>Ngoài scope đồ án (chỉ yêu cầu JWT cơ bản)</td></tr>
+          <tr><td>Webhook trigger pipeline thay cron</td><td>Cần message queue (Kafka/RabbitMQ) — quá phức tạp</td></tr>
+          <tr><td>Unit tests + integration tests</td><td>Thời gian; test file hiện chỉ có SpringBootTest skeleton</td></tr>
+          <tr><td>Pagination cursor-based thay offset</td><td>Offset đủ cho quy mô đồ án</td></tr>
+          <tr><td>Multi-model embedding</td><td>Schema đã thiết kế fixed 384-dim</td></tr>
+        </tbody>
+      </table>
+
+      <div class="callout success" style="margin-top: 32px">
+        <strong>Tổng kết</strong>
+        ScholarSlate là hệ thống fullstack hoàn chỉnh tích hợp AI thực tế — không chỉ là CRUD. Nhóm đã đối mặt và giải quyết 10+ thách thức kỹ thuật thực tiễn trong quá trình phát triển và deploy, từ breaking changes của Spring Boot 4.x đến rate limits của AI APIs. Kết quả: 17/17 use case hoạt động trên production.
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+  // Smooth scroll cho sidebar links
+  document.querySelectorAll('aside a').forEach(link => {
+    link.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.querySelector(link.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+
+  // Highlight active section in sidebar
+  const sections = document.querySelectorAll('section[id]');
+  const links = document.querySelectorAll('aside a');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        links.forEach(l => l.style.cssText = '');
+        const active = document.querySelector(`aside a[href="#${entry.target.id}"]`);
+        if (active) {
+          active.style.background = '#eff6ff';
+          active.style.color = 'var(--primary)';
+          active.style.borderLeftColor = 'var(--primary)';
+        }
+      }
+    });
+  }, { threshold: 0.3 });
+  sections.forEach(s => observer.observe(s));
+</script>
+
+</body>
+</html>

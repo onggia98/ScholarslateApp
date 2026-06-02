@@ -1,0 +1,2063 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Giải Thích Code Từng Dòng — ScholarSlate</title>
+<style>
+:root{
+  --p:#1e40af;--pl:#3b82f6;--g:#16a34a;--w:#d97706;--r:#dc2626;
+  --pu:#7c3aed;--t:#0f766e;--bg:#f8fafc;--sf:#fff;--bd:#e2e8f0;
+  --tx:#1e293b;--mu:#64748b;--cb:#f1f5f9;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--tx);line-height:1.7;font-size:14.5px;}
+
+.hero{background:linear-gradient(135deg,#0f172a,#1e3a8a 55%,#0c4a6e);color:#fff;padding:48px 48px 40px;text-align:center;}
+.hero h1{font-size:2rem;font-weight:800;margin-bottom:8px;}
+.hero p{opacity:.82;font-size:.95rem;max-width:680px;margin:0 auto;}
+.hero-chips{margin-top:16px;display:flex;gap:8px;flex-wrap:wrap;justify-content:center;}
+.hero-chips span{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);border-radius:14px;padding:3px 12px;font-size:12px;}
+
+.layout{display:grid;grid-template-columns:268px 1fr;max-width:1340px;margin:0 auto;}
+aside{position:sticky;top:0;height:100vh;overflow-y:auto;background:var(--sf);border-right:1px solid var(--bd);padding:24px 0;font-size:12.5px;}
+.sl{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--mu);padding:0 18px 8px;}
+.ng{margin-bottom:16px;}
+.ng-l{font-size:10px;font-weight:700;color:var(--p);padding:4px 18px 2px;letter-spacing:.06em;text-transform:uppercase;}
+aside a{display:block;padding:5px 18px 5px 26px;color:var(--tx);text-decoration:none;border-left:3px solid transparent;transition:all .12s;}
+aside a:hover,aside a.on{background:#eff6ff;color:var(--p);border-left-color:var(--p);}
+main{padding:40px 50px;max-width:980px;}
+section{margin-bottom:64px;scroll-margin-top:16px;}
+h2{font-size:1.45rem;font-weight:800;color:var(--p);padding-bottom:9px;border-bottom:2px solid var(--bd);margin-bottom:24px;}
+h3{font-size:1.05rem;font-weight:700;color:var(--tx);margin:26px 0 10px;}
+p{margin-bottom:12px;}
+.fp{display:inline-block;background:#1e293b;color:#94a3b8;border-radius:5px;padding:2px 9px;font-size:11.5px;font-family:monospace;margin:2px 0 10px;}
+
+/* ── CODE BLOCK ── */
+.cb-wrap{position:relative;margin:12px 0 6px;}
+.cb-wrap .lb{position:absolute;top:9px;right:13px;font-size:10px;color:rgba(255,255,255,.32);font-family:monospace;}
+.cb-wrap pre{background:#0f172a;border-radius:10px 10px 0 0;padding:18px 20px 14px;font-size:12.5px;line-height:1.7;overflow-x:auto;color:#e2e8f0;}
+code{background:var(--cb);border:1px solid var(--bd);border-radius:4px;padding:1px 6px;font-size:12px;font-family:'Consolas','Courier New',monospace;color:#c026d3;}
+.cb-wrap pre code{background:none;border:none;color:inherit;padding:0;font-size:12.5px;}
+
+/* syntax */
+.kw{color:#818cf8;}.str{color:#4ade80;}.ann{color:#fb923c;}.cmt{color:#94a3b8;font-style:italic;}.fn{color:#67e8f9;}.tp{color:#fde68a;}.num{color:#f9a8d4;}.op{color:#f1f5f9;}
+
+/* ── TOGGLE BUTTON ── */
+.ann-btn{
+  display:flex;align-items:center;gap:8px;width:100%;padding:9px 16px;
+  background:#1e293b;color:#94a3b8;border:none;border-top:1px solid #334155;
+  cursor:pointer;font-size:12.5px;font-family:inherit;font-weight:600;
+  border-radius:0 0 10px 10px;transition:background .15s,color .15s;
+  text-align:left;
+}
+.ann-btn:hover{background:#0f172a;color:#e2e8f0;}
+.ann-btn .arr{transition:transform .25s;font-size:14px;}
+.ann-btn.open .arr{transform:rotate(90deg);}
+.ann-btn .pill{background:rgba(255,255,255,.1);border-radius:12px;padding:1px 8px;font-size:10.5px;color:#67e8f9;font-weight:700;}
+
+/* ── ANNOTATION PANEL ── */
+.ann-panel{
+  display:none;
+  background:#fff;
+  border:1px solid var(--bd);
+  border-top:none;
+  border-radius:0 0 10px 10px;
+  overflow:hidden;
+  margin-bottom:20px;
+}
+.ann-panel.open{display:block;}
+.ann-table{width:100%;border-collapse:collapse;font-size:12.5px;}
+.ann-table thead tr{background:#f8fafc;}
+.ann-table th{padding:8px 12px;font-size:11px;font-weight:700;color:var(--mu);text-align:left;border-bottom:2px solid var(--bd);text-transform:uppercase;letter-spacing:.05em;}
+.ann-table td{padding:9px 12px;border-bottom:1px solid #f1f5f9;vertical-align:top;}
+.ann-table tr:last-child td{border-bottom:none;}
+.ann-table tr:hover td{background:#fafcff;}
+.ann-table td:first-child{font-family:monospace;font-size:11px;color:#94a3b8;white-space:nowrap;min-width:50px;}
+.ann-table td:nth-child(2){font-family:monospace;font-size:11.5px;color:#6d28d9;background:#fdf4ff;white-space:pre;min-width:200px;max-width:260px;word-break:break-all;white-space:normal;}
+.ann-table td:last-child{color:var(--tx);line-height:1.6;}
+.tag{display:inline-block;padding:1px 7px;border-radius:10px;font-size:10.5px;font-weight:700;margin-right:4px;vertical-align:middle;}
+.t-imp{background:#fef3c7;color:#92400e;}
+.t-sec{background:#fee2e2;color:#b91c1c;}
+.t-opt{background:#dcfce7;color:#15803d;}
+.t-why{background:#ede9fe;color:#5b21b6;}
+.t-bug{background:#ffe4e6;color:#be123c;}
+
+/* ── CALLOUT ── */
+.ca{border-left:4px solid var(--pl);background:#eff6ff;padding:12px 16px;border-radius:0 8px 8px 0;margin:14px 0 18px;font-size:13px;}
+.ca.w{border-color:var(--w);background:#fffbeb;}.ca.g{border-color:var(--g);background:#f0fdf4;}.ca.r{border-color:var(--r);background:#fff1f2;}.ca.pu{border-color:var(--pu);background:#f5f3ff;}
+.ca strong{display:block;margin-bottom:4px;}
+
+table{width:100%;border-collapse:collapse;margin:12px 0 20px;font-size:13px;}
+th{background:var(--cb);font-weight:700;padding:8px 12px;text-align:left;border-bottom:2px solid var(--bd);}
+td{padding:7px 12px;border-bottom:1px solid var(--bd);vertical-align:top;}
+tr:last-child td{border-bottom:none;}
+
+@media(max-width:900px){.layout{grid-template-columns:1fr;}aside{display:none;}main{padding:22px 16px;}}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>📝 Giải Thích Code Từng Dòng — ScholarSlate</h1>
+  <p>Mỗi đoạn code quan trọng đều có nút <strong>"Xem giải thích từng dòng"</strong> — bấm để xem annotation chi tiết cho từng dòng/cụm code.</p>
+  <div class="hero-chips">
+    <span>▶ Click để toggle</span><span>Annotations chi tiết</span><span>Tag: IMP · SEC · WHY · BUG</span>
+  </div>
+</div>
+
+<div class="layout">
+<aside>
+  <div class="sl">Nội dung</div>
+  <div class="ng"><div class="ng-l">Security</div>
+    <a href="#s1">SecurityConfig</a>
+    <a href="#s2">JwtUtil</a>
+    <a href="#s3">JwtAuthFilter</a>
+    <a href="#s4">UserDetailsServiceImpl</a>
+  </div>
+  <div class="ng"><div class="ng-l">Core Infra</div>
+    <a href="#c1">VectorUserType</a>
+    <a href="#c2">AppException</a>
+    <a href="#c3">ApiResponse + PagedResponse</a>
+    <a href="#c4">PaperResponse DTO</a>
+  </div>
+  <div class="ng"><div class="ng-l">Repositories</div>
+    <a href="#r1">PaperRepository</a>
+    <a href="#r2">FavoriteRepository</a>
+    <a href="#r3">NotificationRepository</a>
+  </div>
+  <div class="ng"><div class="ng-l">Services</div>
+    <a href="#sv1">AuthService</a>
+    <a href="#sv2">TopicService</a>
+    <a href="#sv3">PaperService</a>
+    <a href="#sv4">FavoriteService</a>
+  </div>
+  <div class="ng"><div class="ng-l">AI Services</div>
+    <a href="#ai1">ArxivFetchService</a>
+    <a href="#ai2">EmbeddingService</a>
+    <a href="#ai3">GroqService</a>
+    <a href="#ai4">PaperPipelineService</a>
+  </div>
+  <div class="ng"><div class="ng-l">Controllers</div>
+    <a href="#ct1">PaperController</a>
+    <a href="#ct2">AdminController</a>
+  </div>
+  <div class="ng"><div class="ng-l">Schedulers</div>
+    <a href="#sc1">SchedulerConfig</a>
+    <a href="#sc2">MainScheduler</a>
+    <a href="#sc3">RetryScheduler</a>
+  </div>
+  <div class="ng"><div class="ng-l">Frontend</div>
+    <a href="#fe1">api/client.ts</a>
+    <a href="#fe2">utils/auth.ts</a>
+    <a href="#fe3">utils/format.ts</a>
+  </div>
+  <div class="ng"><div class="ng-l">Database</div>
+    <a href="#db1">V4 — Indexes SQL</a>
+  </div>
+</aside>
+
+<main>
+
+<!-- ══════════ SECURITY ══════════ -->
+<section id="s1">
+<h2>SecurityConfig — Cấu hình bảo mật trung tâm</h2>
+<div class="fp">security/SecurityConfig.java</div>
+
+<div class="cb-wrap">
+<span class="lb">Java</span>
+<pre><code><span class="ann">@Configuration</span>
+<span class="ann">@EnableWebSecurity</span>
+<span class="ann">@EnableMethodSecurity</span>
+<span class="ann">@RequiredArgsConstructor</span>
+<span class="kw">public class</span> <span class="tp">SecurityConfig</span> {
+
+    <span class="kw">private final</span> <span class="tp">JwtAuthenticationFilter</span> jwtAuthenticationFilter;
+    <span class="kw">private final</span> <span class="tp">UserDetailsServiceImpl</span> userDetailsService;
+
+    <span class="ann">@Bean</span>
+    <span class="kw">public</span> <span class="tp">SecurityFilterChain</span> <span class="fn">securityFilterChain</span>(<span class="tp">HttpSecurity</span> http) <span class="kw">throws</span> <span class="tp">Exception</span> {
+        http
+            .csrf(<span class="tp">AbstractHttpConfigurer</span>::disable)
+            .cors(cors -> cors.configurationSource(<span class="fn">corsConfigurationSource</span>()))
+            .sessionManagement(s -> s.sessionCreationPolicy(<span class="tp">SessionCreationPolicy</span>.STATELESS))
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers(<span class="tp">HttpMethod</span>.OPTIONS, <span class="str">"/**"</span>).permitAll()
+                .requestMatchers(<span class="str">"/api/actuator/health"</span>).permitAll()
+                .requestMatchers(<span class="str">"/api/auth/**"</span>).permitAll()
+                .requestMatchers(<span class="str">"/api/admin/**"</span>).hasRole(<span class="str">"ADMIN"</span>)
+                .anyRequest().authenticated()
+            )
+            .exceptionHandling(ex -> ex
+                .authenticationEntryPoint((req, res, e) -> {
+                    res.setStatus(<span class="num">401</span>);
+                    res.setContentType(<span class="str">"application/json"</span>);
+                    res.getWriter().write(<span class="str">"{\"success\":false,\"message\":\"Unauthorized\",\"data\":null}"</span>);
+                })
+                .accessDeniedHandler((req, res, e) -> {
+                    res.setStatus(<span class="num">403</span>);
+                    res.setContentType(<span class="str">"application/json"</span>);
+                    res.getWriter().write(<span class="str">"{\"success\":false,\"message\":\"Forbidden\",\"data\":null}"</span>);
+                })
+            )
+            .addFilterBefore(jwtAuthenticationFilter, <span class="tp">UsernamePasswordAuthenticationFilter</span>.class);
+        <span class="kw">return</span> http.build();
+    }
+
+    <span class="ann">@Bean</span>
+    <span class="kw">public</span> <span class="tp">CorsConfigurationSource</span> <span class="fn">corsConfigurationSource</span>() {
+        <span class="tp">CorsConfiguration</span> config = <span class="kw">new</span> <span class="tp">CorsConfiguration</span>();
+        <span class="tp">String</span> frontendUrl = <span class="tp">System</span>.getenv(<span class="str">"FRONTEND_URL"</span>);
+        <span class="tp">List</span>&lt;<span class="tp">String</span>&gt; origins = (frontendUrl != <span class="kw">null</span> && !frontendUrl.isBlank())
+            ? <span class="tp">List</span>.of(<span class="str">"http://localhost:5173"</span>, <span class="str">"http://localhost:3000"</span>, frontendUrl)
+            : <span class="tp">List</span>.of(<span class="str">"http://localhost:5173"</span>, <span class="str">"http://localhost:3000"</span>);
+        config.setAllowedOrigins(origins);
+        config.setAllowedMethods(<span class="tp">List</span>.of(<span class="str">"GET"</span>, <span class="str">"POST"</span>, <span class="str">"PUT"</span>, <span class="str">"DELETE"</span>, <span class="str">"PATCH"</span>, <span class="str">"OPTIONS"</span>));
+        config.setAllowedHeaders(<span class="tp">List</span>.of(<span class="str">"*"</span>));
+        config.setAllowCredentials(<span class="kw">true</span>);
+        config.setMaxAge(<span class="num">3600L</span>);
+        <span class="tp">UrlBasedCorsConfigurationSource</span> source = <span class="kw">new</span> <span class="tp">UrlBasedCorsConfigurationSource</span>();
+        source.registerCorsConfiguration(<span class="str">"/**"</span>, config);
+        <span class="kw">return</span> source;
+    }
+
+    <span class="ann">@Bean</span>
+    <span class="kw">public</span> <span class="tp">AuthenticationProvider</span> <span class="fn">authenticationProvider</span>() {
+        <span class="tp">DaoAuthenticationProvider</span> provider = <span class="kw">new</span> <span class="tp">DaoAuthenticationProvider</span>(userDetailsService);
+        provider.setPasswordEncoder(<span class="fn">passwordEncoder</span>());
+        <span class="kw">return</span> provider;
+    }
+
+    <span class="ann">@Bean</span>
+    <span class="kw">public</span> <span class="tp">PasswordEncoder</span> <span class="fn">passwordEncoder</span>() {
+        <span class="kw">return new</span> <span class="tp">BCryptPasswordEncoder</span>(<span class="num">10</span>);
+    }
+}</code></pre>
+<button class="ann-btn" onclick="toggleAnn(this)">
+  <span class="arr">▶</span> Xem giải thích từng dòng
+  <span class="pill">45 dòng · 12 annotation</span>
+</button>
+</div>
+<div class="ann-panel">
+<table class="ann-table">
+<thead><tr><th>Dòng</th><th>Code</th><th>Giải thích</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>@Configuration</td><td><span class="tag t-imp">IMP</span> Đánh dấu class là Spring bean chứa cấu hình. Spring scan và load tất cả @Bean methods trong class này khi startup.</td></tr>
+<tr><td>2</td><td>@EnableWebSecurity</td><td><span class="tag t-imp">IMP</span> Bật Spring Security cho toàn ứng dụng. Thiếu annotation này → Spring Security không áp dụng filter chain.</td></tr>
+<tr><td>3</td><td>@EnableMethodSecurity</td><td><span class="tag t-opt">OPT</span> Cho phép dùng <code>@PreAuthorize("hasRole('ADMIN')")</code> trực tiếp trên method trong Controller. Không có → @PreAuthorize bị ignore.</td></tr>
+<tr><td>4</td><td>@RequiredArgsConstructor</td><td>Lombok tạo constructor inject tất cả <code>final</code> fields. Thay thế @Autowired — Spring recommend constructor injection.</td></tr>
+<tr><td>13</td><td>.csrf(AbstractHttpConfigurer::disable)</td><td><span class="tag t-sec">SEC</span> Tắt CSRF protection. An toàn vì API này dùng JWT stateless (không cookie session). CSRF chỉ cần cho session-based auth.</td></tr>
+<tr><td>14</td><td>.cors(cors -> cors.configurationSource(...))</td><td><span class="tag t-imp">IMP</span> Chỉ định CORS config từ bean duy nhất. Nếu vừa có bean này vừa dùng @CrossOrigin trên controller → browser nhận 2 CORS header → reject.</td></tr>
+<tr><td>15</td><td>SessionCreationPolicy.STATELESS</td><td><span class="tag t-sec">SEC</span> Không tạo HTTP session. Mỗi request phải kèm JWT. Tránh session fixation attack và scale dễ hơn (stateless).</td></tr>
+<tr><td>17</td><td>OPTIONS "/**" permitAll()</td><td><span class="tag t-imp">IMP</span> Browser gửi OPTIONS preflight trước mọi CORS request (cross-origin POST/PUT/DELETE). Nếu không permitAll → preflight bị 401 → thật sự request bị block.</td></tr>
+<tr><td>18</td><td>"/api/actuator/health"</td><td>Railway health check gọi endpoint này để biết container có alive không. Cần public — không có JWT khi Railway check.</td></tr>
+<tr><td>21</td><td>"/api/admin/**" hasRole("ADMIN")</td><td><span class="tag t-sec">SEC</span> Tất cả endpoint /admin/** chỉ ADMIN. Spring tự thêm "ROLE_" prefix khi compare — trong JWT ta store "ADMIN", Spring check "ROLE_ADMIN".</td></tr>
+<tr><td>24–31</td><td>authenticationEntryPoint + accessDeniedHandler</td><td><span class="tag t-imp">IMP</span> Custom JSON response thay vì Spring redirect sang HTML login page. <strong>401</strong>: chưa auth (không có/sai token). <strong>403</strong>: đã auth nhưng không đủ quyền. Frontend check status code để redirect /login vs hiện thông báo lỗi.</td></tr>
+<tr><td>33</td><td>addFilterBefore(jwtFilter, UsernamePasswordAuthFilter.class)</td><td><span class="tag t-imp">IMP</span> JWT filter chạy TRƯỚC filter mặc định. Thiếu dòng này → JWT không được xử lý → mọi request bị 401 dù có token.</td></tr>
+<tr><td>39</td><td>System.getenv("FRONTEND_URL")</td><td><span class="tag t-why">WHY</span> Đọc từ env var (Railway inject). Không hardcode URL frontend vào code. Local dev không set → chỉ allow localhost. Production set → allow cả Vercel URL.</td></tr>
+<tr><td>56</td><td>new DaoAuthenticationProvider(userDetailsService)</td><td><span class="tag t-imp">IMP</span> Spring Boot 4.x / Security 6.x: constructor nhận UserDetailsService trực tiếp. Cách cũ (Spring 5): dùng setter <code>provider.setUserDetailsService()</code> — không còn hoạt động.</td></tr>
+<tr><td>61</td><td>new BCryptPasswordEncoder(10)</td><td>Cost factor 10 = 2^10 = 1024 iterations. ~80-100ms trên modern hardware. Đủ chậm để brute force không khả thi, đủ nhanh cho UX.</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<!-- ══════════ JWT UTIL ══════════ -->
+<section id="s2">
+<h2>JwtUtil — Tạo và xác thực JWT</h2>
+<div class="fp">security/JwtUtil.java</div>
+<div class="cb-wrap">
+<span class="lb">Java</span>
+<pre><code><span class="ann">@Component</span>
+<span class="kw">public class</span> <span class="tp">JwtUtil</span> {
+    <span class="kw">private final</span> <span class="tp">SecretKey</span> secretKey;
+    <span class="kw">private final long</span> expirationMs;
+
+    <span class="kw">public</span> <span class="fn">JwtUtil</span>(<span class="ann">@Value</span>(<span class="str">"${jwt.secret}"</span>) <span class="tp">String</span> secret,
+                   <span class="ann">@Value</span>(<span class="str">"${jwt.expiration-ms}"</span>) <span class="kw">long</span> expirationMs) {
+        <span class="kw">this</span>.secretKey = <span class="tp">Keys</span>.hmacShaKeyFor(secret.getBytes(<span class="tp">StandardCharsets</span>.UTF_8));
+        <span class="kw">this</span>.expirationMs = expirationMs;
+    }
+
+    <span class="kw">public</span> <span class="tp">String</span> <span class="fn">generateToken</span>(<span class="tp">UUID</span> userId, <span class="tp">String</span> email, <span class="tp">String</span> role) {
+        <span class="tp">Date</span> now = <span class="kw">new</span> <span class="tp">Date</span>();
+        <span class="kw">return</span> <span class="tp">Jwts</span>.builder()
+                .subject(userId.toString())
+                .claim(<span class="str">"email"</span>, email)
+                .claim(<span class="str">"role"</span>, role)
+                .issuedAt(now)
+                .expiration(<span class="kw">new</span> <span class="tp">Date</span>(now.getTime() + expirationMs))
+                .signWith(secretKey)
+                .compact();
+    }
+
+    <span class="kw">public</span> <span class="tp">UUID</span> <span class="fn">extractUserId</span>(<span class="tp">String</span> token) {
+        <span class="kw">return</span> <span class="tp">UUID</span>.fromString(extractClaims(token).getSubject());
+    }
+
+    <span class="kw">public</span> <span class="tp">String</span> <span class="fn">extractRole</span>(<span class="tp">String</span> token) {
+        <span class="kw">return</span> extractClaims(token).get(<span class="str">"role"</span>, <span class="tp">String</span>.class);
+    }
+
+    <span class="kw">public boolean</span> <span class="fn">isTokenValid</span>(<span class="tp">String</span> token) {
+        <span class="kw">try</span> {
+            <span class="tp">Claims</span> claims = extractClaims(token);
+            <span class="kw">return</span> claims.getExpiration().after(<span class="kw">new</span> <span class="tp">Date</span>());
+        } <span class="kw">catch</span> (<span class="tp">JwtException</span> | <span class="tp">IllegalArgumentException</span> e) {
+            <span class="kw">return false</span>;
+        }
+    }
+
+    <span class="kw">private</span> <span class="tp">Claims</span> <span class="fn">extractClaims</span>(<span class="tp">String</span> token) {
+        <span class="kw">return</span> <span class="tp">Jwts</span>.parser()
+                .verifyWith(secretKey)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+    }
+}</code></pre>
+<button class="ann-btn" onclick="toggleAnn(this)">
+  <span class="arr">▶</span> Xem giải thích từng dòng
+  <span class="pill">46 dòng · 11 annotation</span>
+</button>
+</div>
+<div class="ann-panel">
+<table class="ann-table">
+<thead><tr><th>Dòng</th><th>Code</th><th>Giải thích</th></tr></thead>
+<tbody>
+<tr><td>8</td><td>@Value("${jwt.secret}")</td><td><span class="tag t-sec">SEC</span> Spring inject giá trị từ application.yml. Cấu hình là <code>secret: ${JWT_SECRET}</code> — không có default. App crash khi startup nếu env var không set. Đây là security by design: tránh chạy production với secret yếu.</td></tr>
+<tr><td>10</td><td>Keys.hmacShaKeyFor(...UTF_8)</td><td><span class="tag t-sec">SEC</span> Chuyển secret string → <code>SecretKey</code> object cho HMAC-SHA256. Yêu cầu tối thiểu 256 bit (32 bytes). Nếu secret ngắn hơn → <code>WeakKeyException</code>. Chuyển sang UTF_8 (không phải default charset) để đảm bảo consistent encoding.</td></tr>
+<tr><td>14</td><td>.subject(userId.toString())</td><td><span class="tag t-imp">IMP</span> JWT standard claim "sub" (subject) = userId. Controller lấy qua <code>@AuthenticationPrincipal UUID userId</code>. Dùng userId thay vì email vì userId là PK không thay đổi.</td></tr>
+<tr><td>15</td><td>.claim("email", email)</td><td>Custom claim. Frontend decode JWT để lấy email hiển thị — không cần gọi thêm GET /users/me sau login. Tiết kiệm 1 API call.</td></tr>
+<tr><td>16</td><td>.claim("role", role)</td><td>Custom claim "USER" hoặc "ADMIN". JwtAuthFilter đọc claim này để set <code>ROLE_USER</code>/<code>ROLE_ADMIN</code> trong SecurityContext.</td></tr>
+<tr><td>19</td><td>.expiration(new Date(now.getTime() + expirationMs))</td><td>TTL 24h = 86400000ms. Sau khi hết hạn, <code>isTokenValid()</code> trả false → 401. Không có refresh token — logout bằng xóa localStorage phía client.</td></tr>
+<tr><td>20</td><td>.signWith(secretKey)</td><td>JJWT 0.12.x tự detect algorithm từ key type: <code>SecretKey</code> → HMAC-SHA256. Không cần chỉ định <code>SignatureAlgorithm.HS256</code> như JJWT 0.11.x.</td></tr>
+<tr><td>30</td><td>extractClaims(token).getExpiration().after(new Date())</td><td><span class="tag t-imp">IMP</span> Kiểm tra token chưa hết hạn. <code>extractClaims()</code> đồng thời verify signature — nếu giả mạo hoặc corrupt → JwtException ngay tại đây.</td></tr>
+<tr><td>31–33</td><td>catch (JwtException | IllegalArgumentException e)</td><td><span class="tag t-sec">SEC</span> Bắt 2 loại exception: <code>JwtException</code> cho sai signature/expired/malformed. <code>IllegalArgumentException</code> cho token null/empty. Cả hai đều trả <code>false</code> — không leak thông tin lỗi cụ thể.</td></tr>
+<tr><td>37–41</td><td>Jwts.parser().verifyWith(secretKey).build()...</td><td><span class="tag t-imp">IMP</span> JJWT 0.12.x API mới: <code>verifyWith()</code> thay vì <code>setSigningKey()</code>. <code>parseSignedClaims()</code> vừa parse vừa verify signature trong 1 step. Sau đó <code>.getPayload()</code> lấy Claims object.</td></tr>
+<tr><td>-</td><td>private extractClaims()</td><td><span class="tag t-why">WHY</span> Method private được 3 public methods gọi (extractUserId, extractRole, isTokenValid). DRY principle — không lặp code Jwts.parser() mỗi chỗ.</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<!-- ══════════ JWT FILTER ══════════ -->
+<section id="s3">
+<h2>JwtAuthenticationFilter — Xác thực mỗi request</h2>
+<div class="fp">security/JwtAuthenticationFilter.java</div>
+<div class="cb-wrap">
+<span class="lb">Java</span>
+<pre><code><span class="ann">@Component</span>
+<span class="ann">@RequiredArgsConstructor</span>
+<span class="kw">public class</span> <span class="tp">JwtAuthenticationFilter</span> <span class="kw">extends</span> <span class="tp">OncePerRequestFilter</span> {
+
+    <span class="kw">private final</span> <span class="tp">JwtUtil</span> jwtUtil;
+
+    <span class="ann">@Override</span>
+    <span class="kw">protected void</span> <span class="fn">doFilterInternal</span>(<span class="tp">HttpServletRequest</span> request,
+                                     <span class="tp">HttpServletResponse</span> response,
+                                     <span class="tp">FilterChain</span> filterChain)
+            <span class="kw">throws</span> <span class="tp">ServletException</span>, <span class="tp">IOException</span> {
+
+        <span class="tp">String</span> token = <span class="fn">extractToken</span>(request);
+
+        <span class="kw">if</span> (<span class="tp">StringUtils</span>.hasText(token) && jwtUtil.isTokenValid(token)) {
+            <span class="tp">UUID</span> userId = jwtUtil.extractUserId(token);
+            <span class="tp">String</span> role  = jwtUtil.extractRole(token);
+
+            <span class="tp">UsernamePasswordAuthenticationToken</span> authentication =
+                    <span class="kw">new</span> <span class="tp">UsernamePasswordAuthenticationToken</span>(
+                            userId,
+                            <span class="kw">null</span>,
+                            <span class="tp">List</span>.of(<span class="kw">new</span> <span class="tp">SimpleGrantedAuthority</span>(<span class="str">"ROLE_"</span> + role))
+                    );
+            authentication.setDetails(
+                    <span class="kw">new</span> <span class="tp">WebAuthenticationDetailsSource</span>().buildDetails(request));
+            <span class="tp">SecurityContextHolder</span>.getContext().setAuthentication(authentication);
+        }
+
+        filterChain.doFilter(request, response);
+    }
+
+    <span class="kw">private</span> <span class="tp">String</span> <span class="fn">extractToken</span>(<span class="tp">HttpServletRequest</span> request) {
+        <span class="tp">String</span> header = request.getHeader(<span class="str">"Authorization"</span>);
+        <span class="kw">if</span> (<span class="tp">StringUtils</span>.hasText(header) && header.startsWith(<span class="str">"Bearer "</span>))
+            <span class="kw">return</span> header.substring(<span class="num">7</span>);
+        <span class="kw">return null</span>;
+    }
+}</code></pre>
+<button class="ann-btn" onclick="toggleAnn(this)">
+  <span class="arr">▶</span> Xem giải thích từng dòng
+  <span class="pill">35 dòng · 10 annotation</span>
+</button>
+</div>
+<div class="ann-panel">
+<table class="ann-table">
+<thead><tr><th>Dòng</th><th>Code</th><th>Giải thích</th></tr></thead>
+<tbody>
+<tr><td>3</td><td>extends OncePerRequestFilter</td><td><span class="tag t-imp">IMP</span> Đảm bảo filter chạy đúng 1 lần/request, kể cả khi request được forward nội bộ. Nếu extend <code>GenericFilterBean</code> thông thường, filter có thể chạy 2 lần trong một số edge case.</td></tr>
+<tr><td>14</td><td>String token = extractToken(request)</td><td>Tách logic extract token ra method riêng → testable độc lập. extractToken chỉ đọc header, không throw exception.</td></tr>
+<tr><td>16</td><td>StringUtils.hasText(token) && jwtUtil.isTokenValid(token)</td><td><span class="tag t-imp">IMP</span> Short-circuit: kiểm tra null/empty trước khi validate. Tránh NullPointerException trong isTokenValid(). Nếu không có token → skip authentication, request đi tiếp → SecurityChain quyết định 401 nếu endpoint cần auth.</td></tr>
+<tr><td>17–18</td><td>extractUserId + extractRole</td><td><span class="tag t-sec">SEC</span> Đọc trực tiếp từ JWT claim — <strong>không query DB</strong>. Tiết kiệm 1 SELECT/request so với cách thông thường (load UserDetails). Với API xử lý 100 req/s → 100 DB query/s được tiết kiệm.</td></tr>
+<tr><td>20–24</td><td>new UsernamePasswordAuthenticationToken(userId, null, authorities)</td><td><span class="tag t-imp">IMP</span> 3 tham số: (1) <code>principal</code> = UUID userId — controller nhận qua @AuthenticationPrincipal. (2) <code>credentials</code> = null — không cần password sau khi đã verify JWT. (3) <code>authorities</code> = ["ROLE_USER"/"ROLE_ADMIN"].</td></tr>
+<tr><td>25–26</td><td>WebAuthenticationDetailsSource().buildDetails(request)</td><td>Gắn thông tin request (IP, session ID) vào authentication object. Hữu ích cho audit log và rate limiting theo IP.</td></tr>
+<tr><td>27</td><td>SecurityContextHolder.getContext().setAuthentication(auth)</td><td><span class="tag t-imp">IMP</span> Lưu authentication vào ThreadLocal của current thread. Controllers cùng thread đọc được qua <code>@AuthenticationPrincipal</code>. Bị clear tự động sau khi request hoàn thành.</td></tr>
+<tr><td>29</td><td>filterChain.doFilter(request, response)</td><td><span class="tag t-imp">IMP</span> LUÔN phải gọi, kể cả khi token invalid/không có. Nếu không gọi → request bị "nuốt", không đến được SecurityChain → không có response về client.</td></tr>
+<tr><td>32–35</td><td>header.startsWith("Bearer ") ... substring(7)</td><td>RFC 6750: Bearer token format. "Bearer " có dấu cách = 7 ký tự. <code>substring(7)</code> bỏ "Bearer " lấy token thực. StringUtils.hasText() tránh NPE khi header null.</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+
+<!-- ══════════ USERDETAILS ══════════ -->
+<section id="s4">
+<h2>UserDetailsServiceImpl</h2>
+<div class="fp">security/UserDetailsServiceImpl.java</div>
+<div class="cb-wrap">
+<span class="lb">Java</span>
+<pre><code><span class="ann">@Service @RequiredArgsConstructor</span>
+<span class="kw">public class</span> <span class="tp">UserDetailsServiceImpl</span> <span class="kw">implements</span> <span class="tp">UserDetailsService</span> {
+    <span class="kw">private final</span> <span class="tp">UserRepository</span> userRepository;
+
+    <span class="ann">@Override</span>
+    <span class="kw">public</span> <span class="tp">UserDetails</span> <span class="fn">loadUserByUsername</span>(<span class="tp">String</span> email) <span class="kw">throws</span> <span class="tp">UsernameNotFoundException</span> {
+        <span class="tp">User</span> user = userRepository.findByEmail(email)
+                .orElseThrow(() -> <span class="kw">new</span> <span class="tp">UsernameNotFoundException</span>(<span class="str">"User not found: "</span> + email));
+
+        <span class="kw">return new</span> org.springframework.security.core.userdetails.<span class="tp">User</span>(
+                user.getId().toString(),
+                user.getPasswordHash(),
+                <span class="tp">List</span>.of(<span class="kw">new</span> <span class="tp">SimpleGrantedAuthority</span>(<span class="str">"ROLE_"</span> + user.getRole()))
+        );
+    }
+}</code></pre>
+<button class="ann-btn" onclick="toggleAnn(this)">
+  <span class="arr">▶</span> Xem giải thích từng dòng
+  <span class="pill">14 dòng · 5 annotation</span>
+</button>
+</div>
+<div class="ann-panel">
+<table class="ann-table">
+<thead><tr><th>Dòng</th><th>Code</th><th>Giải thích</th></tr></thead>
+<tbody>
+<tr><td>2</td><td>implements UserDetailsService</td><td><span class="tag t-imp">IMP</span> Spring Security interface bắt buộc khi dùng <code>DaoAuthenticationProvider</code>. Spring gọi <code>loadUserByUsername()</code> để verify credentials khi login. Dù JwtAuthFilter không dùng class này — SecurityConfig cần nó để build <code>AuthenticationProvider</code>.</td></tr>
+<tr><td>6</td><td>loadUserByUsername(String email)</td><td>Tên method cố định theo interface, tham số tên "username" nhưng ta dùng nó để nhận email. Spring Security không quan tâm tên field — chỉ quan tâm contract.</td></tr>
+<tr><td>10</td><td>user.getId().toString()</td><td><span class="tag t-why">WHY</span> Username trong UserDetails = <strong>userId</strong> (không phải email). UserController gọi <code>auth.getName()</code> → nhận userId string → <code>UUID.fromString()</code>. Nhất quán với principal trong JwtAuthFilter.</td></tr>
+<tr><td>11</td><td>user.getPasswordHash()</td><td>BCrypt hash, không phải plaintext. <code>DaoAuthenticationProvider</code> tự gọi <code>passwordEncoder.matches(input, hash)</code> khi verify.</td></tr>
+<tr><td>12</td><td>"ROLE_" + user.getRole()</td><td><span class="tag t-imp">IMP</span> Spring Security convention: authority phải có prefix "ROLE_". <code>hasRole("ADMIN")</code> trong SecurityConfig tương đương <code>hasAuthority("ROLE_ADMIN")</code>. Bắt buộc prefix này để SecurityConfig hoạt động đúng.</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<!-- ══════════ VECTOR USER TYPE ══════════ -->
+<section id="c1">
+<h2>VectorUserType — Bridge float[] ↔ pgvector</h2>
+<div class="fp">converter/VectorUserType.java</div>
+<div class="cb-wrap">
+<span class="lb">Java</span>
+<pre><code><span class="kw">public class</span> <span class="tp">VectorUserType</span> <span class="kw">implements</span> <span class="tp">UserType</span>&lt;<span class="kw">float</span>[]&gt; {
+
+    <span class="ann">@Override</span>
+    <span class="kw">public int</span> <span class="fn">getSqlType</span>() {
+        <span class="kw">return</span> <span class="tp">Types</span>.OTHER;
+    }
+
+    <span class="ann">@Override</span>
+    <span class="kw">public</span> <span class="kw">float</span>[] <span class="fn">nullSafeGet</span>(<span class="tp">ResultSet</span> rs, <span class="kw">int</span> position,
+                               <span class="tp">SharedSessionContractImplementor</span> session,
+                               <span class="tp">Object</span> owner) <span class="kw">throws</span> <span class="tp">SQLException</span> {
+        <span class="tp">String</span> value = rs.getString(position);
+        <span class="kw">return</span> value == <span class="kw">null</span> ? <span class="kw">null</span> : <span class="fn">parseVector</span>(value);
+    }
+
+    <span class="ann">@Override</span>
+    <span class="kw">public void</span> <span class="fn">nullSafeSet</span>(<span class="tp">PreparedStatement</span> st, <span class="kw">float</span>[] value, <span class="kw">int</span> index,
+                            <span class="tp">SharedSessionContractImplementor</span> session) <span class="kw">throws</span> <span class="tp">SQLException</span> {
+        <span class="kw">if</span> (value == <span class="kw">null</span>) {
+            st.setNull(index, <span class="tp">Types</span>.OTHER);
+        } <span class="kw">else</span> {
+            <span class="tp">PGobject</span> pgObj = <span class="kw">new</span> <span class="tp">PGobject</span>();
+            pgObj.setType(<span class="str">"vector"</span>);
+            pgObj.setValue(<span class="fn">toVectorString</span>(value));
+            st.setObject(index, pgObj);
+        }
+    }
+
+    <span class="ann">@Override</span>
+    <span class="kw">public</span> <span class="kw">float</span>[] <span class="fn">deepCopy</span>(<span class="kw">float</span>[] value) {
+        <span class="kw">return</span> value == <span class="kw">null</span> ? <span class="kw">null</span> : <span class="tp">Arrays</span>.copyOf(value, value.length);
+    }
+
+    <span class="ann">@Override</span>
+    <span class="kw">public boolean</span> <span class="fn">isMutable</span>() { <span class="kw">return true</span>; }
+
+    <span class="kw">private</span> <span class="tp">String</span> <span class="fn">toVectorString</span>(<span class="kw">float</span>[] arr) {
+        <span class="tp">StringBuilder</span> sb = <span class="kw">new</span> <span class="tp">StringBuilder</span>(<span class="str">"["</span>);
+        <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; arr.length; i++) {
+            <span class="kw">if</span> (i &gt; <span class="num">0</span>) sb.append(<span class="str">","</span>);
+            sb.append(arr[i]);
+        }
+        <span class="kw">return</span> sb.append(<span class="str">"]"</span>).toString();
+    }
+
+    <span class="kw">private</span> <span class="kw">float</span>[] <span class="fn">parseVector</span>(<span class="tp">String</span> s) {
+        <span class="tp">String</span> trimmed = s.trim();
+        <span class="kw">if</span> (trimmed.startsWith(<span class="str">"["</span>))
+            trimmed = trimmed.substring(<span class="num">1</span>, trimmed.length() - <span class="num">1</span>);
+        <span class="tp">String</span>[] parts = trimmed.split(<span class="str">","</span>);
+        <span class="kw">float</span>[] result = <span class="kw">new</span> <span class="kw">float</span>[parts.length];
+        <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; parts.length; i++)
+            result[i] = <span class="tp">Float</span>.parseFloat(parts[i].trim());
+        <span class="kw">return</span> result;
+    }
+}</code></pre>
+<button class="ann-btn" onclick="toggleAnn(this)">
+  <span class="arr">▶</span> Xem giải thích từng dòng
+  <span class="pill">51 dòng · 12 annotation</span>
+</button>
+</div>
+<div class="ann-panel">
+<table class="ann-table">
+<thead><tr><th>Dòng</th><th>Code</th><th>Giải thích</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>implements UserType&lt;float[]&gt;</td><td><span class="tag t-imp">IMP</span> Hibernate 7.x interface cho custom type mapping. Generic parameter <code>float[]</code> = Java-side type. Hibernate gọi nullSafeGet/nullSafeSet khi đọc/ghi column này.</td></tr>
+<tr><td>4</td><td>return Types.OTHER</td><td><span class="tag t-imp">IMP</span> <code>Types.OTHER</code> = JDBC type cho custom/extension types. Hibernate dùng value này để call <code>st.setObject()</code> thay vì <code>st.setString()</code>. Nếu dùng <code>Types.VARCHAR</code> → PostgreSQL báo lỗi type mismatch.</td></tr>
+<tr><td>12</td><td>rs.getString(position)</td><td>PostgreSQL JDBC trả giá trị vector dưới dạng String "[0.1,0.2,...,0.384]". Dù column type là vector, getString() vẫn hoạt động vì JDBC driver tự convert.</td></tr>
+<tr><td>13</td><td>value == null ? null : parseVector(value)</td><td>Null-safe: embedding có thể null (PENDING papers chưa có embedding). Trả null thay vì empty array để phân biệt "chưa có" với "vector toàn số 0".</td></tr>
+<tr><td>20</td><td>st.setNull(index, Types.OTHER)</td><td>NULL cũng phải dùng Types.OTHER. Nếu dùng Types.VARCHAR → PostgreSQL không accept NULL cho column vector.</td></tr>
+<tr><td>21–23</td><td>new PGobject(); pgObj.setType("vector"); pgObj.setValue(...)</td><td><span class="tag t-imp">IMP</span> <strong>KEY SOLUTION</strong>: PGobject với type="vector" → PostgreSQL JDBC driver gửi đúng OID (Object Identifier). OID cho vector type khác với varchar. Đây là lý do không thể dùng AttributeConverter (convert to String → wrong OID).</td></tr>
+<tr><td>24</td><td>st.setObject(index, pgObj)</td><td><code>setObject()</code> thay vì <code>setString()</code> — JDBC driver xử lý PGobject đặc biệt, gửi đúng PostgreSQL wire protocol.</td></tr>
+<tr><td>27–29</td><td>Arrays.copyOf(value, value.length)</td><td><span class="tag t-imp">IMP</span> <code>deepCopy()</code> phải trả copy mới, không thể trả reference. Hibernate dùng deepCopy để theo dõi "dirty state" — nếu trả same reference, mọi thay đổi đều bị detect sai là dirty.</td></tr>
+<tr><td>32</td><td>return true (isMutable)</td><td>float[] là mutable (có thể thay đổi element). Nếu return false → Hibernate không gọi deepCopy → dirty checking sai → có thể miss update hoặc tạo spurious update.</td></tr>
+<tr><td>35–40</td><td>toVectorString StringBuilder</td><td>Manual StringBuilder thay vì String.join() vì cần xử lý float[] (không phải String[]). Format "[0.1,0.2,...,0.384]" theo pgvector spec.</td></tr>
+<tr><td>43–50</td><td>parseVector() — strip brackets, split, parse</td><td>Parse "[0.1,...,0.384]": bước 1 strip "[" và "]", bước 2 split(","), bước 3 Float.parseFloat() từng element. parts.trim() xử lý space thừa "0.1, 0.2" → OK.</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<!-- ══════════ APP EXCEPTION ══════════ -->
+<section id="c2">
+<h2>AppException &amp; GlobalExceptionHandler</h2>
+<div class="fp">exception/AppException.java</div>
+<div class="cb-wrap">
+<span class="lb">Java</span>
+<pre><code><span class="kw">public class</span> <span class="tp">AppException</span> <span class="kw">extends</span> <span class="tp">RuntimeException</span> {
+    <span class="kw">private final</span> <span class="tp">HttpStatus</span> status;
+
+    <span class="kw">public</span> <span class="fn">AppException</span>(<span class="tp">HttpStatus</span> status, <span class="tp">String</span> message) {
+        <span class="kw">super</span>(message);
+        <span class="kw">this</span>.status = status;
+    }
+
+    <span class="kw">public static</span> <span class="tp">AppException</span> <span class="fn">notFound</span>(<span class="tp">String</span> msg) {
+        <span class="kw">return new</span> <span class="tp">AppException</span>(<span class="tp">HttpStatus</span>.NOT_FOUND, msg);
+    }
+    <span class="kw">public static</span> <span class="tp">AppException</span> <span class="fn">badRequest</span>(<span class="tp">String</span> msg) {
+        <span class="kw">return new</span> <span class="tp">AppException</span>(<span class="tp">HttpStatus</span>.BAD_REQUEST, msg);
+    }
+    <span class="kw">public static</span> <span class="tp">AppException</span> <span class="fn">conflict</span>(<span class="tp">String</span> msg) {
+        <span class="kw">return new</span> <span class="tp">AppException</span>(<span class="tp">HttpStatus</span>.CONFLICT, msg);
+    }
+    <span class="kw">public static</span> <span class="tp">AppException</span> <span class="fn">forbidden</span>(<span class="tp">String</span> msg) {
+        <span class="kw">return new</span> <span class="tp">AppException</span>(<span class="tp">HttpStatus</span>.FORBIDDEN, msg);
+    }
+}
+
+<span class="cmt">// GlobalExceptionHandler.java (tóm tắt)</span>
+<span class="ann">@RestControllerAdvice</span>
+<span class="kw">public class</span> <span class="tp">GlobalExceptionHandler</span> {
+
+    <span class="ann">@ExceptionHandler</span>(<span class="tp">AppException</span>.class)
+    <span class="kw">public</span> <span class="tp">ResponseEntity</span>&lt;<span class="tp">ApiResponse</span>&lt;<span class="tp">Void</span>&gt;&gt; <span class="fn">handleApp</span>(<span class="tp">AppException</span> ex) {
+        <span class="kw">return</span> <span class="tp">ResponseEntity</span>.status(ex.getStatus()).body(<span class="tp">ApiResponse</span>.error(ex.getMessage()));
+    }
+
+    <span class="ann">@ExceptionHandler</span>(<span class="tp">MethodArgumentNotValidException</span>.class)
+    <span class="kw">public</span> <span class="tp">ResponseEntity</span>&lt;...&gt; <span class="fn">handleValidation</span>(<span class="tp">MethodArgumentNotValidException</span> ex) {
+        <span class="tp">String</span> msg = ex.getBindingResult().getFieldErrors().stream()
+                .map(<span class="tp">FieldError</span>::getDefaultMessage)
+                .collect(<span class="tp">Collectors</span>.joining(<span class="str">", "</span>));
+        <span class="kw">return</span> <span class="tp">ResponseEntity</span>.badRequest().body(<span class="tp">ApiResponse</span>.error(msg));
+    }
+
+    <span class="ann">@ExceptionHandler</span>(<span class="tp">MethodArgumentTypeMismatchException</span>.class)
+    <span class="kw">public</span> <span class="tp">ResponseEntity</span>&lt;...&gt; <span class="fn">handleTypeMismatch</span>(<span class="tp">MethodArgumentTypeMismatchException</span> ex) {
+        <span class="tp">String</span> message = <span class="str">"Invalid value for parameter '%s': %s"</span>
+                .formatted(ex.getName(), ex.getValue());
+        <span class="kw">return</span> <span class="tp">ResponseEntity</span>.badRequest().body(<span class="tp">ApiResponse</span>.error(message));
+    }
+
+    <span class="ann">@ExceptionHandler</span>(<span class="tp">Exception</span>.class)
+    <span class="kw">public</span> <span class="tp">ResponseEntity</span>&lt;...&gt; <span class="fn">handleGeneric</span>(<span class="tp">Exception</span> ex) {
+        log.error(<span class="str">"Unhandled exception: {}"</span>, ex.getMessage(), ex);
+        <span class="kw">return</span> <span class="tp">ResponseEntity</span>.internalServerError().body(<span class="tp">ApiResponse</span>.error(<span class="str">"Internal server error"</span>));
+    }
+}</code></pre>
+<button class="ann-btn" onclick="toggleAnn(this)">
+  <span class="arr">▶</span> Xem giải thích từng dòng
+  <span class="pill">43 dòng · 9 annotation</span>
+</button>
+</div>
+<div class="ann-panel">
+<table class="ann-table">
+<thead><tr><th>Dòng</th><th>Code</th><th>Giải thích</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>extends RuntimeException</td><td><span class="tag t-why">WHY</span> RuntimeException (unchecked) — không cần khai báo <code>throws</code>. Service methods ném AppException tự do mà không làm bẩn signature. GlobalExceptionHandler bắt tại tầng controller.</td></tr>
+<tr><td>3</td><td>private final HttpStatus status</td><td><span class="tag t-imp">IMP</span> Exception mang HTTP status tương ứng. GlobalExceptionHandler đọc <code>ex.getStatus()</code> → <code>ResponseEntity.status()</code>. Pattern này gọi là "HTTP-aware exception".</td></tr>
+<tr><td>9–19</td><td>static factory methods notFound/badRequest/conflict/forbidden</td><td><span class="tag t-opt">OPT</span> Fluent API: <code>throw AppException.notFound("Paper not found")</code> thay vì <code>throw new AppException(HttpStatus.NOT_FOUND, "Paper not found")</code>. Ngắn hơn, dễ đọc hơn. IDE autocomplete tốt hơn.</td></tr>
+<tr><td>22</td><td>@RestControllerAdvice</td><td><span class="tag t-imp">IMP</span> = @ControllerAdvice + @ResponseBody. Bắt exception từ MỌI @RestController trong application. Method trả object → tự serialize thành JSON (không cần @ResponseBody trên từng method).</td></tr>
+<tr><td>24</td><td>@ExceptionHandler(AppException.class)</td><td>Chỉ bắt AppException. Các exception khác "pass through" đến handler tiếp theo. Thứ tự handler: specific exception → generic exception (Exception.class cuối cùng).</td></tr>
+<tr><td>28</td><td>MethodArgumentNotValidException</td><td>Thrown bởi Spring khi @Valid fail. Chứa list FieldError. Stream → join thành "email: invalid, password: too short". Frontend nhận 1 message gộp thay vì nhiều lỗi rời rạc.</td></tr>
+<tr><td>34</td><td>MethodArgumentTypeMismatchException</td><td><span class="tag t-bug">BUG PREVENTED</span> Xảy ra khi path variable sai kiểu: <code>GET /papers/search</code> → "search" không parse thành UUID → 400 thay vì 500. Không handle → Spring trả 500 Internal Server Error — không thân thiện.</td></tr>
+<tr><td>39</td><td>@ExceptionHandler(Exception.class)</td><td>Catch-all cho mọi exception không được xử lý ở trên (RuntimeException, NullPointerException, ...). Trả 500 với message chung — không leak stack trace ra client.</td></tr>
+<tr><td>40</td><td>log.error("Unhandled exception: {}", ex.getMessage(), ex)</td><td><span class="tag t-imp">IMP</span> Log đầy đủ stack trace (<code>ex</code> là tham số thứ 3) → dễ debug trên production. Nhưng không trả stack trace về client → không leak thông tin nội bộ.</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+
+<!-- ══════════ PAPER RESPONSE ══════════ -->
+<section id="c4">
+<h2>PaperResponse DTO — Cầu nối Entity ↔ JSON</h2>
+<div class="fp">dto/paper/PaperResponse.java</div>
+<div class="cb-wrap">
+<span class="lb">Java</span>
+<pre><code><span class="ann">@Getter @Builder @NoArgsConstructor @AllArgsConstructor</span>
+<span class="kw">public class</span> <span class="tp">PaperResponse</span> {
+
+    <span class="kw">private</span> <span class="tp">UUID</span> id;
+    <span class="kw">private</span> <span class="tp">String</span> arxivId;
+
+    <span class="cmt">// abstractText → JSON "abstract" (không phải "abstract_text")</span>
+    <span class="ann">@JsonProperty</span>(<span class="str">"abstract"</span>)
+    <span class="kw">private</span> <span class="tp">String</span> abstractText;
+
+    <span class="kw">private</span> <span class="tp">String</span> authors;
+    <span class="kw">private</span> <span class="tp">String</span> paperUrl;
+    <span class="kw">private</span> <span class="tp">String</span> pdfUrl;
+    <span class="kw">private</span> <span class="tp">String</span> summary;
+    <span class="kw">private</span> <span class="tp">Float</span> qualityScore;
+    <span class="kw">private</span> <span class="tp">Boolean</span> isDuplicate;
+    <span class="kw">private</span> <span class="tp">String</span> processingStatus;
+    <span class="kw">private</span> <span class="tp">Integer</span> retryCount;
+    <span class="kw">private</span> <span class="tp">String</span> lastError;
+    <span class="kw">private</span> <span class="tp">OffsetDateTime</span> lastRetryAt;
+    <span class="kw">private</span> <span class="tp">OffsetDateTime</span> publishedAt;
+    <span class="kw">private</span> <span class="tp">OffsetDateTime</span> createdAt;
+
+    <span class="cmt">// Không có float[] embedding — không bao giờ expose ra API</span>
+
+    <span class="kw">private</span> <span class="tp">List</span>&lt;<span class="tp">String</span>&gt; topics;
+    <span class="kw">private</span> <span class="tp">Boolean</span> isFavorite;
+}</code></pre>
+<button class="ann-btn" onclick="toggleAnn(this)">
+  <span class="arr">▶</span> Xem giải thích từng dòng
+  <span class="pill">24 dòng · 10 annotation</span>
+</button>
+</div>
+<div class="ann-panel">
+<table class="ann-table">
+<thead><tr><th>Dòng</th><th>Code</th><th>Giải thích</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>@Getter @Builder @NoArgsConstructor @AllArgsConstructor</td><td>4 Lombok annotation: <code>@Getter</code> tạo getters, <code>@Builder</code> cho fluent builder pattern, <code>@NoArgsConstructor</code> cho Jackson deserialization, <code>@AllArgsConstructor</code> cho Builder.build().</td></tr>
+<tr><td>5</td><td>private String arxivId</td><td>Jackson SNAKE_CASE policy tự convert: <code>arxivId</code> → JSON <code>"arxiv_id"</code>. Frontend TypeScript type dùng <code>arxiv_id: string</code>.</td></tr>
+<tr><td>8</td><td>@JsonProperty("abstract")</td><td><span class="tag t-imp">IMP</span> Override SNAKE_CASE: không có annotation → <code>abstractText</code> → <code>"abstract_text"</code>. Nhưng frontend expect <code>"abstract"</code>. <code>@JsonProperty("abstract")</code> buộc Jackson dùng tên này. Java không thể đặt field tên <code>abstract</code> (reserved keyword).</td></tr>
+<tr><td>13</td><td>private Float qualityScore</td><td>Boxed <code>Float</code> (không phải primitive <code>float</code>) để cho phép null. Papers ở trạng thái PENDING và duplicate không có quality_score → cần null, không phải 0.</td></tr>
+<tr><td>14</td><td>private Boolean isDuplicate</td><td>JSON: <code>"is_duplicate"</code>. Boolean (boxed) để nhất quán với null-safety. Frontend check <code>paper.is_duplicate</code> để hiện banner amber "Duplicate detected".</td></tr>
+<tr><td>16</td><td>private Integer retryCount</td><td>Admin page cần hiển thị retry history. Frontend type: <code>retry_count: number</code>.</td></tr>
+<tr><td>17</td><td>private String lastError</td><td>Error message từ pipeline (HuggingFace/Groq error). Admin page hiển thị để debug. Frontend: <code>paper.last_error</code> trong failure banner.</td></tr>
+<tr><td>22</td><td><i>(không có embedding)</i></td><td><span class="tag t-sec">SEC</span> Embedding là 384 floats (~1.5KB) — vô nghĩa với frontend. Không khai báo field → Mapper không thể vô tình set nó → đảm bảo không bao giờ expose ra API.</td></tr>
+<tr><td>24</td><td>private List&lt;String&gt; topics</td><td>Danh sách <strong>tên</strong> topic (không phải UUID). Frontend hiển thị trực tiếp thành badge. Nếu trả UUID → frontend cần thêm API call để lookup tên.</td></tr>
+<tr><td>25</td><td>private Boolean isFavorite</td><td>JSON: <code>"is_favorite"</code>. Computed per-request: PaperMapper nhận <code>boolean isFavorite</code> từ caller (không self-query). Caller (PaperService) fetch Set&lt;UUID&gt; favIds một lần cho cả page → O(1) lookup.</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<!-- ══════════ PAPER REPOSITORY ══════════ -->
+<section id="r1">
+<h2>PaperRepository — Queries vector search &amp; FTS</h2>
+<div class="fp">repository/PaperRepository.java</div>
+<div class="cb-wrap">
+<span class="lb">Java</span>
+<pre><code><span class="cmt">// ── Full-text search (UC05) ─────────────────────────────────────────────────</span>
+<span class="ann">@Query</span>(value = <span class="str">"""
+    SELECT * FROM paper
+    WHERE processing_status = 'DONE'
+    AND is_duplicate = false
+    AND to_tsvector('english',
+        coalesce(title,'') || ' ' || coalesce(abstract,'') || ' ' || coalesce(authors,''))
+        @@ plainto_tsquery('english', :keyword)
+    ORDER BY published_at DESC
+    """</span>,
+    countQuery = <span class="str">"""
+    SELECT count(*) FROM paper
+    WHERE processing_status = 'DONE' AND is_duplicate = false
+    AND to_tsvector('english',
+        coalesce(title,'') || ' ' || coalesce(abstract,'') || ' ' || coalesce(authors,''))
+        @@ plainto_tsquery('english', :keyword)
+    """</span>,
+    nativeQuery = <span class="kw">true</span>)
+<span class="tp">Page</span>&lt;<span class="tp">Paper</span>&gt; <span class="fn">fullTextSearch</span>(<span class="ann">@Param</span>(<span class="str">"keyword"</span>) <span class="tp">String</span> keyword, <span class="tp">Pageable</span> pageable);
+
+<span class="cmt">// ── Duplicate detection (UC11) ───────────────────────────────────────────────</span>
+<span class="ann">@Query</span>(value = <span class="str">"""
+    SELECT * FROM paper
+    WHERE processing_status = 'DONE'
+    AND is_duplicate = false
+    AND id != :excludeId
+    AND published_at >= :windowStart
+    AND embedding IS NOT NULL
+    AND embedding <=> CAST(:embedding AS vector) < 0.05
+    ORDER BY embedding <=> CAST(:embedding AS vector)
+    LIMIT 1
+    """</span>, nativeQuery = <span class="kw">true</span>)
+<span class="tp">Optional</span>&lt;<span class="tp">Paper</span>&gt; <span class="fn">findDuplicate</span>(<span class="ann">@Param</span>(<span class="str">"excludeId"</span>) <span class="tp">UUID</span> excludeId,
+                               <span class="ann">@Param</span>(<span class="str">"embedding"</span>) <span class="tp">String</span> embedding,
+                               <span class="ann">@Param</span>(<span class="str">"windowStart"</span>) <span class="tp">OffsetDateTime</span> windowStart);
+
+<span class="cmt">// ── Recommendation (UC14) ────────────────────────────────────────────────────</span>
+<span class="ann">@Query</span>(value = <span class="str">"""
+    SELECT * FROM paper
+    WHERE processing_status = 'DONE'
+    AND is_duplicate = false
+    AND id != :paperId
+    AND published_at >= :oneYearAgo
+    AND embedding IS NOT NULL
+    AND embedding <=> CAST(:embedding AS vector) < 0.5
+    ORDER BY embedding <=> CAST(:embedding AS vector)
+    LIMIT :maxResults
+    """</span>, nativeQuery = <span class="kw">true</span>)
+<span class="tp">List</span>&lt;<span class="tp">Paper</span>&gt; <span class="fn">findRecommendations</span>(<span class="ann">@Param</span>(<span class="str">"paperId"</span>) <span class="tp">UUID</span> paperId,
+                                  <span class="ann">@Param</span>(<span class="str">"embedding"</span>) <span class="tp">String</span> embedding,
+                                  <span class="ann">@Param</span>(<span class="str">"oneYearAgo"</span>) <span class="tp">OffsetDateTime</span> oneYearAgo,
+                                  <span class="ann">@Param</span>(<span class="str">"maxResults"</span>) <span class="kw">int</span> maxResults);
+
+<span class="cmt">// ── Topic matching (UC12) ────────────────────────────────────────────────────</span>
+<span class="ann">@Query</span>(value = <span class="str">"""
+    SELECT COUNT(*) > 0 FROM paper
+    WHERE id = :paperId
+    AND to_tsvector('english', coalesce(title,'') || ' ' || coalesce(abstract,''))
+        @@ phraseto_tsquery('english', :keyword)
+    """</span>, nativeQuery = <span class="kw">true</span>)
+<span class="kw">boolean</span> <span class="fn">matchesTopic</span>(<span class="ann">@Param</span>(<span class="str">"paperId"</span>) <span class="tp">UUID</span> paperId, <span class="ann">@Param</span>(<span class="str">"keyword"</span>) <span class="tp">String</span> keyword);</code></pre>
+<button class="ann-btn" onclick="toggleAnn(this)">
+  <span class="arr">▶</span> Xem giải thích từng dòng / cụm
+  <span class="pill">4 queries · 14 annotation</span>
+</button>
+</div>
+<div class="ann-panel">
+<table class="ann-table">
+<thead><tr><th>Query/Dòng</th><th>Code</th><th>Giải thích</th></tr></thead>
+<tbody>
+<tr><td>FTS — nativeQuery=true</td><td>nativeQuery = true</td><td><span class="tag t-imp">IMP</span> Bắt buộc dùng native SQL vì JPQL không hỗ trợ PostgreSQL-specific functions như <code>to_tsvector</code>, <code>@@</code> operator, hay <code>&lt;=&gt;</code> (pgvector).</td></tr>
+<tr><td>FTS — countQuery</td><td>countQuery = """..."""</td><td><span class="tag t-imp">IMP</span> Spring Data cần query đếm tổng để tính <code>totalElements</code> trong PagedResponse. Nếu thiếu → Spring cố wrap query trong <code>SELECT COUNT(*) FROM (...)</code> → fail với ORDER BY trong subquery.</td></tr>
+<tr><td>FTS — coalesce</td><td>coalesce(title,'') || ' ' || coalesce(abstract,'')</td><td><code>coalesce()</code> trả empty string nếu column NULL — tránh <code>NULL || 'text' = NULL</code>. Nếu không có coalesce → paper có title=NULL → không bao giờ match FTS dù abstract có keyword.</td></tr>
+<tr><td>FTS — plainto_tsquery</td><td>@@ plainto_tsquery('english', :keyword)</td><td><span class="tag t-imp">IMP</span> <code>plainto_tsquery</code>: logic AND, flexible. "machine learning" → match cả "learning machine" (bất kỳ thứ tự). Khác <code>phraseto_tsquery</code> yêu cầu exact phrase. Dùng cho search tổng quát UC05 (bao gồm tìm theo tên tác giả).</td></tr>
+<tr><td>DUP — id != :excludeId</td><td>AND id != :excludeId</td><td>Loại chính paper đang xét khỏi kết quả (không compare với chính nó). <code>excludeId</code> = id của paper mới vừa save.</td></tr>
+<tr><td>DUP — published_at >= windowStart</td><td>AND published_at >= :windowStart</td><td>Window 90 ngày. Không so sánh với paper quá cũ — paper cũ và paper mới cùng topic không nhất thiết là duplicate (có thể là follow-up research).</td></tr>
+<tr><td>DUP — embedding &lt;=&gt; CAST(...)</td><td>embedding &lt;=&gt; CAST(:embedding AS vector) &lt; 0.05</td><td><span class="tag t-imp">IMP</span> <code>&lt;=&gt;</code> là pgvector <strong>cosine distance</strong> operator. Distance 0→1 (0=identical, 1=orthogonal). Distance &lt;0.05 = similarity &gt;95% — rất giống nhau. <code>CAST(:embedding AS vector)</code>: tham số là String "[0.1,...,0.384]" → cast sang vector type.</td></tr>
+<tr><td>DUP — ORDER BY + LIMIT 1</td><td>ORDER BY ... LIMIT 1</td><td>Lấy paper gần nhất (minimum distance). LIMIT 1 tối ưu — chỉ cần biết có duplicate hay không, không cần tất cả.</td></tr>
+<tr><td>REC — distance &lt; 0.5</td><td>embedding &lt;=&gt; ... &lt; 0.5</td><td>Ngưỡng looser hơn duplicate (0.5 vs 0.05). Distance &lt;0.5 = similarity &gt;50% — đủ liên quan để recommend nhưng không trùng lặp.</td></tr>
+<tr><td>REC — published_at >= oneYearAgo</td><td>AND published_at >= :oneYearAgo</td><td>Giới hạn 1 năm. Paper cũ hơn ít có giá trị recommend — field tiến bộ nhanh. Cũng giảm candidate set → HNSW scan nhanh hơn.</td></tr>
+<tr><td>REC — ef_search global</td><td><i>(không trong query)</i></td><td><span class="tag t-why">WHY</span> <code>ef_search=128</code> đã set qua <code>connection-init-sql</code> trong HikariCP → không cần <code>SET LOCAL hnsw.ef_search=128</code> trước mỗi query. ef_search cao hơn = recall tốt hơn nhưng chậm hơn.</td></tr>
+<tr><td>TOPIC — phraseto_tsquery</td><td>@@ phraseto_tsquery('english', :keyword)</td><td><span class="tag t-imp">IMP</span> Khác FTS search: <code>phraseto_tsquery</code> match <strong>exact phrase theo thứ tự</strong>. "large language model" → chỉ match nếu 3 từ xuất hiện liền nhau đúng thứ tự. Tránh false positive: paper về "model của ngôn ngữ lớn" không match keyword "large language model".</td></tr>
+<tr><td>TOPIC — title+abstract ONLY</td><td>coalesce(title,'') || ' ' || coalesce(abstract,'')</td><td><span class="tag t-imp">IMP</span> <strong>Không có authors</strong> — phải khớp chính xác với expression trong <code>CREATE INDEX idx_paper_fts_topic</code>. Nếu thêm authors → PostgreSQL không dùng được index → seq scan → chậm. Index UC05 có authors, index UC12 không có.</td></tr>
+<tr><td>TOPIC — COUNT(*) &gt; 0</td><td>SELECT COUNT(*) &gt; 0</td><td>Trả boolean (true/false) thay vì SELECT * — tối ưu hơn, không cần load toàn bộ row. PostgreSQL short-circuit sau khi tìm được 1 match.</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+
+<!-- ══════════ FAVORITE REPO ══════════ -->
+<section id="r2">
+<h2>FavoriteRepository — N+1 Prevention Pattern</h2>
+<div class="fp">repository/FavoriteRepository.java</div>
+<div class="cb-wrap">
+<span class="lb">Java</span>
+<pre><code><span class="ann">@Repository</span>
+<span class="kw">public interface</span> <span class="tp">FavoriteRepository</span> <span class="kw">extends</span> <span class="tp">JpaRepository</span>&lt;<span class="tp">Favorite</span>, <span class="tp">UUID</span>&gt; {
+
+    <span class="kw">boolean</span> <span class="fn">existsByUserIdAndPaperId</span>(<span class="tp">UUID</span> userId, <span class="tp">UUID</span> paperId);
+
+    <span class="tp">Page</span>&lt;<span class="tp">Favorite</span>&gt; <span class="fn">findByUserIdOrderByCreatedAtDesc</span>(<span class="tp">UUID</span> userId, <span class="tp">Pageable</span> pageable);
+
+    <span class="ann">@Modifying</span>
+    <span class="ann">@Query</span>(<span class="str">"DELETE FROM Favorite f WHERE f.user.id = :userId AND f.paper.id = :paperId"</span>)
+    <span class="kw">int</span> <span class="fn">deleteByUserIdAndPaperId</span>(<span class="ann">@Param</span>(<span class="str">"userId"</span>) <span class="tp">UUID</span> userId,
+                                  <span class="ann">@Param</span>(<span class="str">"paperId"</span>) <span class="tp">UUID</span> paperId);
+
+    <span class="cmt">/**
+     * Lấy TẤT CẢ paper_id đã favorite của user trong 1 query.
+     * Trả Set&lt;UUID&gt; → O(1) contains() khi map page papers.
+     * Giải quyết N+1: thay vì existsByUserIdAndPaperId() N lần.
+     */</span>
+    <span class="ann">@Query</span>(<span class="str">"SELECT f.paper.id FROM Favorite f WHERE f.user.id = :userId"</span>)
+    <span class="tp">Set</span>&lt;<span class="tp">UUID</span>&gt; <span class="fn">findFavoritedPaperIdsByUserId</span>(<span class="ann">@Param</span>(<span class="str">"userId"</span>) <span class="tp">UUID</span> userId);
+}</code></pre>
+<button class="ann-btn" onclick="toggleAnn(this)">
+  <span class="arr">▶</span> Xem giải thích từng dòng
+  <span class="pill">20 dòng · 7 annotation</span>
+</button>
+</div>
+<div class="ann-panel">
+<table class="ann-table">
+<thead><tr><th>Dòng</th><th>Code</th><th>Giải thích</th></tr></thead>
+<tbody>
+<tr><td>3</td><td>existsByUserIdAndPaperId</td><td>Spring Data tự generate: <code>SELECT COUNT(*) &gt; 0 WHERE user_id=? AND paper_id=?</code>. Dùng cho single paper check (xem chi tiết UC06). Không dùng khi list nhiều papers — gây N+1.</td></tr>
+<tr><td>5</td><td>findByUserIdOrderByCreatedAtDesc</td><td>Spring Data method naming: <code>findBy</code> + field <code>UserId</code> + <code>OrderBy</code> + field <code>CreatedAt</code> + <code>Desc</code>. Sort mới nhất trước — user thấy paper vừa favorite đầu tiên.</td></tr>
+<tr><td>7–8</td><td>@Modifying + @Query JPQL DELETE</td><td><span class="tag t-imp">IMP</span> <code>@Modifying</code> bắt buộc cho UPDATE/DELETE query. Trả <code>int</code> = số rows bị xóa. Service check nếu = 0 → throw 404 (paper không trong favorites). Dùng JPQL (<code>f.user.id</code> = property path) thay vì native SQL.</td></tr>
+<tr><td>13</td><td>SELECT f.paper.id FROM Favorite f</td><td><span class="tag t-imp">IMP</span> JPQL property path: <code>f.paper.id</code> = JOIN Favorite → Paper → get id. Hibernate tự generate <code>JOIN paper ON ... SELECT p.id</code>. Trả chỉ UUID, không load toàn bộ Paper entity.</td></tr>
+<tr><td>13</td><td>Set&lt;UUID&gt; trả về</td><td><span class="tag t-opt">OPT</span> <strong>N+1 prevention pattern</strong>: PaperService gọi method này 1 lần → nhận Set. Khi map 10 papers → <code>favIds.contains(paper.getId())</code> = O(1) × 10 = 10 ops. So với: <code>existsByUserIdAndPaperId()</code> × 10 = 10 DB queries. Tiết kiệm 9 queries mỗi page.</td></tr>
+<tr><td>-</td><td>Không có findFavoriteByUserIdAndPaperId</td><td><span class="tag t-why">WHY</span> Bỏ favorite chỉ cần <code>paperId</code> (từ path param) và <code>userId</code> (từ JWT) — không cần <code>favoriteId</code>. <code>deleteByUserIdAndPaperId()</code> đủ, không cần load entity trước rồi mới delete.</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<!-- ══════════ NOTIFICATION REPO ══════════ -->
+<section id="r3">
+<h2>NotificationRepository — Idempotent Insert</h2>
+<div class="fp">repository/NotificationRepository.java</div>
+<div class="cb-wrap">
+<span class="lb">Java</span>
+<pre><code><span class="ann">@Repository</span>
+<span class="kw">public interface</span> <span class="tp">NotificationRepository</span> <span class="kw">extends</span> <span class="tp">JpaRepository</span>&lt;<span class="tp">Notification</span>, <span class="tp">UUID</span>&gt; {
+
+    <span class="tp">Page</span>&lt;<span class="tp">Notification</span>&gt; <span class="fn">findByUserIdOrderByCreatedAtDesc</span>(<span class="tp">UUID</span> userId, <span class="tp">Pageable</span> p);
+
+    <span class="tp">Page</span>&lt;<span class="tp">Notification</span>&gt; <span class="fn">findByUserIdAndIsReadOrderByCreatedAtDesc</span>(
+            <span class="tp">UUID</span> userId, <span class="tp">Boolean</span> isRead, <span class="tp">Pageable</span> p);
+
+    <span class="kw">long</span> <span class="fn">countByUserIdAndIsReadFalse</span>(<span class="tp">UUID</span> userId);
+
+    <span class="ann">@Modifying</span>
+    <span class="ann">@Query</span>(<span class="str">"UPDATE Notification n SET n.isRead = true WHERE n.user.id = :userId AND n.isRead = false"</span>)
+    <span class="kw">int</span> <span class="fn">markAllAsRead</span>(<span class="ann">@Param</span>(<span class="str">"userId"</span>) <span class="tp">UUID</span> userId);
+
+    <span class="cmt">// ON CONFLICT (user_id, paper_id, type) DO NOTHING</span>
+    <span class="cmt">// Đảm bảo mỗi (user, paper) chỉ có tối đa 1 notification</span>
+    <span class="ann">@Modifying</span>
+    <span class="ann">@Query</span>(value = <span class="str">"""
+            INSERT INTO notification (id, user_id, paper_id, type, message, is_read, created_at)
+            VALUES (gen_random_uuid(), :userId, :paperId, 'NEW_PAPER', :message, false, NOW())
+            ON CONFLICT (user_id, paper_id, type) DO NOTHING
+            """</span>, nativeQuery = <span class="kw">true</span>)
+    <span class="kw">void</span> <span class="fn">insertIfNotExists</span>(<span class="ann">@Param</span>(<span class="str">"userId"</span>) <span class="tp">UUID</span> userId,
+                           <span class="ann">@Param</span>(<span class="str">"paperId"</span>) <span class="tp">UUID</span> paperId,
+                           <span class="ann">@Param</span>(<span class="str">"message"</span>) <span class="tp">String</span> message);
+}</code></pre>
+<button class="ann-btn" onclick="toggleAnn(this)">
+  <span class="arr">▶</span> Xem giải thích từng dòng
+  <span class="pill">24 dòng · 7 annotation</span>
+</button>
+</div>
+<div class="ann-panel">
+<table class="ann-table">
+<thead><tr><th>Dòng</th><th>Code</th><th>Giải thích</th></tr></thead>
+<tbody>
+<tr><td>6–7</td><td>findByUserIdAndIsReadOrderByCreatedAtDesc</td><td>Spring Data parse: <code>findBy</code> + <code>UserId</code> + <code>And</code> + <code>IsRead</code> + <code>OrderBy</code> + <code>CreatedAt</code> + <code>Desc</code> → <code>WHERE user_id=? AND is_read=? ORDER BY created_at DESC</code>. Tham số <code>Boolean isRead</code> có thể null → service chọn method này chỉ khi filter được yêu cầu.</td></tr>
+<tr><td>9</td><td>countByUserIdAndIsReadFalse</td><td><span class="tag t-opt">OPT</span> Spring Data method naming: <code>False</code> suffix = <code>= false</code>. Tạo <code>SELECT COUNT(*) WHERE user_id=? AND is_read=false</code>. Dùng cho badge notification count trên UI.</td></tr>
+<tr><td>11–12</td><td>UPDATE SET isRead=true WHERE isRead=false</td><td><span class="tag t-opt">OPT</span> Bulk UPDATE trong 1 query — hiệu quả hơn load từng notification rồi set từng cái. <code>WHERE isRead=false</code> tối ưu index <code>idx_notification_user_read(user_id, is_read, created_at)</code>.</td></tr>
+<tr><td>15–22</td><td>insertIfNotExists native SQL</td><td><span class="tag t-imp">IMP</span> PostgreSQL-specific syntax, bắt buộc <code>nativeQuery=true</code>. JPQL không có <code>ON CONFLICT</code> clause. JPA <code>save()</code> thông thường sẽ throw <code>DataIntegrityViolationException</code> khi conflict — phải dùng native INSERT.</td></tr>
+<tr><td>20</td><td>gen_random_uuid()</td><td>Tạo UUID ngay trong SQL — không phụ thuộc Hibernate generate UUID Java-side. Nhanh hơn và đảm bảo UUID được tạo khi row thực sự insert (không phải khi Java prepare statement).</td></tr>
+<tr><td>21</td><td>ON CONFLICT (user_id, paper_id, type) DO NOTHING</td><td><span class="tag t-imp">IMP</span> Idempotent insert. Scheduler chạy mỗi ngày — nếu không có clause này, user nhận notification trùng mỗi ngày. <code>DO NOTHING</code>: bỏ qua silently nếu conflict — không throw exception, không update row cũ.</td></tr>
+<tr><td>-</td><td>void (không phải int)</td><td>Trả void thay vì int (rows affected) vì caller không cần biết có insert thật hay skip do conflict. Cả 2 trường hợp đều là thành công từ góc nhìn business.</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<!-- ══════════ AUTH SERVICE ══════════ -->
+<section id="sv1">
+<h2>AuthService — Register &amp; Login</h2>
+<div class="fp">service/AuthService.java</div>
+<div class="cb-wrap">
+<span class="lb">Java</span>
+<pre><code><span class="ann">@Service @RequiredArgsConstructor</span>
+<span class="kw">public class</span> <span class="tp">AuthService</span> {
+    <span class="kw">private final</span> <span class="tp">UserRepository</span> userRepository;
+    <span class="kw">private final</span> <span class="tp">PasswordEncoder</span> passwordEncoder;
+    <span class="kw">private final</span> <span class="tp">JwtUtil</span> jwtUtil;
+
+    <span class="ann">@Transactional</span>
+    <span class="kw">public</span> <span class="tp">AuthResponse</span> <span class="fn">register</span>(<span class="tp">RegisterRequest</span> request) {
+        <span class="kw">if</span> (userRepository.existsByEmail(request.getEmail()))
+            <span class="kw">throw</span> <span class="tp">AppException</span>.conflict(<span class="str">"Email already registered"</span>);
+
+        <span class="tp">User</span> user = <span class="tp">User</span>.builder()
+                .email(request.getEmail())
+                .passwordHash(passwordEncoder.encode(request.getPassword()))
+                .role(<span class="str">"USER"</span>)
+                .build();
+
+        userRepository.save(user);
+        <span class="tp">String</span> token = jwtUtil.generateToken(user.getId(), user.getEmail(), user.getRole());
+        <span class="kw">return</span> <span class="fn">buildAuthResponse</span>(user, token);
+    }
+
+    <span class="ann">@Transactional</span>(readOnly = <span class="kw">true</span>)
+    <span class="kw">public</span> <span class="tp">AuthResponse</span> <span class="fn">login</span>(<span class="tp">LoginRequest</span> request) {
+        <span class="tp">User</span> user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> <span class="tp">AppException</span>.badRequest(<span class="str">"Invalid email or password"</span>));
+
+        <span class="kw">if</span> (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash()))
+            <span class="kw">throw</span> <span class="tp">AppException</span>.badRequest(<span class="str">"Invalid email or password"</span>);
+
+        <span class="tp">String</span> token = jwtUtil.generateToken(user.getId(), user.getEmail(), user.getRole());
+        <span class="kw">return</span> <span class="fn">buildAuthResponse</span>(user, token);
+    }
+
+    <span class="kw">private</span> <span class="tp">AuthResponse</span> <span class="fn">buildAuthResponse</span>(<span class="tp">User</span> user, <span class="tp">String</span> token) {
+        <span class="kw">return</span> <span class="tp">AuthResponse</span>.builder()
+                .token(token)
+                .userId(user.getId())
+                .email(user.getEmail())
+                .role(user.getRole())
+                .build();
+    }
+}</code></pre>
+<button class="ann-btn" onclick="toggleAnn(this)">
+  <span class="arr">▶</span> Xem giải thích từng dòng
+  <span class="pill">38 dòng · 9 annotation</span>
+</button>
+</div>
+<div class="ann-panel">
+<table class="ann-table">
+<thead><tr><th>Dòng</th><th>Code</th><th>Giải thích</th></tr></thead>
+<tbody>
+<tr><td>9</td><td>existsByEmail() trước save()</td><td><span class="tag t-imp">IMP</span> Check trùng trước INSERT thay vì bắt <code>DataIntegrityViolationException</code>. Lý do: (1) Message lỗi rõ ràng hơn. (2) Không cần try-catch xấu xí. (3) Nhược điểm: race condition (2 request cùng lúc) — nhưng UNIQUE constraint DB vẫn bảo vệ cuối cùng.</td></tr>
+<tr><td>13</td><td>passwordEncoder.encode(request.getPassword())</td><td><span class="tag t-sec">SEC</span> BCrypt(cost=10) hash password TRƯỚC khi save. Không bao giờ lưu plaintext. Hash không thể reverse — nếu DB bị leak, attacker không biết password thật.</td></tr>
+<tr><td>15</td><td>.role("USER")</td><td><span class="tag t-sec">SEC</span> Hardcode "USER" — không nhận role từ request body. Nếu nhận từ client: attacker có thể tự đăng ký ADMIN. ADMIN chỉ tạo qua Flyway V5 seed.</td></tr>
+<tr><td>18</td><td>userRepository.save(user)</td><td>Sau save(), Hibernate assign UUID và populate @CreationTimestamp. <code>user.getId()</code> ở dòng tiếp theo có giá trị vì save() đã flush (hoặc trong @Transactional sẽ flush khi cần).</td></tr>
+<tr><td>22</td><td>@Transactional(readOnly = true)</td><td><span class="tag t-opt">OPT</span> Login chỉ đọc DB — <code>readOnly=true</code> giúp Hibernate skip dirty checking và flush, connection pool có thể route đến read replica nếu có.</td></tr>
+<tr><td>24</td><td>"Invalid email or password" (cả 2 trường hợp)</td><td><span class="tag t-sec">SEC</span> <strong>Security best practice</strong>: thông báo giống nhau cho "email không tồn tại" và "sai password". Nếu khác nhau → attacker enumerate được email nào đã đăng ký (user enumeration attack).</td></tr>
+<tr><td>26</td><td>passwordEncoder.matches(input, hash)</td><td>BCrypt matches(): (1) Extract salt từ hash, (2) BCrypt(input, salt), (3) So sánh constant-time. Không cần extract salt thủ công — BCrypt tự lưu salt trong hash string.</td></tr>
+<tr><td>29–33</td><td>buildAuthResponse(user, token)</td><td><span class="tag t-why">WHY</span> Method riêng vì register và login đều cần build response giống nhau. DRY. Trả token + email + role → frontend không cần gọi GET /users/me sau login.</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<!-- ══════════ TOPIC SERVICE ══════════ -->
+<section id="sv2">
+<h2>TopicService — CRUD với validation</h2>
+<div class="fp">service/TopicService.java</div>
+<div class="cb-wrap">
+<span class="lb">Java</span>
+<pre><code><span class="ann">@Service @RequiredArgsConstructor</span>
+<span class="kw">public class</span> <span class="tp">TopicService</span> {
+    <span class="ann">@Value</span>(<span class="str">"${limits.max-topics-per-user:10}"</span>)
+    <span class="kw">private int</span> maxTopicsPerUser;
+
+    <span class="ann">@Value</span>(<span class="str">"${limits.max-keywords-per-topic:5}"</span>)
+    <span class="kw">private int</span> maxKeywordsPerTopic;
+
+    <span class="ann">@Transactional</span>
+    <span class="kw">public</span> <span class="tp">TopicResponse</span> <span class="fn">createTopic</span>(<span class="tp">TopicRequest</span> request, <span class="tp">UUID</span> userId) {
+        <span class="kw">if</span> (topicRepository.countByUserId(userId) >= maxTopicsPerUser)
+            <span class="kw">throw</span> <span class="tp">AppException</span>.badRequest(<span class="str">"Maximum "</span> + maxTopicsPerUser + <span class="str">" topics per user"</span>);
+
+        <span class="kw">if</span> (topicRepository.existsByUserIdAndName(userId, request.getName()))
+            <span class="kw">throw</span> <span class="tp">AppException</span>.conflict(<span class="str">"Topic name already exists"</span>);
+
+        <span class="tp">String</span> keywords = <span class="fn">normalizeKeywords</span>(request.getKeywords());
+
+        <span class="tp">User</span> user = userRepository.getReferenceById(userId);
+        <span class="tp">Topic</span> topic = <span class="tp">Topic</span>.builder()
+                .name(request.getName().trim())
+                .keywords(keywords)
+                .isActive(<span class="kw">true</span>)
+                .user(user)
+                .build();
+
+        <span class="kw">return</span> topicMapper.toResponse(topicRepository.saveAndFlush(topic));
+    }
+
+    <span class="kw">private</span> <span class="tp">String</span> <span class="fn">normalizeKeywords</span>(<span class="tp">String</span> keywords) {
+        <span class="kw">if</span> (keywords == <span class="kw">null</span> || keywords.isBlank()) <span class="kw">return null</span>;
+        <span class="tp">List</span>&lt;<span class="tp">String</span>&gt; kws = <span class="tp">Arrays</span>.stream(keywords.split(<span class="str">","</span>))
+                .map(<span class="tp">String</span>::trim)
+                .map(<span class="tp">String</span>::toLowerCase)
+                .filter(k -> !k.isEmpty())
+                .distinct()
+                .toList();
+        <span class="kw">if</span> (kws.size() > maxKeywordsPerTopic)
+            <span class="kw">throw</span> <span class="tp">AppException</span>.badRequest(<span class="str">"Maximum "</span> + maxKeywordsPerTopic + <span class="str">" keywords per topic"</span>);
+        <span class="kw">return</span> <span class="tp">String</span>.join(<span class="str">","</span>, kws);
+    }
+}</code></pre>
+<button class="ann-btn" onclick="toggleAnn(this)">
+  <span class="arr">▶</span> Xem giải thích từng dòng
+  <span class="pill">38 dòng · 10 annotation</span>
+</button>
+</div>
+<div class="ann-panel">
+<table class="ann-table">
+<thead><tr><th>Dòng</th><th>Code</th><th>Giải thích</th></tr></thead>
+<tbody>
+<tr><td>3</td><td>@Value("${limits.max-topics-per-user:10}")</td><td><span class="tag t-opt">OPT</span> Đọc từ application.yml, default 10 nếu không set. Configurable — không hardcode trong code. Cho phép thay đổi giới hạn mà không cần recompile (chỉ cần restart với yml mới).</td></tr>
+<tr><td>11</td><td>countByUserId(userId) >= maxTopicsPerUser</td><td><span class="tag t-imp">IMP</span> Đếm trước INSERT — kiểm tra giới hạn business (không phải DB constraint). DB không có CHECK constraint cho số lượng topic/user — logic này nằm hoàn toàn ở application layer.</td></tr>
+<tr><td>17</td><td>normalizeKeywords(request.getKeywords())</td><td>Tách riêng normalize logic ra method private — testable, reusable (updateTopic cũng dùng). Clean code: createTopic() focus vào flow, không bị lấp bởi string processing.</td></tr>
+<tr><td>19</td><td>userRepository.getReferenceById(userId)</td><td><span class="tag t-imp">IMP</span> Trả Hibernate proxy với chỉ PK — <strong>không SELECT user từ DB</strong>. Chỉ cần để set FK relationship trong Topic. Khi Hibernate INSERT topic → dùng userId trực tiếp từ proxy. Tiết kiệm 1 SELECT query.</td></tr>
+<tr><td>25</td><td>saveAndFlush(topic)</td><td><span class="tag t-why">WHY</span> <code>save()</code> chỉ đưa vào persistence context, chưa FLUSH đến DB. <code>saveAndFlush()</code> buộc flush ngay → Hibernate execute INSERT → DB assign <code>created_at</code>/<code>updated_at</code> via <code>DEFAULT NOW()</code> → <code>@CreationTimestamp</code> được populate → Response DTO có thể trả <code>createdAt</code>.</td></tr>
+<tr><td>28–29</td><td>.map(String::trim).map(String::toLowerCase)</td><td>Normalize: loại bỏ khoảng trắng, lowercase. "Large Language Model" → "large language model". Đảm bảo keyword consistent với FTS index (PostgreSQL to_tsvector cũng lowercase).</td></tr>
+<tr><td>31</td><td>.distinct()</td><td>Loại bỏ keyword trùng lặp trong input. "rag,RAG,Rag" → sau lowercase + distinct = ["rag"]. Tránh lãng phí keyword slot.</td></tr>
+<tr><td>33</td><td>kws.size() > maxKeywordsPerTopic</td><td>Validate sau khi distinct — đếm keyword thực sự unique, không đếm duplicate. Ví dụ: "rag,rag,llm,transformer,bert,gpt" → sau distinct = 5 → OK (không vượt max 5).</td></tr>
+<tr><td>35</td><td>String.join(",", kws)</td><td>Store dưới dạng "keyword1,keyword2,keyword3" trong VARCHAR(255). Format nhất quán — mọi nơi đọc keywords đều split(",") và trim(). Không có space quanh comma.</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+
+<!-- ══════════ PAPER SERVICE ══════════ -->
+<section id="sv3">
+<h2>PaperService — N+1 Fix &amp; Recommendations</h2>
+<div class="fp">service/PaperService.java</div>
+<div class="cb-wrap">
+<span class="lb">Java</span>
+<pre><code><span class="ann">@Service @RequiredArgsConstructor</span>
+<span class="kw">public class</span> <span class="tp">PaperService</span> {
+
+    <span class="ann">@Transactional</span>(readOnly = <span class="kw">true</span>)
+    <span class="kw">public</span> <span class="tp">PagedResponse</span>&lt;<span class="tp">PaperResponse</span>&gt; <span class="fn">getPapers</span>(
+            <span class="tp">UUID</span> userId, <span class="tp">UUID</span> topicId, <span class="tp">String</span> keyword, <span class="kw">int</span> page, <span class="kw">int</span> size) {
+
+        Set&lt;<span class="tp">UUID</span>&gt; favIds = userId != <span class="kw">null</span>
+                ? favoriteRepository.findFavoritedPaperIdsByUserId(userId)
+                : <span class="tp">Set</span>.of();
+
+        <span class="kw">if</span> (<span class="tp">StringUtils</span>.hasText(keyword)) {
+            <span class="kw">var</span> unsorted = <span class="tp">PageRequest</span>.of(page, size);
+            <span class="kw">return</span> <span class="tp">PagedResponse</span>.of(
+                    paperRepository.fullTextSearch(keyword, unsorted)
+                            .map(p -> paperMapper.toResponse(p, favIds.contains(p.getId()))));
+        }
+
+        <span class="kw">if</span> (topicId != <span class="kw">null</span>) {
+            <span class="kw">var</span> pageable = <span class="tp">PageRequest</span>.of(page, size, <span class="tp">Sort</span>.by(<span class="str">"publishedAt"</span>).descending());
+            <span class="kw">return</span> <span class="tp">PagedResponse</span>.of(
+                    paperRepository.findDonePapersByTopicId(topicId, pageable)
+                            .map(p -> paperMapper.toResponse(p, favIds.contains(p.getId()))));
+        }
+
+        <span class="kw">var</span> pageable = <span class="tp">PageRequest</span>.of(page, size, <span class="tp">Sort</span>.by(<span class="str">"publishedAt"</span>).descending());
+        <span class="kw">return</span> <span class="tp">PagedResponse</span>.of(
+                paperRepository.findByProcessingStatusAndIsDuplicateFalse(<span class="str">"DONE"</span>, pageable)
+                        .map(p -> paperMapper.toResponse(p, favIds.contains(p.getId()))));
+    }
+
+    <span class="ann">@Transactional</span>(readOnly = <span class="kw">true</span>)
+    <span class="kw">public</span> <span class="tp">List</span>&lt;<span class="tp">PaperResponse</span>&gt; <span class="fn">getRecommendations</span>(<span class="tp">UUID</span> paperId) {
+        <span class="kw">var</span> paper = paperRepository.findById(paperId)
+                .orElseThrow(() -> <span class="tp">AppException</span>.notFound(<span class="str">"Paper not found"</span>));
+
+        <span class="kw">if</span> (paper.getEmbedding() == <span class="kw">null</span>) <span class="kw">return</span> <span class="tp">List</span>.of();
+
+        <span class="tp">String</span> embeddingStr = <span class="tp">VectorUtils</span>.toVectorString(paper.getEmbedding());
+        <span class="kw">var</span> oneYearAgo = <span class="tp">OffsetDateTime</span>.now().minusYears(<span class="num">1</span>);
+
+        <span class="kw">return</span> paperMapper.toResponseList(
+                paperRepository.findRecommendations(paperId, embeddingStr, oneYearAgo, <span class="num">10</span>));
+    }
+
+    <span class="ann">@Transactional</span>(readOnly = <span class="kw">true</span>)
+    <span class="kw">public</span> <span class="tp">List</span>&lt;<span class="tp">Map</span>&lt;<span class="tp">String</span>, <span class="tp">Object</span>&gt;&gt; <span class="fn">getTrendStats</span>(<span class="tp">UUID</span> topicId) {
+        <span class="kw">var</span> since = <span class="tp">OffsetDateTime</span>.now().minusYears(<span class="num">2</span>);
+        <span class="kw">return</span> paperRepository.findTrendStats(topicId, since).stream()
+                .map(row -> <span class="tp">Map</span>.&lt;<span class="tp">String</span>, <span class="tp">Object</span>&gt;of(<span class="str">"month"</span>, row[<span class="num">0</span>], <span class="str">"count"</span>, row[<span class="num">1</span>]))
+                .toList();
+    }
+}</code></pre>
+<button class="ann-btn" onclick="toggleAnn(this)">
+  <span class="arr">▶</span> Xem giải thích từng dòng
+  <span class="pill">46 dòng · 11 annotation</span>
+</button>
+</div>
+<div class="ann-panel">
+<table class="ann-table">
+<thead><tr><th>Dòng</th><th>Code</th><th>Giải thích</th></tr></thead>
+<tbody>
+<tr><td>8–10</td><td>findFavoritedPaperIdsByUserId(userId)</td><td><span class="tag t-imp">IMP</span> <strong>N+1 prevention</strong>: fetch TẤT CẢ favorite paper_id của user trong 1 query, nhận <code>Set&lt;UUID&gt;</code>. Mọi <code>favIds.contains()</code> sau đó là O(1) HashMap lookup. Thay thế: gọi <code>existsByUserIdAndPaperId()</code> trong vòng lặp = N queries cho N papers.</td></tr>
+<tr><td>8</td><td>userId != null ? ... : Set.of()</td><td>Guard: admin endpoint có thể gọi getPapers() không có userId (null). <code>Set.of()</code> = immutable empty set, <code>contains()</code> luôn trả false → isFavorite luôn false.</td></tr>
+<tr><td>12</td><td>var unsorted = PageRequest.of(page, size)</td><td><span class="tag t-imp">IMP</span> <strong>No Sort intentionally</strong>: native query <code>fullTextSearch</code> đã có <code>ORDER BY published_at DESC</code>. Nếu thêm Sort vào Pageable → Spring Data JPA append thêm <code>ORDER BY publishedat</code> (camelCase) → PostgreSQL không tìm thấy column → error.</td></tr>
+<tr><td>15</td><td>.map(p -> paperMapper.toResponse(p, favIds.contains(p.getId())))</td><td><span class="tag t-imp">IMP</span> Lambda truyền kết quả <code>favIds.contains()</code> trực tiếp làm tham số <code>isFavorite</code>. Set.contains() = O(1) → map 50 papers = 50 O(1) ops, không phải 50 DB queries.</td></tr>
+<tr><td>19–22</td><td>findDonePapersByTopicId với Sort</td><td>JPQL query (không phải native) → Sort OK. Spring Data JPA translate <code>Sort.by("publishedAt")</code> thành <code>ORDER BY p.published_at DESC</code> correctly.</td></tr>
+<tr><td>34</td><td>paper.getEmbedding() == null → return List.of()</td><td>Guard: PENDING papers chưa có embedding. List.of() = immutable empty list. Không throw exception — Controller nhận danh sách rỗng, trả 200 với empty recommendations.</td></tr>
+<tr><td>36</td><td>VectorUtils.toVectorString(paper.getEmbedding())</td><td>Chuyển <code>float[384]</code> → <code>"[0.1,...,0.384]"</code> để truyền vào native query parameter. Native query cần String vì JDBC không có vector type — PostgreSQL cast <code>CAST(:embedding AS vector)</code>.</td></tr>
+<tr><td>37</td><td>OffsetDateTime.now().minusYears(1)</td><td>Tính từ thời điểm request, không hardcode năm cụ thể. <code>OffsetDateTime</code> (có timezone) thay vì <code>LocalDateTime</code> — consistent với các timestamp khác trong hệ thống.</td></tr>
+<tr><td>44</td><td>OffsetDateTime.now().minusYears(2)</td><td>Trend stats 2 năm. Không query toàn bộ history — tránh trả data quá cũ không còn giá trị phân tích xu hướng.</td></tr>
+<tr><td>46</td><td>Map.of("month", row[0], "count", row[1])</td><td><code>findTrendStats</code> trả <code>List&lt;Object[]&gt;</code> từ native query. <code>row[0]</code> = month string "2025-01", <code>row[1]</code> = count Long. Map.of() tạo immutable map → serialize thành <code>{"month":"2025-01","count":5}</code>.</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<!-- ══════════ FAVORITE SERVICE ══════════ -->
+<section id="sv4">
+<h2>FavoriteService — Idempotent Operations</h2>
+<div class="fp">service/FavoriteService.java</div>
+<div class="cb-wrap">
+<span class="lb">Java</span>
+<pre><code><span class="ann">@Service @RequiredArgsConstructor</span>
+<span class="kw">public class</span> <span class="tp">FavoriteService</span> {
+
+    <span class="ann">@Transactional</span>
+    <span class="kw">public void</span> <span class="fn">addFavorite</span>(<span class="tp">UUID</span> paperId, <span class="tp">UUID</span> userId) {
+        <span class="kw">if</span> (favoriteRepository.existsByUserIdAndPaperId(userId, paperId)) {
+            <span class="kw">return</span>;
+        }
+        <span class="tp">Paper</span> paper = paperRepository.findById(paperId)
+                .orElseThrow(() -> <span class="tp">AppException</span>.notFound(<span class="str">"Paper not found"</span>));
+        <span class="tp">User</span> user = userRepository.getReferenceById(userId);
+        favoriteRepository.save(<span class="tp">Favorite</span>.builder().user(user).paper(paper).build());
+    }
+
+    <span class="ann">@Transactional</span>
+    <span class="kw">public void</span> <span class="fn">removeFavorite</span>(<span class="tp">UUID</span> paperId, <span class="tp">UUID</span> userId) {
+        <span class="kw">int</span> deleted = favoriteRepository.deleteByUserIdAndPaperId(userId, paperId);
+        <span class="kw">if</span> (deleted == <span class="num">0</span>) {
+            <span class="kw">throw</span> <span class="tp">AppException</span>.notFound(<span class="str">"Favorite not found"</span>);
+        }
+    }
+
+    <span class="ann">@Transactional</span>(readOnly = <span class="kw">true</span>)
+    <span class="kw">public</span> <span class="tp">PagedResponse</span>&lt;<span class="tp">PaperResponse</span>&gt; <span class="fn">getFavorites</span>(<span class="tp">UUID</span> userId, <span class="kw">int</span> page, <span class="kw">int</span> size) {
+        <span class="kw">var</span> pageable = <span class="tp">PageRequest</span>.of(page, size, <span class="tp">Sort</span>.by(<span class="str">"createdAt"</span>).descending());
+        <span class="kw">return</span> <span class="tp">PagedResponse</span>.of(
+                favoriteRepository.findByUserIdOrderByCreatedAtDesc(userId, pageable)
+                        .map(fav -> paperMapper.toResponse(fav.getPaper(), <span class="kw">true</span>)));
+    }
+}</code></pre>
+<button class="ann-btn" onclick="toggleAnn(this)">
+  <span class="arr">▶</span> Xem giải thích từng dòng
+  <span class="pill">28 dòng · 8 annotation</span>
+</button>
+</div>
+<div class="ann-panel">
+<table class="ann-table">
+<thead><tr><th>Dòng</th><th>Code</th><th>Giải thích</th></tr></thead>
+<tbody>
+<tr><td>6–7</td><td>existsByUserIdAndPaperId → return sớm</td><td><span class="tag t-imp">IMP</span> <strong>Idempotent</strong>: đã favorite → bỏ qua silently, không throw 409 Conflict. Frontend dùng optimistic update (click → UI update ngay, không chờ response). Nếu server throw 409 → frontend phải revert UI → UX kém. Return void = thành công cho client.</td></tr>
+<tr><td>9</td><td>paperRepository.findById(paperId)</td><td>Verify paper tồn tại trước khi insert Favorite. Nếu paperId không tồn tại → Foreign Key violation khi INSERT → ugly error. Kiểm tra trước → 404 rõ ràng hơn.</td></tr>
+<tr><td>11</td><td>userRepository.getReferenceById(userId)</td><td>Proxy, không SELECT. Chỉ cần để set FK user_id trong Favorite entity. Hibernate dùng userId trực tiếp khi INSERT.</td></tr>
+<tr><td>12</td><td>Favorite.builder().user(user).paper(paper).build()</td><td>Builder pattern: rõ ràng, không nhầm thứ tự tham số. id=null → Hibernate/DB tự generate UUID. created_at=null → @CreationTimestamp tự populate.</td></tr>
+<tr><td>16</td><td>int deleted = deleteByUserIdAndPaperId()</td><td><span class="tag t-imp">IMP</span> Trả số rows bị xóa. Nếu = 0: paper không trong favorites của user này → 404. Không cần load Favorite trước rồi mới delete — tránh 1 SELECT không cần thiết.</td></tr>
+<tr><td>17–19</td><td>if (deleted == 0) throw 404</td><td>Feedback rõ ràng: user biết paper chưa/không còn trong favorites. Khác với addFavorite (idempotent), removeFavorite có thể cần báo lỗi nếu double-click remove — tuỳ UX decision.</td></tr>
+<tr><td>26</td><td>fav.getPaper()</td><td>Favorite entity có <code>@ManyToOne(fetch=LAZY)</code> với Paper. Gọi <code>fav.getPaper()</code> trong <code>@Transactional</code> context → Hibernate lazy-load Paper. Nếu gọi ngoài transaction → LazyInitializationException.</td></tr>
+<tr><td>26</td><td>paperMapper.toResponse(fav.getPaper(), true)</td><td>Hardcode <code>isFavorite=true</code> — đây là danh sách FAVORITES, mọi paper đều đã favorite. Không cần query DB để check.</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+
+<!-- ══════════ ARXIV FETCH ══════════ -->
+<section id="ai1">
+<h2>ArxivFetchService — Fetch &amp; Parse XML</h2>
+<div class="fp">service/ai/ArxivFetchService.java</div>
+<div class="cb-wrap">
+<span class="lb">Java</span>
+<pre><code><span class="kw">private static final</span> <span class="tp">String</span> ARXIV_API =
+    <span class="str">"https://export.arxiv.org/api/query?search_query=all:{keyword}"</span>
+    + <span class="str">"&sortBy=submittedDate&sortOrder=descending&max_results={maxResults}"</span>;
+
+<span class="kw">public</span> <span class="tp">List</span>&lt;<span class="tp">Paper</span>&gt; <span class="fn">fetchByKeyword</span>(<span class="tp">String</span> keyword) {
+    <span class="tp">String</span> encoded = <span class="tp">URLEncoder</span>.encode(keyword, <span class="tp">StandardCharsets</span>.UTF_8);
+    <span class="tp">String</span> url = ARXIV_API
+            .replace(<span class="str">"{keyword}"</span>, encoded)
+            .replace(<span class="str">"{maxResults}"</span>, <span class="tp">String</span>.valueOf(maxResults));
+
+    <span class="tp">String</span> xml = <span class="kw">null</span>;
+    <span class="kw">for</span> (<span class="kw">int</span> attempt = <span class="num">0</span>; attempt &lt;= <span class="num">2</span>; attempt++) {
+        <span class="kw">try</span> {
+            <span class="kw">if</span> (attempt &gt; <span class="num">0</span>) {
+                <span class="kw">long</span> backoff = (<span class="kw">long</span>) <span class="tp">Math</span>.pow(<span class="num">2</span>, attempt) * <span class="num">1000L</span>;
+                <span class="tp">Thread</span>.sleep(backoff);
+            }
+            xml = restClient.get().uri(url).retrieve().body(<span class="tp">String</span>.class);
+            <span class="kw">break</span>;
+        } <span class="kw">catch</span> (<span class="tp">Exception</span> e) {
+            <span class="kw">if</span> (attempt == <span class="num">2</span>) {
+                log.error(<span class="str">"Failed to fetch arXiv for keyword '{}': {}"</span>, keyword, e.getMessage());
+                <span class="kw">return</span> <span class="tp">List</span>.of();
+            }
+        }
+    }
+
+    <span class="kw">try</span> { <span class="tp">Thread</span>.sleep(requestDelayMs); }
+    <span class="kw">catch</span> (<span class="tp">InterruptedException</span> e) { <span class="tp">Thread</span>.currentThread().interrupt(); }
+
+    <span class="kw">return</span> <span class="fn">parseAtomXml</span>(xml);
+}
+
+<span class="kw">private</span> <span class="tp">List</span>&lt;<span class="tp">Paper</span>&gt; <span class="fn">parseAtomXml</span>(<span class="tp">String</span> xml) {
+    <span class="tp">Document</span> doc = <span class="tp">DocumentBuilderFactory</span>.newInstance()
+            .newDocumentBuilder()
+            .parse(<span class="kw">new</span> <span class="tp">ByteArrayInputStream</span>(xml.getBytes()));
+    doc.getDocumentElement().normalize();
+    <span class="tp">NodeList</span> entries = doc.getElementsByTagName(<span class="str">"entry"</span>);
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; entries.getLength(); i++) {
+        <span class="kw">var</span> children = entries.item(i).getChildNodes();
+        <span class="kw">for</span> (<span class="kw">int</span> j = <span class="num">0</span>; j &lt; children.getLength(); j++) {
+            <span class="kw">var</span> node = children.item(j);
+            <span class="kw">switch</span> (node.getNodeName()) {
+                <span class="kw">case</span> <span class="str">"id"</span> -> {
+                    <span class="tp">String</span> raw = node.getTextContent().trim();
+                    arxivId = raw.replaceAll(<span class="str">".*/abs/"</span>, <span class="str">""</span>).replaceAll(<span class="str">"v\\d+$"</span>, <span class="str">""</span>);
+                    paperUrl = raw;
+                }
+                <span class="kw">case</span> <span class="str">"author"</span> -> {
+                    <span class="kw">var</span> nameNode = ((<span class="tp">Element</span>) node).getElementsByTagName(<span class="str">"name"</span>).item(<span class="num">0</span>);
+                    <span class="kw">if</span> (nameNode != <span class="kw">null</span>) {
+                        <span class="tp">String</span> name = nameNode.getTextContent().trim();
+                        authors = (authors == <span class="kw">null</span>) ? name : authors + <span class="str">", "</span> + name;
+                    }
+                }
+            }
+        }
+        papers.add(<span class="tp">Paper</span>.builder()
+                .processingStatus(<span class="str">"PENDING"</span>).retryCount(<span class="num">0</span>).isDuplicate(<span class="kw">false</span>).build());
+    }
+}</code></pre>
+<button class="ann-btn" onclick="toggleAnn(this)">
+  <span class="arr">▶</span> Xem giải thích từng dòng
+  <span class="pill">50 dòng · 12 annotation</span>
+</button>
+</div>
+<div class="ann-panel">
+<table class="ann-table">
+<thead><tr><th>Dòng</th><th>Code</th><th>Giải thích</th></tr></thead>
+<tbody>
+<tr><td>2–3</td><td>sortBy=submittedDate&sortOrder=descending</td><td><span class="tag t-imp">IMP</span> arXiv default sort = relevance (không phải ngày). Thiếu params này → nhận papers cũ random. Với params này → luôn nhận papers mới nhất. Discovered in production: không có params → fetch papers từ 2015.</td></tr>
+<tr><td>6</td><td>URLEncoder.encode(keyword, UTF_8)</td><td>Encode keyword trước khi ghép vào URL. "large language model" → "large+language+model". Thiếu encode: nếu keyword có dấu cách hoặc ký tự đặc biệt → URL malformed → arXiv trả error.</td></tr>
+<tr><td>11</td><td>for (int attempt = 0; attempt &lt;= 2; attempt++)</td><td>Max 3 lần thử (attempt 0, 1, 2). Attempt 0 = lần đầu (không phải retry). Attempt 1, 2 = retry với backoff.</td></tr>
+<tr><td>14–15</td><td>Math.pow(2, attempt) * 1000L</td><td><span class="tag t-imp">IMP</span> Exponential backoff: attempt 1 = 2^1 × 1000 = 2s, attempt 2 = 2^2 × 1000 = 4s. Tránh spam server khi đang quá tải. Long cast để tránh overflow khi pow lớn.</td></tr>
+<tr><td>18</td><td>break sau khi success</td><td>Exit loop ngay khi thành công. Không cần flag variable — break từ for loop.</td></tr>
+<tr><td>20–22</td><td>if (attempt == 2) return List.of()</td><td>Đã hết lần retry → bỏ keyword này, tiếp tục keyword tiếp theo. Không throw exception — 1 keyword fail không stop toàn bộ batch.</td></tr>
+<tr><td>25–27</td><td>Thread.sleep(requestDelayMs) + interrupt handling</td><td><span class="tag t-imp">IMP</span> Delay 1500ms NGOÀI try-catch chính — luôn delay dù request thành công hay retry. Pattern interrupt: nếu thread bị interrupt trong sleep → re-set interrupt flag (<code>Thread.currentThread().interrupt()</code>) để code caller biết.</td></tr>
+<tr><td>34</td><td>doc.getDocumentElement().normalize()</td><td>Merge adjacent text nodes — tránh DOM parser split 1 text node thành nhiều nodes. Ví dụ: title "Machine\nLearning" có thể là 2 text nodes → normalize → 1 node.</td></tr>
+<tr><td>40–44</td><td>raw.replaceAll(".*/abs/", "").replaceAll("v\\d+$", "")</td><td>Parse arXiv ID từ URL. URL format: <code>http://arxiv.org/abs/2301.00001v1</code>. Regex 1: bỏ <code>http://arxiv.org/abs/</code>. Regex 2: bỏ version suffix <code>v1</code>, <code>v2</code>, ... Kết quả: <code>2301.00001</code> — paper ID ổn định, không thay đổi khi có version mới.</td></tr>
+<tr><td>47–50</td><td>getElementsByTagName("name").item(0)</td><td>XML &lt;author&gt;&lt;name&gt;Alice&lt;/name&gt;&lt;/author&gt;. getElementsByTagName("name") trả NodeList. item(0) = node đầu tiên. Null check vì đôi khi &lt;name&gt; vắng mặt (arXiv data inconsistency).</td></tr>
+<tr><td>51</td><td>authors == null ? name : authors + ", " + name</td><td>Gom nhiều authors: null → "Alice" → "Alice, Bob" → "Alice, Bob, Charlie". Không dùng StringBuilder để code gọn hơn — concat ít lần, không cần optimize.</td></tr>
+<tr><td>56</td><td>processingStatus("PENDING").retryCount(0).isDuplicate(false)</td><td><span class="tag t-imp">IMP</span> Initial state: PENDING (chưa qua AI pipeline), retryCount=0 (chưa fail), isDuplicate=false (chưa check). PaperPipelineService sẽ cập nhật các field này.</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<!-- ══════════ EMBEDDING ══════════ -->
+<section id="ai2">
+<h2>EmbeddingService — HuggingFace + Mean Pooling</h2>
+<div class="fp">service/ai/EmbeddingService.java</div>
+<div class="cb-wrap">
+<span class="lb">Java</span>
+<pre><code><span class="kw">public</span> <span class="tp">List</span>&lt;<span class="kw">float</span>[]&gt; <span class="fn">embedBatch</span>(<span class="tp">List</span>&lt;<span class="tp">String</span>&gt; texts) {
+    <span class="tp">String</span> url = HF_URL.replace(<span class="str">"{model}"</span>, model);
+
+    <span class="kw">for</span> (<span class="kw">int</span> attempt = <span class="num">0</span>; attempt &lt;= <span class="num">1</span>; attempt++) {
+        <span class="kw">try</span> {
+            <span class="kw">if</span> (attempt &gt; <span class="num">0</span>) <span class="tp">Thread</span>.sleep(retryWaitMs);
+
+            <span class="ann">@SuppressWarnings</span>(<span class="str">"unchecked"</span>)
+            <span class="kw">var</span> raw = (<span class="tp">List</span>&lt;<span class="tp">Object</span>&gt;) restClient.post()
+                    .uri(url)
+                    .contentType(<span class="tp">MediaType</span>.APPLICATION_JSON)
+                    .body(<span class="tp">Map</span>.of(<span class="str">"inputs"</span>, texts))
+                    .retrieve()
+                    .body(<span class="tp">List</span>.class);
+
+            <span class="kw">if</span> (raw == <span class="kw">null</span> || raw.isEmpty()) {
+                log.error(<span class="str">"[HF] Empty/null body from {} — check API key"</span>, url);
+                <span class="kw">return null</span>;
+            }
+            <span class="kw">return</span> raw.stream().map(<span class="kw">this</span>::<span class="fn">extractEmbedding</span>).toList();
+
+        } <span class="kw">catch</span> (<span class="tp">HttpServerErrorException</span> e) {
+            <span class="kw">if</span> (attempt == <span class="num">0</span> && e.getStatusCode().value() == <span class="num">503</span>) {
+                log.warn(<span class="str">"[HF] 503 cold start, waiting {}ms"</span>, retryWaitMs);
+                <span class="kw">try</span> { <span class="tp">Thread</span>.sleep(retryWaitMs); } <span class="kw">catch</span> (<span class="tp">InterruptedException</span> ie) {
+                    <span class="tp">Thread</span>.currentThread().interrupt(); <span class="kw">return null</span>;
+                }
+            } <span class="kw">else</span> { log.error(<span class="str">"[HF] HTTP {} from {}: {}"</span>, e.getStatusCode(), url, e.getResponseBodyAsString()); <span class="kw">return null</span>; }
+        } <span class="kw">catch</span> (<span class="tp">Exception</span> e) {
+            log.error(<span class="str">"[HF] Request failed attempt {}: {}"</span>, attempt+<span class="num">1</span>, e.getMessage()); <span class="kw">if</span> (attempt == <span class="num">1</span>) <span class="kw">return null</span>;
+        }
+    }
+    <span class="kw">return null</span>;
+}
+
+<span class="ann">@SuppressWarnings</span>(<span class="str">"unchecked"</span>)
+<span class="kw">private</span> <span class="kw">float</span>[] <span class="fn">extractEmbedding</span>(<span class="tp">Object</span> item) {
+    <span class="kw">if</span> (item <span class="kw">instanceof</span> <span class="tp">List</span>&lt;?&gt; list && !list.isEmpty()) {
+        <span class="tp">Object</span> first = list.get(<span class="num">0</span>);
+        <span class="kw">if</span> (first <span class="kw">instanceof</span> <span class="tp">Number</span>) {
+            <span class="kw">return</span> <span class="fn">toFloatArray</span>((<span class="tp">List</span>&lt;<span class="tp">Number</span>&gt;) list);
+        } <span class="kw">else if</span> (first <span class="kw">instanceof</span> <span class="tp">List</span>&lt;?&gt;) {
+            <span class="kw">return</span> <span class="fn">meanPool</span>((<span class="tp">List</span>&lt;<span class="tp">List</span>&lt;<span class="tp">Number</span>&gt;&gt;) list);
+        }
+    }
+    <span class="kw">return new</span> <span class="kw">float</span>[<span class="num">0</span>];
+}
+
+<span class="kw">private</span> <span class="kw">float</span>[] <span class="fn">meanPool</span>(<span class="tp">List</span>&lt;<span class="tp">List</span>&lt;<span class="tp">Number</span>&gt;&gt; tokenEmbeddings) {
+    <span class="kw">int</span> dims = tokenEmbeddings.get(<span class="num">0</span>).size();
+    <span class="kw">float</span>[] result = <span class="kw">new</span> <span class="kw">float</span>[dims];
+    <span class="kw">for</span> (<span class="tp">List</span>&lt;<span class="tp">Number</span>&gt; token : tokenEmbeddings)
+        <span class="kw">for</span> (<span class="kw">int</span> d = <span class="num">0</span>; d &lt; dims; d++) result[d] += token.get(d).floatValue();
+    <span class="kw">for</span> (<span class="kw">int</span> d = <span class="num">0</span>; d &lt; dims; d++) result[d] /= tokenEmbeddings.size();
+    <span class="kw">return</span> result;
+}</code></pre>
+<button class="ann-btn" onclick="toggleAnn(this)">
+  <span class="arr">▶</span> Xem giải thích từng dòng
+  <span class="pill">52 dòng · 11 annotation</span>
+</button>
+</div>
+<div class="ann-panel">
+<table class="ann-table">
+<thead><tr><th>Dòng</th><th>Code</th><th>Giải thích</th></tr></thead>
+<tbody>
+<tr><td>3</td><td>for (attempt = 0; attempt &lt;= 1; attempt++)</td><td>Max 2 lần: attempt 0 (first try) + attempt 1 (1 retry). Khác ArxivFetch (3 lần) vì HF chỉ cần 1 retry cho cold start. Nhiều retry hơn = pipeline chậm hơn cho mọi paper.</td></tr>
+<tr><td>5</td><td>if (attempt &gt; 0) Thread.sleep(retryWaitMs)</td><td><span class="tag t-imp">IMP</span> Sleep 30s TRƯỚC retry lần 2. Lý do: HF 503 = model đang warm up. 30s thường đủ để model sẵn sàng. Sleep ở đầu retry (không phải cuối attempt 0) để tránh sleep thừa nếu attempt 0 thành công.</td></tr>
+<tr><td>12</td><td>Map.of("inputs", texts)</td><td>HuggingFace feature-extraction API format. Không có "options" field — một số HF endpoints báo lỗi "unexpected field" nếu có options.</td></tr>
+<tr><td>19</td><td>raw.stream().map(this::extractEmbedding).toList()</td><td>Stream map từng element của response. HF response: list of embeddings, một embedding per input text. <code>this::extractEmbedding</code> = method reference, gọn hơn lambda.</td></tr>
+<tr><td>21</td><td>catch (HttpServerErrorException e)</td><td><span class="tag t-imp">IMP</span> Bắt riêng HTTP 5xx. Khác với generic Exception — cần kiểm tra status code cụ thể (503 vs 500). <code>e.getResponseBodyAsString()</code> log body từ HF để debug.</td></tr>
+<tr><td>22</td><td>attempt == 0 && e.getStatusCode().value() == 503</td><td>Chỉ retry cho 503 ở attempt đầu tiên. 503 = service unavailable (cold start). 500 = server error (không retry — sẽ thử lại ở attempt 0 của request tiếp theo).</td></tr>
+<tr><td>35</td><td>if (first instanceof Number)</td><td><span class="tag t-imp">IMP</span> Phát hiện response format. 2D response (<code>List&lt;Float&gt;</code>): first element là Number → đây là pooled sentence embedding → dùng trực tiếp.</td></tr>
+<tr><td>37–39</td><td>else if (first instanceof List&lt;?&gt;)</td><td>3D response (<code>List&lt;List&lt;Float&gt;&gt;</code>): first element là List → đây là token-level embeddings → cần mean pool. BAAI/bge-small-en-v1.5 đôi khi trả 3D depending on API version.</td></tr>
+<tr><td>43</td><td>meanPool(tokenEmbeddings)</td><td><span class="tag t-why">WHY</span> Mean pooling: average tất cả token embeddings → sentence embedding. Shape [seq_len, 384] → [384]. Cách chuẩn để tạo sentence embedding từ token embeddings của BERT-based models.</td></tr>
+<tr><td>47–50</td><td>for dims, result[d] += token.get(d), /= size</td><td>Bước 1: sum tất cả token vectors element-wise. Bước 2: chia cho số token → average. Kết quả: float[384] đại diện cho toàn bộ câu input.</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+
+<!-- ══════════ GROQ SERVICE ══════════ -->
+<section id="ai3">
+<h2>GroqService — AI Summary + Quality Score</h2>
+<div class="fp">service/ai/GroqService.java</div>
+<div class="cb-wrap">
+<span class="lb">Java</span>
+<pre><code><span class="kw">private static final</span> <span class="tp">ObjectMapper</span> OBJECT_MAPPER = <span class="kw">new</span> <span class="tp">ObjectMapper</span>();
+
+<span class="kw">public record</span> <span class="tp">GroqResult</span>(<span class="tp">String</span> summary, <span class="tp">Float</span> qualityScore, <span class="tp">String</span> error) {
+    <span class="kw">public boolean</span> <span class="fn">isValid</span>() { <span class="kw">return</span> error == <span class="kw">null</span>; }
+}
+
+<span class="kw">public</span> <span class="tp">GroqResult</span> <span class="fn">summarize</span>(<span class="tp">String</span> title, <span class="tp">String</span> abstractText) {
+    <span class="kw">for</span> (<span class="kw">int</span> attempt = <span class="num">0</span>; attempt &lt;= <span class="num">1</span>; attempt++) {
+        <span class="kw">try</span> {
+            <span class="kw">if</span> (attempt &gt; <span class="num">0</span>) <span class="tp">Thread</span>.sleep(transientRetryDelayMs);
+
+            <span class="kw">var</span> body = <span class="tp">Map</span>.of(
+                    <span class="str">"model"</span>, model,
+                    <span class="str">"response_format"</span>, <span class="tp">Map</span>.of(<span class="str">"type"</span>, <span class="str">"json_object"</span>),
+                    <span class="str">"messages"</span>, <span class="tp">List</span>.of(<span class="tp">Map</span>.of(<span class="str">"role"</span>, <span class="str">"user"</span>, <span class="str">"content"</span>, <span class="fn">buildPrompt</span>(title, abstractText)))
+            );
+
+            <span class="kw">var</span> response = restClient.post().uri(GROQ_API)
+                    .contentType(<span class="tp">MediaType</span>.APPLICATION_JSON)
+                    .body(body).retrieve().body(<span class="tp">Map</span>.class);
+
+            <span class="tp">Thread</span>.sleep(callDelayMs);
+            <span class="kw">return</span> <span class="fn">parseResponse</span>(response);
+
+        } <span class="kw">catch</span> (<span class="tp">Exception</span> e) {
+            <span class="tp">String</span> msg = e.getMessage() != <span class="kw">null</span> ? e.getMessage() : <span class="str">""</span>;
+            <span class="kw">if</span> (msg.contains(<span class="str">"429"</span>)) {
+                log.warn(<span class="str">"Groq 429 rate limit, skipping retry: {}"</span>, title);
+                <span class="kw">return new</span> <span class="tp">GroqResult</span>(<span class="kw">null</span>, <span class="kw">null</span>, <span class="str">"Groq rate limit: "</span> + msg);
+            }
+            <span class="kw">if</span> (attempt == <span class="num">1</span>) {
+                log.error(<span class="str">"Groq failed after retry for '{}': {}"</span>, title, msg);
+                <span class="kw">return new</span> <span class="tp">GroqResult</span>(<span class="kw">null</span>, <span class="kw">null</span>, msg);
+            }
+        }
+    }
+    <span class="kw">return new</span> <span class="tp">GroqResult</span>(<span class="kw">null</span>, <span class="kw">null</span>, <span class="str">"Groq failed"</span>);
+}
+
+<span class="kw">private</span> <span class="tp">GroqResult</span> <span class="fn">parseResponse</span>(<span class="tp">Map</span>&lt;?, ?&gt; response) {
+    <span class="kw">try</span> {
+        <span class="kw">var</span> choices = (<span class="tp">List</span>&lt;<span class="tp">Map</span>&lt;?, ?&gt;&gt;) response.get(<span class="str">"choices"</span>);
+        <span class="kw">var</span> message = (<span class="tp">Map</span>&lt;?, ?&gt;) choices.get(<span class="num">0</span>).get(<span class="str">"message"</span>);
+        <span class="tp">String</span> content = (<span class="tp">String</span>) message.get(<span class="str">"content"</span>);
+
+        <span class="kw">var</span> json = OBJECT_MAPPER.readValue(content, <span class="tp">Map</span>.class);
+        <span class="tp">String</span> summary = (<span class="tp">String</span>) json.get(<span class="str">"summary"</span>);
+        <span class="tp">Number</span> scoreNum = (<span class="tp">Number</span>) json.get(<span class="str">"quality_score"</span>);
+
+        <span class="kw">if</span> (summary == <span class="kw">null</span> || summary.isBlank())
+            <span class="kw">return new</span> <span class="tp">GroqResult</span>(<span class="kw">null</span>, <span class="kw">null</span>, <span class="str">"Empty summary from Groq"</span>);
+        <span class="kw">if</span> (summary.length() > maxSummaryLength)
+            summary = summary.substring(<span class="num">0</span>, maxSummaryLength);
+        <span class="kw">if</span> (scoreNum == <span class="kw">null</span>)
+            <span class="kw">return new</span> <span class="tp">GroqResult</span>(<span class="kw">null</span>, <span class="kw">null</span>, <span class="str">"Missing quality_score from Groq"</span>);
+        <span class="kw">float</span> score = scoreNum.floatValue();
+        <span class="kw">if</span> (score &lt; <span class="num">0.0f</span> || score &gt; <span class="num">10.0f</span>)
+            <span class="kw">return new</span> <span class="tp">GroqResult</span>(<span class="kw">null</span>, <span class="kw">null</span>, <span class="str">"quality_score out of range: "</span> + score);
+
+        <span class="kw">return new</span> <span class="tp">GroqResult</span>(summary, score, <span class="kw">null</span>);
+    } <span class="kw">catch</span> (<span class="tp">Exception</span> e) {
+        <span class="kw">return new</span> <span class="tp">GroqResult</span>(<span class="kw">null</span>, <span class="kw">null</span>, <span class="str">"Failed to parse Groq response: "</span> + e.getMessage());
+    }
+}</code></pre>
+<button class="ann-btn" onclick="toggleAnn(this)">
+  <span class="arr">▶</span> Xem giải thích từng dòng
+  <span class="pill">58 dòng · 14 annotation</span>
+</button>
+</div>
+<div class="ann-panel">
+<table class="ann-table">
+<thead><tr><th>Dòng</th><th>Code</th><th>Giải thích</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>private static final ObjectMapper OBJECT_MAPPER</td><td><span class="tag t-why">WHY</span> <code>static final</code> singleton, không inject làm @Bean. Lý do: ObjectMapper là thread-safe sau khi configured. Tạo mới mỗi lần gọi rất tốn kém. Không inject để tránh circular dependency với Jackson config của Spring.</td></tr>
+<tr><td>3–5</td><td>record GroqResult(summary, qualityScore, error)</td><td><span class="tag t-imp">IMP</span> Java 16+ record: immutable, auto-generated equals/hashCode/toString/getters. Trả 1 object thay vì throw exception. Caller check <code>result.isValid()</code> thay vì try-catch. Cleaner API.</td></tr>
+<tr><td>4</td><td>boolean isValid() { return error == null; }</td><td>Convention: error=null = success, error=non-null = failure. Caller: <code>if (!result.isValid()) markFailed(paper, result.error())</code>. Không dùng Optional để giữ simple.</td></tr>
+<tr><td>13</td><td>"response_format", Map.of("type", "json_object")</td><td><span class="tag t-imp">IMP</span> Buộc Groq/llama trả JSON thuần. Không có flag này → LLM có thể thêm "Sure, here is..." trước JSON → parse fail. json_object mode đảm bảo content là valid JSON object.</td></tr>
+<tr><td>19</td><td>Thread.sleep(callDelayMs)</td><td>Delay 2s SAU khi nhận response thành công. Groq free tier ~30 RPM = 1 call/2s. Sleep sau parse để đảm bảo >= 2s giữa 2 calls liên tiếp.</td></tr>
+<tr><td>24–27</td><td>if (msg.contains("429")) return GroqResult(null, null, "rate limit")</td><td><span class="tag t-imp">IMP</span> HTTP 429 Rate Limit: <strong>KHÔNG retry ngay</strong>. Retry 429 ngay sẽ trigger 429 tiếp theo (vòng lặp). Thay vào đó: trả FAILED → RetryScheduler sẽ retry sau 30 phút — đủ thời gian rate limit reset.</td></tr>
+<tr><td>28–31</td><td>if (attempt == 1) return GroqResult(..., msg)</td><td>HTTP 5xx/timeout: retry 1 lần sau transientRetryDelayMs (5s). Sau attempt 1 vẫn fail → trả FAILED. Caller (PaperPipelineService) set paper.processingStatus = FAILED.</td></tr>
+<tr><td>37–39</td><td>choices.get(0).get("message").get("content")</td><td>Groq response structure: <code>{"choices": [{"message": {"content": "{\"summary\":...}"}}]}</code>. content là String JSON — cần parse lần 2 với ObjectMapper. Tên field "content" là OpenAI API convention mà Groq follow.</td></tr>
+<tr><td>42</td><td>OBJECT_MAPPER.readValue(content, Map.class)</td><td>Parse String JSON → Map. Không dùng @JsonProperty type-safe vì structure dynamic (LLM có thể thêm/bỏ field). Sau đó extract thủ công "summary" và "quality_score".</td></tr>
+<tr><td>44</td><td>summary.isBlank()</td><td>Guard: LLM đôi khi trả empty string (model overloaded, hallucination). isBlank() bắt cả empty string lẫn whitespace-only string.</td></tr>
+<tr><td>45–46</td><td>summary.length() &gt; maxSummaryLength → substring(0, max)</td><td>Truncate nếu LLM trả summary dài hơn 2000 ký tự (không tuân thủ prompt). Không throw error — truncate và dùng. DB column TEXT không giới hạn nhưng UX không cần summary quá dài.</td></tr>
+<tr><td>50–52</td><td>score &lt; 0.0f || score &gt; 10.0f → FAILED</td><td><span class="tag t-bug">BUG PREVENTED</span> LLM đôi khi trả score 8.5/10 (string) hoặc 85 (out of range). Guard này bắt outlier. Nếu không check: DB CHECK constraint reject → DataIntegrityViolationException → ugly 500 error.</td></tr>
+<tr><td>56–58</td><td>catch (Exception e) → GroqResult(..., "Failed to parse")</td><td>Catch-all cho parse errors. Ném exception từ parseResponse lên tầng gọi là bad practice — method này return GroqResult dù fail. Caller xử lý đồng nhất qua isValid().</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<!-- ══════════ PIPELINE ══════════ -->
+<section id="ai4">
+<h2>PaperPipelineService — Orchestrator AI</h2>
+<div class="fp">service/ai/PaperPipelineService.java</div>
+<div class="cb-wrap">
+<span class="lb">Java</span>
+<pre><code><span class="ann">@Transactional</span>(propagation = <span class="tp">Propagation</span>.REQUIRES_NEW)
+<span class="kw">public boolean</span> <span class="fn">process</span>(<span class="tp">Paper</span> paper) {
+    <span class="kw">if</span> (paperRepository.existsByArxivId(paper.getArxivId())) {
+        log.debug(<span class="str">"Skipping duplicate arxivId: {}"</span>, paper.getArxivId());
+        <span class="kw">return false</span>;
+    }
+    <span class="tp">Paper</span> saved = paperRepository.save(paper);
+    <span class="fn">runPipeline</span>(saved);
+    <span class="kw">return true</span>;
+}
+
+<span class="ann">@Transactional</span>(propagation = <span class="tp">Propagation</span>.REQUIRES_NEW)
+<span class="kw">public void</span> <span class="fn">retry</span>(<span class="tp">Paper</span> paper) {
+    paper.setRetryCount(paper.getRetryCount() + <span class="num">1</span>);
+    paper.setLastRetryAt(<span class="tp">OffsetDateTime</span>.now());
+    paper.setProcessingStatus(<span class="str">"PENDING"</span>);
+    paper.setLastError(<span class="kw">null</span>);
+    paperRepository.save(paper);
+    <span class="fn">runPipeline</span>(paper);
+}
+
+<span class="kw">private void</span> <span class="fn">runPipeline</span>(<span class="tp">Paper</span> paper) {
+    <span class="cmt">// Step 1: Embedding</span>
+    <span class="kw">float</span>[] embedding = embeddingService.embed(
+            (paper.getTitle() != <span class="kw">null</span> ? paper.getTitle() : <span class="str">""</span>)
+            + <span class="str">" "</span> + (paper.getAbstractText() != <span class="kw">null</span> ? paper.getAbstractText() : <span class="str">""</span>));
+    <span class="kw">if</span> (embedding == <span class="kw">null</span> || embedding.length == <span class="num">0</span>) {
+        <span class="fn">markFailed</span>(paper, <span class="str">"Embedding failed: empty/null response from HuggingFace"</span>);
+        <span class="kw">return</span>;
+    }
+    paper.setEmbedding(embedding);
+
+    <span class="cmt">// Step 2: Duplicate detection</span>
+    <span class="tp">String</span> embeddingStr = <span class="tp">VectorUtils</span>.toVectorString(embedding);
+    <span class="kw">var</span> windowStart = <span class="tp">OffsetDateTime</span>.now().minusDays(<span class="num">90</span>);
+    <span class="kw">var</span> duplicate = paperRepository.findDuplicate(paper.getId(), embeddingStr, windowStart);
+    <span class="kw">if</span> (duplicate.isPresent()) {
+        paper.setIsDuplicate(<span class="kw">true</span>);
+        paper.setOriginalPaper(duplicate.get());
+        paper.setProcessingStatus(<span class="str">"DONE"</span>);
+        paperRepository.save(paper);
+        <span class="kw">return</span>;
+    }
+
+    <span class="cmt">// Step 3: Groq</span>
+    <span class="kw">var</span> groqResult = groqService.summarize(paper.getTitle(), paper.getAbstractText());
+    <span class="kw">if</span> (!groqResult.isValid()) { <span class="fn">markFailed</span>(paper, groqResult.error()); <span class="kw">return</span>; }
+    paper.setSummary(groqResult.summary());
+    paper.setQualityScore(groqResult.qualityScore());
+
+    <span class="cmt">// Step 4: Topic matching + Notification</span>
+    <span class="tp">List</span>&lt;<span class="tp">Topic</span>&gt; activeTopics = topicRepository.findByIsActiveTrue();
+    <span class="kw">for</span> (<span class="tp">Topic</span> topic : activeTopics) {
+        <span class="kw">if</span> (topic.getKeywords() == <span class="kw">null</span> || topic.getKeywords().isBlank()) <span class="kw">continue</span>;
+        <span class="kw">boolean</span> matched = <span class="tp">Arrays</span>.stream(topic.getKeywords().split(<span class="str">","</span>))
+                .map(<span class="tp">String</span>::trim).filter(k -> !k.isEmpty())
+                .anyMatch(kw -> paperRepository.matchesTopic(paper.getId(), kw));
+        <span class="kw">if</span> (matched) {
+            paperTopicRepository.insertIfNotExists(paper.getId(), topic.getId());
+            <span class="tp">String</span> msg = <span class="tp">String</span>.format(<span class="str">"New paper matching your topic \"%s\": %s"</span>,
+                    topic.getName(), paper.getTitle());
+            notificationRepository.insertIfNotExists(topic.getUser().getId(), paper.getId(), msg);
+        }
+    }
+
+    <span class="cmt">// Step 5: Mark DONE</span>
+    paper.setProcessingStatus(<span class="str">"DONE"</span>);
+    paperRepository.save(paper);
+}
+
+<span class="kw">private void</span> <span class="fn">markFailed</span>(<span class="tp">Paper</span> paper, <span class="tp">String</span> error) {
+    paper.setProcessingStatus(<span class="str">"FAILED"</span>);
+    paper.setLastError(error);
+    paperRepository.save(paper);
+}</code></pre>
+<button class="ann-btn" onclick="toggleAnn(this)">
+  <span class="arr">▶</span> Xem giải thích từng dòng
+  <span class="pill">60 dòng · 15 annotation</span>
+</button>
+</div>
+<div class="ann-panel">
+<table class="ann-table">
+<thead><tr><th>Dòng</th><th>Code</th><th>Giải thích</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>@Transactional(propagation = REQUIRES_NEW)</td><td><span class="tag t-imp">IMP</span> Mỗi paper chạy trong <strong>transaction hoàn toàn độc lập</strong>. REQUIRES_NEW: suspend transaction hiện tại (nếu có), tạo transaction mới. Khi commit: chỉ paper này được commit. Khi rollback: chỉ paper này bị rollback — không ảnh hưởng papers khác đã xử lý.</td></tr>
+<tr><td>3–6</td><td>existsByArxivId → return false</td><td>Idempotency: arxivId đã tồn tại (paper trước đó đã processed) → skip. Trả false để caller đếm skipped papers. Không throw exception — duplicate là expected case khi cùng keyword match nhiều topics.</td></tr>
+<tr><td>7</td><td>Paper saved = paperRepository.save(paper)</td><td><span class="tag t-imp">IMP</span> Save TRƯỚC khi gọi AI services. Lý do: <code>findDuplicate()</code> cần <code>paper.getId()</code> (UUID), và query dùng <code>id != :excludeId</code>. UUID chỉ được assign sau khi save (Hibernate generate và set vào entity).</td></tr>
+<tr><td>13–17</td><td>retry(): setRetryCount++, setLastRetryAt, setProcessingStatus PENDING</td><td><span class="tag t-imp">IMP</span> Reset về PENDING trước khi retry — không chạy pipeline trên FAILED paper. setLastError(null): xóa error cũ để tránh nhầm lẫn nếu retry thành công. LastRetryAt: admin page hiển thị "last retry: 2h ago".</td></tr>
+<tr><td>24–26</td><td>title + " " + abstractText null-safe concat</td><td>Embedding input = title + space + abstract. Null check vì một số arXiv papers không có abstract. Concat về empty string thay vì NPE.</td></tr>
+<tr><td>27–30</td><td>embedding == null || embedding.length == 0 → markFailed</td><td><span class="tag t-imp">IMP</span> Early return pattern: fail fast, không tiếp tục các bước tốn kém (Groq API call). markFailed() set FAILED + lastError, sau đó return. Caller (RetryScheduler) sẽ retry sau 30 phút.</td></tr>
+<tr><td>34</td><td>VectorUtils.toVectorString(embedding)</td><td>Chuyển float[384] → String "[0.1,...,0.384]" để truyền vào native SQL parameter. JDBC không có vector type — pass String và PostgreSQL CAST.</td></tr>
+<tr><td>37–42</td><td>duplicate.isPresent() → setIsDuplicate + return</td><td><span class="tag t-why">WHY</span> Duplicate: không cần Groq summary (nội dung đã có ở original paper). Không cần topic matching (duplicate không tạo giá trị mới). Không tạo notification (tránh spam). Set DONE ngay và return. Tiết kiệm 1 Groq API call.</td></tr>
+<tr><td>47–48</td><td>!groqResult.isValid() → markFailed</td><td>Pattern nhất quán với embedding fail. Không throw exception từ Groq - GroqService trả GroqResult với error message. Pipeline xử lý đồng nhất.</td></tr>
+<tr><td>54</td><td>anyMatch(kw → paperRepository.matchesTopic(paperId, kw))</td><td><span class="tag t-imp">IMP</span> anyMatch: short-circuit — stop ngay khi tìm được 1 keyword match. Không cần check tất cả keywords nếu đã match 1. Mỗi matchesTopic() là 1 DB query → anyMatch tiết kiệm query.</td></tr>
+<tr><td>56</td><td>paperTopicRepository.insertIfNotExists(paperId, topicId)</td><td>ON CONFLICT DO NOTHING — idempotent. Nếu retry() chạy lại paper đã DONE → không tạo duplicate paper_topic rows.</td></tr>
+<tr><td>57–59</td><td>String.format("New paper matching...")</td><td>Message chứa tên topic và title — user đọc notification biết ngay paper về gì mà không cần click vào.</td></tr>
+<tr><td>60</td><td>notificationRepository.insertIfNotExists(...)</td><td>ON CONFLICT (user_id, paper_id, type) DO NOTHING — mỗi user nhận đúng 1 notification cho mỗi paper, dù pipeline retry nhiều lần.</td></tr>
+<tr><td>65</td><td>paper.setProcessingStatus("DONE"); paperRepository.save(paper)</td><td>DONE chỉ set sau khi TẤT CẢ steps thành công. Nếu set DONE trước và Groq fail → paper bị đánh dấu DONE nhưng không có summary. DONE = "hoàn chỉnh", không phải "đã xử lý một phần".</td></tr>
+<tr><td>68–71</td><td>markFailed(paper, error)</td><td>Tập trung logic FAILED vào 1 method: set status + set lastError + save. 3 steps này phải xảy ra cùng nhau — tách ra method đảm bảo không bỏ sót bước nào.</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+
+<!-- ══════════ PAPER CONTROLLER ══════════ -->
+<section id="ct1">
+<h2>PaperController &amp; AdminController</h2>
+<div class="fp">controller/PaperController.java &nbsp; AdminController.java</div>
+<div class="cb-wrap">
+<span class="lb">Java</span>
+<pre><code><span class="ann">@RestController</span>
+<span class="ann">@RequestMapping</span>(<span class="str">"/api/papers"</span>)
+<span class="ann">@RequiredArgsConstructor</span>
+<span class="kw">public class</span> <span class="tp">PaperController</span> {
+
+    <span class="ann">@GetMapping</span>
+    <span class="kw">public</span> <span class="tp">ApiResponse</span>&lt;<span class="tp">PagedResponse</span>&lt;<span class="tp">PaperResponse</span>&gt;&gt; <span class="fn">getPapers</span>(
+            <span class="ann">@AuthenticationPrincipal</span> <span class="tp">UUID</span> userId,
+            <span class="ann">@RequestParam</span>(required = <span class="kw">false</span>) <span class="tp">UUID</span> topicId,
+            <span class="ann">@RequestParam</span>(required = <span class="kw">false</span>) <span class="tp">String</span> keyword,
+            <span class="ann">@RequestParam</span>(defaultValue = <span class="str">"0"</span>) <span class="kw">int</span> page,
+            <span class="ann">@RequestParam</span>(defaultValue = <span class="str">"10"</span>) <span class="kw">int</span> size) {
+        <span class="kw">return</span> <span class="tp">ApiResponse</span>.ok(paperService.getPapers(userId, topicId, keyword, page, size));
+    }
+
+    <span class="ann">@GetMapping</span>(<span class="str">"/{id}/recommendations"</span>)
+    <span class="ann">@Cacheable</span>(value = <span class="str">"recommendations"</span>, key = <span class="str">"#id"</span>)
+    <span class="kw">public</span> <span class="tp">ApiResponse</span>&lt;<span class="tp">List</span>&lt;<span class="tp">PaperResponse</span>&gt;&gt; <span class="fn">getRecommendations</span>(<span class="ann">@PathVariable</span> <span class="tp">UUID</span> id) {
+        <span class="kw">return</span> <span class="tp">ApiResponse</span>.ok(paperService.getRecommendations(id));
+    }
+
+    <span class="cmt">// UC05 — Search alias: ?q=... (cùng logic với ?keyword=, dành cho frontend search bar)</span>
+    <span class="ann">@GetMapping</span>(<span class="str">"/search"</span>)
+    <span class="kw">public</span> <span class="tp">ApiResponse</span>&lt;<span class="tp">PagedResponse</span>&lt;<span class="tp">PaperResponse</span>&gt;&gt; <span class="fn">searchPapers</span>(
+            <span class="ann">@AuthenticationPrincipal</span> <span class="tp">UUID</span> userId,
+            <span class="ann">@RequestParam</span>(required = <span class="kw">false</span>) <span class="tp">String</span> q,
+            <span class="ann">@RequestParam</span>(defaultValue = <span class="str">"0"</span>) <span class="kw">int</span> page,
+            <span class="ann">@RequestParam</span>(defaultValue = <span class="str">"10"</span>) <span class="kw">int</span> size) {
+        <span class="kw">return</span> <span class="tp">ApiResponse</span>.ok(paperService.getPapers(userId, <span class="kw">null</span>, q, page, size));
+    }
+
+    <span class="ann">@GetMapping</span>(<span class="str">"/stats/trend"</span>)
+    <span class="kw">public</span> <span class="tp">ApiResponse</span>&lt;<span class="tp">List</span>&lt;<span class="tp">Map</span>&lt;<span class="tp">String</span>,<span class="tp">Object</span>&gt;&gt;&gt; <span class="fn">getTrendStats</span>(<span class="ann">@RequestParam</span> <span class="tp">UUID</span> topicId) {
+        <span class="kw">return</span> <span class="tp">ApiResponse</span>.ok(paperService.getTrendStats(topicId));
+    }
+}
+
+<span class="cmt">// AdminController.java</span>
+<span class="ann">@RestController</span>
+<span class="ann">@RequestMapping</span>(<span class="str">"/api/admin"</span>)
+<span class="ann">@PreAuthorize</span>(<span class="str">"hasRole('ADMIN')"</span>)
+<span class="ann">@RequiredArgsConstructor</span>
+<span class="kw">public class</span> <span class="tp">AdminController</span> {
+
+    <span class="cmt">// UC17 — Xem danh sách paper FAILED (phân trang)</span>
+    <span class="ann">@GetMapping</span>(<span class="str">"/papers/failed"</span>)
+    <span class="kw">public</span> <span class="tp">ApiResponse</span>&lt;<span class="tp">PagedResponse</span>&lt;<span class="tp">PaperResponse</span>&gt;&gt; <span class="fn">getFailedPapers</span>(
+            <span class="ann">@RequestParam</span>(defaultValue = <span class="str">"0"</span>) <span class="kw">int</span> page,
+            <span class="ann">@RequestParam</span>(defaultValue = <span class="str">"20"</span>) <span class="kw">int</span> size) {
+        <span class="kw">return</span> <span class="tp">ApiResponse</span>.ok(adminService.getFailedPapers(page, size));
+    }
+
+    <span class="cmt">// UC17 — Reset 1 paper: retryCount=0 → RetryScheduler pick up lại trong 30 phút</span>
+    <span class="ann">@PostMapping</span>(<span class="str">"/papers/{id}/reset"</span>)
+    <span class="kw">public</span> <span class="tp">ApiResponse</span>&lt;<span class="tp">Void</span>&gt; <span class="fn">resetFailedPaper</span>(<span class="ann">@PathVariable</span> <span class="tp">UUID</span> id) {
+        adminService.resetFailedPaper(id);
+        <span class="kw">return</span> <span class="tp">ApiResponse</span>.ok(<span class="str">"Paper reset — RetryScheduler will reprocess it within 30 minutes"</span>);
+    }
+
+    <span class="ann">@PostMapping</span>(<span class="str">"/pipeline/trigger"</span>)
+    <span class="kw">public</span> <span class="tp">ApiResponse</span>&lt;<span class="tp">Void</span>&gt; <span class="fn">triggerPipeline</span>() {
+        <span class="tp">Thread</span>.ofVirtual().name(<span class="str">"manual-pipeline"</span>).start(mainScheduler::runDailyFetch);
+        <span class="kw">return</span> <span class="tp">ApiResponse</span>.ok(<span class="str">"Main pipeline triggered — check server logs for progress"</span>);
+    }
+
+    <span class="ann">@PostMapping</span>(<span class="str">"/pipeline/retry"</span>)
+    <span class="kw">public</span> <span class="tp">ApiResponse</span>&lt;<span class="tp">Void</span>&gt; <span class="fn">triggerRetry</span>() {
+        <span class="tp">Thread</span>.ofVirtual().name(<span class="str">"manual-retry"</span>).start(retryScheduler::retryFailed);
+        <span class="kw">return</span> <span class="tp">ApiResponse</span>.ok(<span class="str">"Retry triggered — processing FAILED papers"</span>);
+    }
+
+    <span class="cmt">// UC17 — Bulk reset: đặt lại retryCount=0 cho TẤT CẢ paper FAILED</span>
+    <span class="ann">@PostMapping</span>(<span class="str">"/papers/reset-all-failed"</span>)
+    <span class="kw">public</span> <span class="tp">ApiResponse</span>&lt;<span class="tp">Void</span>&gt; <span class="fn">resetAllFailedPapers</span>() {
+        <span class="kw">int</span> count = adminService.resetAllFailedPapers();
+        <span class="kw">return</span> <span class="tp">ApiResponse</span>.ok(<span class="str">"Reset "</span> + count + <span class="str">" FAILED paper(s)"</span>);
+    }
+}</code></pre>
+<button class="ann-btn" onclick="toggleAnn(this)">
+  <span class="arr">▶</span> Xem giải thích từng dòng
+  <span class="pill">42 dòng · 10 annotation</span>
+</button>
+</div>
+<div class="ann-panel">
+<table class="ann-table">
+<thead><tr><th>Dòng</th><th>Code</th><th>Giải thích</th></tr></thead>
+<tbody>
+<tr><td>8</td><td>@AuthenticationPrincipal UUID userId</td><td><span class="tag t-imp">IMP</span> Spring inject principal từ SecurityContext (được JwtAuthFilter set). Principal = UUID (không phải UserDetails). <code>userId</code> đến từ JWT, không từ request body — không thể fake.</td></tr>
+<tr><td>9–10</td><td>required = false cho topicId, keyword</td><td>Optional query params. Nếu không có → null. PaperService xử lý từng case: keyword != null → FTS, topicId != null → filter, cả hai null → all DONE papers.</td></tr>
+<tr><td>11–12</td><td>defaultValue = "0", "10"</td><td>Pagination defaults. Frontend không cần truyền page/size nếu muốn page đầu với 10 items. defaultValue = String vì HTTP params đều là String — Spring tự convert sang int.</td></tr>
+<tr><td>17</td><td>@Cacheable(value = "recommendations", key = "#id")</td><td><span class="tag t-imp">IMP</span> Spring kiểm tra Caffeine cache trước khi gọi service. Cache key = paperId. TTL 1h (từ application.yml). Cache hit → không query DB, không call HNSW index. Cache miss → query DB, cache result cho lần tiếp theo.</td></tr>
+<tr><td>17</td><td>key = "#id"</td><td>SpEL expression: <code>#id</code> = tham số tên "id" của method. Mỗi paperId có cache entry riêng. Khi paper được update (DONE → embedding mới) → cache entry cũ vẫn còn (1h TTL). Acceptable trade-off cho đồ án.</td></tr>
+<tr><td>30</td><td>@PreAuthorize("hasRole('ADMIN')"</td><td><span class="tag t-sec">SEC</span> Class-level @PreAuthorize → áp dụng cho TẤT CẢ methods trong class. Không cần lặp lại trên từng method. Cần @EnableMethodSecurity trong SecurityConfig để annotation này có hiệu lực.</td></tr>
+<tr><td>35</td><td>Thread.ofVirtual().name("manual-pipeline").start(...)</td><td><span class="tag t-imp">IMP</span> Java 21 Virtual Thread: lightweight thread cho I/O-bound tasks. Không block HTTP thread → response trả ngay, pipeline chạy background. mainScheduler::runDailyFetch là method reference — chạy cùng logic như cron.</td></tr>
+<tr><td>35</td><td>.name("manual-pipeline")</td><td>Đặt tên thread để dễ nhận diện trong logs và thread dump. Logs: "manual-pipeline | INFO - Fetch keyword: llm". Phân biệt với "paper-scheduler-1" từ ScheduledTaskRegistrar.</td></tr>
+<tr><td>38</td><td>return ApiResponse.ok("Main pipeline triggered")</td><td>Trả ngay sau khi start virtual thread — không chờ pipeline hoàn thành (có thể mất 20-40 phút). Admin phải check server logs để biết progress. Async fire-and-forget pattern.</td></tr>
+<tr><td>42</td><td>"Reset " + count + " FAILED paper(s)"</td><td>Trả số paper thực sự được reset — admin biết reset ảnh hưởng bao nhiêu papers. count = int từ JPA @Modifying UPDATE rows affected.</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<!-- ══════════ SCHEDULERS ══════════ -->
+<section id="sc1">
+<h2>SchedulerConfig &amp; MainScheduler</h2>
+<div class="fp">config/SchedulerConfig.java &nbsp; scheduler/MainScheduler.java</div>
+<div class="cb-wrap">
+<span class="lb">Java</span>
+<pre><code><span class="cmt">// SchedulerConfig.java</span>
+<span class="ann">@Configuration</span>
+<span class="kw">public class</span> <span class="tp">SchedulerConfig</span> <span class="kw">implements</span> <span class="tp">SchedulingConfigurer</span> {
+    <span class="ann">@Override</span>
+    <span class="kw">public void</span> <span class="fn">configureTasks</span>(<span class="tp">ScheduledTaskRegistrar</span> taskRegistrar) {
+        <span class="tp">ThreadPoolTaskScheduler</span> scheduler = <span class="kw">new</span> <span class="tp">ThreadPoolTaskScheduler</span>();
+        scheduler.setPoolSize(<span class="num">3</span>);
+        scheduler.setThreadNamePrefix(<span class="str">"paper-scheduler-"</span>);
+        scheduler.initialize();
+        taskRegistrar.setTaskScheduler(scheduler);
+    }
+}
+
+<span class="cmt">// MainScheduler.java</span>
+<span class="ann">@Scheduled</span>(cron = <span class="str">"${scheduler.main.cron:0 0 6 * * *}"</span>)
+<span class="kw">public void</span> <span class="fn">runDailyFetch</span>() {
+    <span class="kw">var</span> activeTopics = topicRepository.findByIsActiveTrue();
+    <span class="kw">if</span> (activeTopics.isEmpty()) {
+        log.info(<span class="str">"Main Scheduler: no active topics found, skipping."</span>);
+        <span class="kw">return</span>;
+    }
+
+    <span class="tp">Set</span>&lt;<span class="tp">String</span>&gt; uniqueKeywords = <span class="kw">new</span> <span class="tp">LinkedHashSet</span>&lt;&gt;();
+    <span class="kw">for</span> (<span class="kw">var</span> topic : activeTopics) {
+        <span class="kw">if</span> (topic.getKeywords() == <span class="kw">null</span> || topic.getKeywords().isBlank()) <span class="kw">continue</span>;
+        <span class="tp">Arrays</span>.stream(topic.getKeywords().split(<span class="str">","</span>))
+                .map(<span class="tp">String</span>::trim)
+                .filter(k -> !k.isEmpty())
+                .forEach(uniqueKeywords::add);
+    }
+
+    <span class="tp">AtomicInteger</span> processed = <span class="kw">new</span> <span class="tp">AtomicInteger</span>();
+    <span class="kw">for</span> (<span class="tp">String</span> keyword : uniqueKeywords) {
+        <span class="tp">List</span>&lt;<span class="tp">Paper</span>&gt; papers = arxivFetchService.fetchByKeyword(keyword);
+        <span class="kw">for</span> (<span class="tp">Paper</span> paper : papers) {
+            <span class="kw">try</span> {
+                <span class="kw">boolean</span> wasNew = paperPipelineService.process(paper);
+                <span class="kw">if</span> (wasNew) processed.incrementAndGet();
+            } <span class="kw">catch</span> (<span class="tp">Exception</span> e) {
+                log.error(<span class="str">"Pipeline error for arxivId={}: {}"</span>, paper.getArxivId(), e.getMessage());
+            }
+        }
+    }
+    log.info(<span class="str">"=== Main Scheduler FINISHED in {}s — processed={} skipped={} failed={} ==="</span>,
+            elapsedSec, processed.get(), skipped.get(), failed.get());
+}</code></pre>
+<button class="ann-btn" onclick="toggleAnn(this)">
+  <span class="arr">▶</span> Xem giải thích từng dòng
+  <span class="pill">42 dòng · 11 annotation</span>
+</button>
+</div>
+<div class="ann-panel">
+<table class="ann-table">
+<thead><tr><th>Dòng</th><th>Code</th><th>Giải thích</th></tr></thead>
+<tbody>
+<tr><td>6</td><td>scheduler.setPoolSize(3)</td><td><span class="tag t-imp">IMP</span> Pool size 3: Main + Retry + buffer cho admin trigger. Nếu pool size 1 → tất cả @Scheduled tasks share 1 thread → MainScheduler block RetryScheduler (khi Main đang chạy, Retry không thể start).</td></tr>
+<tr><td>8</td><td>scheduler.setThreadNamePrefix("paper-scheduler-")</td><td>Threads tên "paper-scheduler-1", "paper-scheduler-2", "paper-scheduler-3". Dễ nhận trong logs, thread dump, và profiler. Không có prefix → tên mặc định "pool-1-thread-1" khó đọc.</td></tr>
+<tr><td>13</td><td>cron = "${scheduler.main.cron:0 0 6 * * *}"</td><td><span class="tag t-opt">OPT</span> SpEL với default value. Syntax: <code>${property:defaultValue}</code>. Nếu không set application.yml → dùng "0 0 6 * * *" (06:00 hàng ngày). Dev có thể set "0 * * * * *" (mỗi phút) để test mà không sửa code.</td></tr>
+<tr><td>19</td><td>LinkedHashSet&lt;String&gt; uniqueKeywords</td><td><span class="tag t-imp">IMP</span> LinkedHashSet = HashSet giữ insertion order. Dedup: user A "machine learning" + user B "machine learning" → fetch 1 lần. Giữ order: predictable log output, dễ debug hơn HashSet (random order).</td></tr>
+<tr><td>21–26</td><td>split(",").map(trim).filter(!empty).forEach(add)</td><td>Parse keywords từ "large language model,rag, transformer" → ["large language model", "rag", "transformer"]. trim() bỏ space thừa. filter(!empty) bỏ ",," double comma edge case.</td></tr>
+<tr><td>28</td><td>AtomicInteger processed</td><td>Thread-safe counter — nhưng MainScheduler chạy single-thread nên AtomicInteger là overkill. Giữ để consistent: nếu sau này pipeline chạy parallel, không cần refactor.</td></tr>
+<tr><td>32–35</td><td>try { paperPipelineService.process(paper) } catch (Exception e)</td><td><span class="tag t-imp">IMP</span> Catch-all trong loop: exception từ 1 paper không dừng cả batch. REQUIRES_NEW transaction: exception đã được commit/rollback trước khi đến đây. log.error để biết paper nào fail.</td></tr>
+<tr><td>33</td><td>boolean wasNew = process(paper)</td><td>process() trả false nếu arxivId đã tồn tại (skip). Đếm riêng processed/skipped/failed. Log cuối: "processed=5 skipped=3 failed=0" — meaningful hơn chỉ log tổng số.</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<!-- ══════════ RETRY SCHEDULER ══════════ -->
+<section id="sc3">
+<h2>RetryScheduler</h2>
+<div class="fp">scheduler/RetryScheduler.java</div>
+<div class="cb-wrap">
+<span class="lb">Java</span>
+<pre><code><span class="kw">private static final int</span> MAX_RETRIES = <span class="num">3</span>;
+
+<span class="ann">@Scheduled</span>(fixedDelayString = <span class="str">"${scheduler.retry.fixed-delay-ms:1800000}"</span>)
+<span class="kw">public void</span> <span class="fn">retryFailed</span>() {
+    <span class="kw">var</span> failedPapers = paperRepository.findFailedPapersForRetry(MAX_RETRIES);
+    <span class="kw">if</span> (failedPapers.isEmpty()) {
+        log.debug(<span class="str">"Retry Scheduler: no FAILED papers eligible for retry"</span>);
+        <span class="kw">return</span>;
+    }
+    log.info(<span class="str">"Retry Scheduler: retrying {} FAILED paper(s)"</span>, failedPapers.size());
+    <span class="kw">int</span> success = <span class="num">0</span>, failure = <span class="num">0</span>;
+    <span class="kw">for</span> (<span class="kw">var</span> paper : failedPapers) {
+        <span class="kw">try</span> {
+            paperPipelineService.retry(paper);
+            success++;
+        } <span class="kw">catch</span> (<span class="tp">Exception</span> e) {
+            log.error(<span class="str">"Unexpected retry error for arxivId={} (retryCount={}): {}"</span>,
+                    paper.getArxivId(), paper.getRetryCount(), e.getMessage());
+            failure++;
+        }
+    }
+    log.info(<span class="str">"Retry Scheduler finished — success={} failure={}"</span>, success, failure);
+}</code></pre>
+<button class="ann-btn" onclick="toggleAnn(this)">
+  <span class="arr">▶</span> Xem giải thích từng dòng
+  <span class="pill">22 dòng · 7 annotation</span>
+</button>
+</div>
+<div class="ann-panel">
+<table class="ann-table">
+<thead><tr><th>Dòng</th><th>Code</th><th>Giải thích</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>private static final int MAX_RETRIES = 3</td><td>Constant, không phải @Value. Giá trị này cần nhất quán giữa query (findFailedPapersForRetry) và logic — nếu để configurable qua @Value, cần thêm sync. 3 lần retry đủ cho hầu hết transient failures.</td></tr>
+<tr><td>3</td><td>fixedDelayString (không phải fixedDelay)</td><td><span class="tag t-imp">IMP</span> <code>fixedDelayString</code> nhận String để support SpEL <code>${property:default}</code>. <code>fixedDelay</code> nhận long literal không thể dùng property. fixedDelay vs fixedRate: delay bắt đầu tính SAU KHI method kết thúc → không overlap.</td></tr>
+<tr><td>4</td><td>findFailedPapersForRetry(MAX_RETRIES)</td><td>Query: <code>WHERE processingStatus='FAILED' AND retryCount &lt; MAX_RETRIES</code>. Papers đã retry đủ 3 lần (retryCount=3) không được pickup — phải admin reset thủ công.</td></tr>
+<tr><td>10</td><td>int success = 0, failure = 0</td><td>Đếm kết quả để log. failure ở đây là "unexpected exception" — khác với paper vẫn FAILED sau retry (đó là expected, PipelineService xử lý và update retryCount).</td></tr>
+<tr><td>12–14</td><td>try { retry(paper); success++ } catch...</td><td>REQUIRES_NEW transaction trong retry() đảm bảo: rollback của paper này không ảnh hưởng paper khác. Exception "bọt" lên đây là bất thường (không phải pipeline failure).</td></tr>
+<tr><td>15–18</td><td>catch → log retryCount trong error message</td><td>Log retryCount giúp admin debug: nếu paper đã retry 2/3 lần và vẫn fail với unexpected error → có vấn đề nghiêm trọng hơn pipeline failure thông thường.</td></tr>
+<tr><td>20</td><td>log.info("success={} failure={}")</td><td>Summary log sau mỗi batch. Admin monitoring: nếu failure &gt; 0 liên tục → cần investigate. Phân biệt rõ: success = went through pipeline (dù kết quả DONE hay FAILED), failure = crashed unexpectedly.</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+
+<!-- ══════════ FRONTEND: API CLIENT ══════════ -->
+<section id="fe1">
+<h2>api/client.ts — HTTP Client Layer</h2>
+<div class="fp">frontend/src/api/client.ts</div>
+<div class="cb-wrap">
+<span class="lb">TypeScript</span>
+<pre><code><span class="kw">const</span> API_BASE = <span class="kw">import</span>.meta.env.VITE_API_BASE_URL ?? <span class="str">'/api'</span>;
+
+<span class="kw">class</span> <span class="tp">ApiError</span> <span class="kw">extends</span> <span class="tp">Error</span> {
+  code: <span class="kw">number</span>;
+  <span class="fn">constructor</span>(code: <span class="kw">number</span>, message: string) {
+    <span class="kw">super</span>(message);
+    <span class="kw">this</span>.code = code;
+  }
+}
+
+<span class="kw">async function</span> <span class="fn">request</span>&lt;T&gt;(path: string, options: RequestInit = {}): Promise&lt;T&gt; {
+  <span class="kw">const</span> token = <span class="fn">getStoredToken</span>();
+  <span class="kw">const</span> res = <span class="kw">await</span> <span class="fn">fetch</span>(API_BASE + path, {
+    ...options,
+    headers: {
+      <span class="str">'Content-Type'</span>: <span class="str">'application/json'</span>,
+      ...(token ? { Authorization: <span class="str">'Bearer '</span> + token } : {}),
+      ...(options.headers ?? {}),
+    },
+  });
+
+  <span class="kw">if</span> (res.status === <span class="num">401</span>) <span class="kw">throw new</span> <span class="tp">ApiError</span>(<span class="num">401</span>, <span class="str">'Unauthorized'</span>);
+  <span class="kw">if</span> (res.status === <span class="num">204</span>) <span class="kw">return</span> undefined <span class="kw">as</span> T;
+
+  <span class="kw">const</span> body = <span class="kw">await</span> res.json();
+
+  <span class="kw">if</span> (!res.ok) {
+    <span class="kw">const</span> msg = body?.message || <span class="str">'Request failed: '</span> + res.status;
+    <span class="kw">throw new</span> <span class="tp">ApiError</span>(res.status, msg);
+  }
+
+  <span class="kw">if</span> (body !== <span class="kw">null</span> && <span class="kw">typeof</span> body === <span class="str">'object'</span> && <span class="str">'data'</span> <span class="kw">in</span> body) {
+    <span class="kw">return</span> body.data <span class="kw">as</span> T;
+  }
+  <span class="kw">return</span> body <span class="kw">as</span> T;
+}
+
+<span class="kw">export async function</span> <span class="fn">addFavorite</span>(paperId: string): Promise&lt;<span class="kw">void</span>&gt; {
+  <span class="kw">return</span> <span class="fn">request</span>(<span class="str">'/papers/'</span> + <span class="fn">encodeURIComponent</span>(paperId) + <span class="str">'/favorite'</span>, { method: <span class="str">'POST'</span> });
+}
+
+<span class="kw">export async function</span> <span class="fn">markAllNotificationsRead</span>(): Promise&lt;<span class="kw">void</span>&gt; {
+  <span class="kw">return</span> <span class="fn">request</span>(<span class="str">'/notifications/read-all'</span>, { method: <span class="str">'PATCH'</span> });
+}</code></pre>
+<button class="ann-btn" onclick="toggleAnn(this)">
+  <span class="arr">▶</span> Xem giải thích từng dòng
+  <span class="pill">40 dòng · 11 annotation</span>
+</button>
+</div>
+<div class="ann-panel">
+<table class="ann-table">
+<thead><tr><th>Dòng</th><th>Code</th><th>Giải thích</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>import.meta.env.VITE_API_BASE_URL ?? '/api'</td><td><span class="tag t-imp">IMP</span> Dev: <code>VITE_API_BASE_URL</code> unset → dùng <code>'/api'</code> → Vite proxy forward đến localhost:8081. Không có CORS vì cùng origin. Prod: set env var = Railway URL. <code>??</code> nullish coalescing: chỉ fallback khi undefined/null (khác <code>||</code> fallback cả empty string).</td></tr>
+<tr><td>3–8</td><td>class ApiError extends Error</td><td><span class="tag t-why">WHY</span> Custom error class mang <code>code: number</code> (HTTP status). Caller check: <code>if (err instanceof ApiError && err.code === 401) navigate('/login')</code>. Generic Error không có status code.</td></tr>
+<tr><td>12</td><td>const token = getStoredToken()</td><td>Đọc từ localStorage (remember me) hoặc sessionStorage. Mỗi request tự động check và gắn token — không cần truyền token vào từng API function.</td></tr>
+<tr><td>15–17</td><td>...options.headers ?? {}</td><td>Spread merge: Content-Type và Authorization là defaults. Nếu caller truyền headers override → <code>options.headers</code> được spread sau → override defaults. Ví dụ: form upload cần <code>Content-Type: multipart/form-data</code>.</td></tr>
+<tr><td>20</td><td>if (res.status === 401) throw ApiError(401)</td><td>Handle 401 TRƯỚC khi parse body. Lý do: 401 thường không có body JSON (custom authEntryPoint trả JSON nhưng không đảm bảo). Throw ngay → không cần parse.</td></tr>
+<tr><td>21</td><td>if (res.status === 204) return undefined as T</td><td><span class="tag t-imp">IMP</span> HTTP 204 No Content (DELETE response) không có body. Nếu cố <code>res.json()</code> → parse error. Cast <code>undefined as T</code> an toàn vì caller của void function không dùng return value.</td></tr>
+<tr><td>27</td><td>body?.message || 'Request failed: ' + res.status</td><td>Ưu tiên message từ backend (<code>ApiResponse.error("...")</code>). Fallback dùng HTTP status code nếu backend không trả JSON error message.</td></tr>
+<tr><td>30–32</td><td>'data' in body → return body.data as T</td><td><span class="tag t-imp">IMP</span> Unwrap <code>ApiResponse&lt;T&gt;</code>: backend trả <code>{"success":true,"data":T}</code>, frontend nhận trực tiếp T. <code>'data' in body</code> type guard: tránh error nếu backend trả raw object không có wrapper.</td></tr>
+<tr><td>35–37</td><td>encodeURIComponent(paperId) + '/favorite'</td><td><code>encodeURIComponent()</code> encode paperId an toàn trong URL path. UUID chỉ chứa hex + hyphen → thực ra không cần encode, nhưng là best practice cho mọi dynamic path segment.</td></tr>
+<tr><td>39</td><td>PATCH /notifications/read-all</td><td>HTTP PATCH (không phải PUT) cho partial update. PUT = replace toàn bộ resource. PATCH = update một phần. Đánh dấu tất cả là đã đọc = partial update của collection → PATCH đúng semantic.</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<!-- ══════════ AUTH UTILS ══════════ -->
+<section id="fe2">
+<h2>utils/auth.ts — JWT Decode không cần thư viện</h2>
+<div class="fp">frontend/src/utils/auth.ts</div>
+<div class="cb-wrap">
+<span class="lb">TypeScript</span>
+<pre><code><span class="kw">export function</span> <span class="fn">decodeJwt</span>(token: string): <span class="tp">JwtPayload</span> | <span class="kw">null</span> {
+  <span class="kw">if</span> (!token || <span class="kw">typeof</span> token !== <span class="str">'string'</span>) <span class="kw">return null</span>;
+  <span class="kw">const</span> parts = token.split(<span class="str">'.'</span>);
+  <span class="kw">if</span> (parts.length &lt; <span class="num">2</span>) <span class="kw">return null</span>;
+  <span class="kw">try</span> {
+    <span class="kw">let</span> b64 = parts[<span class="num">1</span>].replace(/-/g, <span class="str">'+'</span>).replace(/_/g, <span class="str">'/'</span>);
+    <span class="kw">while</span> (b64.length % <span class="num">4</span>) b64 += <span class="str">'='</span>;
+    <span class="kw">const</span> json = <span class="fn">decodeURIComponent</span>(
+      <span class="fn">atob</span>(b64).split(<span class="str">''</span>)
+        .map(c => <span class="str">'%'</span> + (<span class="str">'00'</span> + c.charCodeAt(<span class="num">0</span>).toString(<span class="num">16</span>)).slice(-<span class="num">2</span>))
+        .join(<span class="str">''</span>)
+    );
+    <span class="kw">return</span> <span class="tp">JSON</span>.parse(json) <span class="kw">as</span> <span class="tp">JwtPayload</span>;
+  } <span class="kw">catch</span> { <span class="kw">return null</span>; }
+}
+
+<span class="kw">export function</span> <span class="fn">emailToInitials</span>(email: string): string {
+  <span class="kw">if</span> (!email) <span class="kw">return</span> <span class="str">'U'</span>;
+  <span class="kw">const</span> local = String(email).split(<span class="str">'@'</span>)[<span class="num">0</span>] || <span class="str">''</span>;
+  <span class="kw">const</span> parts = local.split(<span class="str">/[._\-+]+/</span>).filter(Boolean);
+  <span class="kw">if</span> (parts.length &gt;= <span class="num">2</span>) <span class="kw">return</span> (parts[<span class="num">0</span>][<span class="num">0</span>] + parts[<span class="num">1</span>][<span class="num">0</span>]).toUpperCase();
+  <span class="kw">if</span> (parts.length === <span class="num">1</span>) <span class="kw">return</span> parts[<span class="num">0</span>].slice(<span class="num">0</span>, <span class="num">2</span>).toUpperCase();
+  <span class="kw">return</span> <span class="str">'U'</span>;
+}</code></pre>
+<button class="ann-btn" onclick="toggleAnn(this)">
+  <span class="arr">▶</span> Xem giải thích từng dòng
+  <span class="pill">22 dòng · 10 annotation</span>
+</button>
+</div>
+<div class="ann-panel">
+<table class="ann-table">
+<thead><tr><th>Dòng</th><th>Code</th><th>Giải thích</th></tr></thead>
+<tbody>
+<tr><td>3</td><td>token.split('.')</td><td>JWT format: <code>header.payload.signature</code>. Split thành 3 parts. parts[0] = base64url header, parts[1] = base64url payload (claims), parts[2] = signature. Chỉ cần parts[1] để đọc claims.</td></tr>
+<tr><td>6</td><td>.replace(/-/g, '+').replace(/_/g, '/')</td><td><span class="tag t-imp">IMP</span> base64url → base64 standard conversion. URL-safe base64 dùng <code>-</code> và <code>_</code> thay vì <code>+</code> và <code>/</code> (vì + và / có ý nghĩa đặc biệt trong URL). <code>atob()</code> chỉ hiểu base64 standard.</td></tr>
+<tr><td>7</td><td>while (b64.length % 4) b64 += '='</td><td>Base64 cần length là bội số của 4. JWT bỏ padding <code>=</code> để ngắn hơn → cần thêm lại. Ví dụ: length 22 → thêm 2 dấu <code>=</code> → length 24 = 6×4.</td></tr>
+<tr><td>9–11</td><td>atob(b64).split('').map(...).join('')</td><td><span class="tag t-why">WHY</span> <code>atob()</code> trả binary string (ISO-8859-1). Cần convert sang percent-encoded để <code>decodeURIComponent()</code> xử lý UTF-8 đúng. Technique: mỗi byte → <code>%XX</code> (hex). Đảm bảo emoji, tiếng Việt trong email decode đúng.</td></tr>
+<tr><td>12</td><td>JSON.parse(json) as JwtPayload</td><td>Parse JSON string → object. TypeScript <code>as JwtPayload</code> = type assertion (không validate runtime). Nên có try-catch bọc ngoài — JWT payload malformed → JSON.parse throw → catch trả null.</td></tr>
+<tr><td>14</td><td>catch { return null }</td><td>Bắt tất cả errors: atob fail (invalid base64), JSON.parse fail (invalid JSON), access parts[1] khi undefined. Trả null thay vì throw — caller check null và redirect /login.</td></tr>
+<tr><td>17–18</td><td>local = email.split('@')[0]</td><td>Lấy phần local của email (trước @). <code>split('@')[0]</code> an toàn: nếu không có @ → trả toàn bộ string (không crash).</td></tr>
+<tr><td>19</td><td>local.split(/[._\-+]+/).filter(Boolean)</td><td>Split theo các delimiters phổ biến trong email: dấu chấm, gạch dưới, gạch ngang, dấu +. Regex: <code>[._\-+]+</code> = 1 hoặc nhiều ký tự. filter(Boolean) loại empty strings từ consecutive delimiters.</td></tr>
+<tr><td>20</td><td>(parts[0][0] + parts[1][0]).toUpperCase()</td><td>"john.doe" → ["john", "doe"] → "j" + "d" → "JD". Initials từ 2 phần đầu.</td></tr>
+<tr><td>21</td><td>parts[0].slice(0, 2).toUpperCase()</td><td>"admin" → ["admin"] → "AD". Lấy 2 ký tự đầu khi chỉ có 1 phần. slice(0,2) an toàn kể cả khi string ngắn hơn 2 ký tự.</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<!-- ══════════ FORMAT UTILS ══════════ -->
+<section id="fe3">
+<h2>utils/format.ts — Display Helpers</h2>
+<div class="fp">frontend/src/utils/format.ts</div>
+<div class="cb-wrap">
+<span class="lb">TypeScript</span>
+<pre><code><span class="kw">export function</span> <span class="fn">timeAgo</span>(iso: string): string {
+  <span class="kw">const</span> s = Math.max(<span class="num">1</span>, Math.round((Date.now() - <span class="kw">new</span> Date(iso).getTime()) / <span class="num">1000</span>));
+  <span class="kw">if</span> (s &lt; <span class="num">60</span>)   <span class="kw">return</span> s + <span class="str">'s ago'</span>;
+  <span class="kw">const</span> m = Math.round(s / <span class="num">60</span>);
+  <span class="kw">if</span> (m &lt; <span class="num">60</span>)   <span class="kw">return</span> m + <span class="str">'m ago'</span>;
+  <span class="kw">const</span> h = Math.round(m / <span class="num">60</span>);
+  <span class="kw">if</span> (h &lt; <span class="num">24</span>)   <span class="kw">return</span> h + <span class="str">'h ago'</span>;
+  <span class="kw">return</span> Math.round(h / <span class="num">24</span>) + <span class="str">'d ago'</span>;
+}
+
+<span class="kw">export function</span> <span class="fn">authorString</span>(authors: string | string[]): string {
+  <span class="kw">if</span> (!authors) <span class="kw">return</span> <span class="str">''</span>;
+  <span class="kw">const</span> parts = Array.isArray(authors)
+    ? authors
+    : String(authors).split(<span class="str">','</span>).map(s => s.trim()).filter(Boolean);
+  <span class="kw">if</span> (parts.length &lt;= <span class="num">3</span>) <span class="kw">return</span> parts.join(<span class="str">', '</span>);
+  <span class="kw">return</span> parts.slice(<span class="num">0</span>, <span class="num">3</span>).join(<span class="str">', '</span>) + <span class="str">' +'</span> + (parts.length - <span class="num">3</span>);
+}
+
+<span class="kw">export function</span> <span class="fn">scoreColor</span>(score: <span class="kw">number</span> | <span class="kw">null</span>) {
+  <span class="kw">if</span> (score == <span class="kw">null</span>)
+    <span class="kw">return</span> { bg: <span class="str">'bg-slate-100'</span>, text: <span class="str">'text-slate-500'</span>, border: <span class="str">'border-slate-200'</span>, dot: <span class="str">'bg-slate-400'</span> };
+  <span class="kw">if</span> (score &gt;= <span class="num">8</span>)
+    <span class="kw">return</span> { bg: <span class="str">'bg-emerald-50'</span>, text: <span class="str">'text-emerald-700'</span>, border: <span class="str">'border-emerald-200'</span>, dot: <span class="str">'bg-emerald-500'</span> };
+  <span class="kw">if</span> (score &gt;= <span class="num">5</span>)
+    <span class="kw">return</span> { bg: <span class="str">'bg-amber-50'</span>, text: <span class="str">'text-amber-700'</span>, border: <span class="str">'border-amber-200'</span>, dot: <span class="str">'bg-amber-500'</span> };
+  <span class="kw">return</span>     { bg: <span class="str">'bg-rose-50'</span>, text: <span class="str">'text-rose-700'</span>, border: <span class="str">'border-rose-200'</span>, dot: <span class="str">'bg-rose-500'</span> };
+}</code></pre>
+<button class="ann-btn" onclick="toggleAnn(this)">
+  <span class="arr">▶</span> Xem giải thích từng dòng
+  <span class="pill">26 dòng · 8 annotation</span>
+</button>
+</div>
+<div class="ann-panel">
+<table class="ann-table">
+<thead><tr><th>Dòng</th><th>Code</th><th>Giải thích</th></tr></thead>
+<tbody>
+<tr><td>2</td><td>Math.max(1, Math.round(...))</td><td><code>Math.max(1, ...)</code>: đảm bảo minimum "1s ago" thay vì "0s ago". Math.round thay vì floor: 1.7s → 2s (chính xác hơn 1s). Nếu timestamp tương lai → s âm → max(1, âm) = 1 → "1s ago".</td></tr>
+<tr><td>3–8</td><td>cascade if checks</td><td>Ưu tiên unit nhỏ nhất phù hợp. 59s → "59s ago" (không phải "0m ago"). 61s → "1m ago". Không dùng array lookup để tránh tính toán thừa.</td></tr>
+<tr><td>12–14</td><td>Array.isArray(authors) ? ... : split</td><td>Handle cả 2 format: array <code>["Alice", "Bob"]</code> (nếu API thay đổi) và string <code>"Alice, Bob"</code> (format hiện tại). Defensive programming.</td></tr>
+<tr><td>15</td><td>parts.length &lt;= 3 → join</td><td>3 tác giả trở xuống: "Alice, Bob, Charlie". Đủ ngắn để hiển thị trên một dòng trong card.</td></tr>
+<tr><td>16</td><td>slice(0,3).join + ' +' + (length-3)</td><td>"Alice, Bob, Charlie +2" cho 5 tác giả. Compact, thông tin đủ. <code>slice(0,3)</code> an toàn kể cả khi length &lt; 3 (không throw).</td></tr>
+<tr><td>20–27</td><td>scoreColor return object with 4 CSS classes</td><td><span class="tag t-imp">IMP</span> Trả object với 4 Tailwind classes: bg, text, border, dot. Caller dùng: <code>const s = scoreColor(paper.quality_score); &lt;div className={s.bg + ' ' + s.text}&gt;</code>. Không hardcode classes trong component — separation of concern.</td></tr>
+<tr><td>20</td><td>score == null (double equal)</td><td><code>==</code> (không phải ===): bắt cả null và undefined. Paper PENDING có quality_score = null trong DB → undefined trong JS sau JSON parse. Double equal xử lý cả 2 case.</td></tr>
+<tr><td>21–26</td><td>Thresholds 8, 5</td><td>Score ≥8 = emerald (xanh lá, tốt), ≥5 = amber (vàng, trung bình), &lt;5 = rose (đỏ, thấp). Threshold được chọn theo scale 10 điểm: top 20% = excellent, top 50% = good.</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<!-- ══════════ V4 INDEX ══════════ -->
+<section id="db1">
+<h2>V4 — Index SQL: HNSW &amp; GIN</h2>
+<div class="fp">db/migration/V4__create_indexes.sql</div>
+<div class="cb-wrap">
+<span class="lb">SQL</span>
+<pre><code><span class="cmt">-- HNSW vector index cho similarity search</span>
+<span class="kw">CREATE INDEX</span> idx_paper_embedding_hnsw
+    <span class="kw">ON</span> paper
+    <span class="kw">USING</span> hnsw (embedding vector_cosine_ops)
+    <span class="kw">WITH</span> (m = <span class="num">16</span>, ef_construction = <span class="num">64</span>);
+
+<span class="cmt">-- GIN index 1: UC05 Full-text search (title + abstract + authors)</span>
+<span class="kw">CREATE INDEX</span> idx_paper_fts_search
+    <span class="kw">ON</span> paper
+    <span class="kw">USING</span> gin (
+        to_tsvector(<span class="str">'english'</span>,
+            coalesce(title, <span class="str">''</span>) || <span class="str">' '</span> ||
+            coalesce(abstract, <span class="str">''</span>) || <span class="str">' '</span> ||
+            coalesce(authors, <span class="str">''</span>))
+    );
+
+<span class="cmt">-- GIN index 2: UC12 Topic matching (title + abstract ONLY, NO authors)</span>
+<span class="kw">CREATE INDEX</span> idx_paper_fts_topic
+    <span class="kw">ON</span> paper
+    <span class="kw">USING</span> gin (
+        to_tsvector(<span class="str">'english'</span>,
+            coalesce(title, <span class="str">''</span>) || <span class="str">' '</span> ||
+            coalesce(abstract, <span class="str">''</span>))
+    );
+
+<span class="cmt">-- B-tree cho queries thường gặp</span>
+<span class="kw">CREATE INDEX</span> idx_paper_published_at ON paper(published_at);
+<span class="kw">CREATE INDEX</span> idx_paper_status        ON paper(processing_status);
+<span class="kw">CREATE INDEX</span> idx_topic_user_active   ON topic(user_id, is_active);</code></pre>
+<button class="ann-btn" onclick="toggleAnn(this)">
+  <span class="arr">▶</span> Xem giải thích từng dòng
+  <span class="pill">28 dòng · 10 annotation</span>
+</button>
+</div>
+<div class="ann-panel">
+<table class="ann-table">
+<thead><tr><th>Dòng</th><th>Code</th><th>Giải thích</th></tr></thead>
+<tbody>
+<tr><td>2</td><td>USING hnsw</td><td><span class="tag t-imp">IMP</span> HNSW = Hierarchical Navigable Small World. Approximate Nearest Neighbor (ANN) graph index. Tốt cho high-dimensional vector search. Alternative là IVFFlat (slower, less accurate). pgvector hỗ trợ cả 2.</td></tr>
+<tr><td>3</td><td>vector_cosine_ops</td><td>Operator class cho cosine distance. Nếu dùng <code>vector_l2_ops</code> → L2 (Euclidean) distance. <code>&lt;=&gt;</code> operator trong query cũng phải match: <code>&lt;=&gt;</code> = cosine, <code>&lt;-&gt;</code> = L2. Sentence embeddings: cosine phù hợp hơn L2.</td></tr>
+<tr><td>4</td><td>m = 16, ef_construction = 64</td><td><code>m</code>: số neighbor mỗi node trong graph (16 = balance accuracy/memory). <code>ef_construction</code>: beam width khi build (64 = moderate accuracy). Cao hơn → index chính xác hơn nhưng build lâu hơn. ef_search (query time) set qua connection-init-sql.</td></tr>
+<tr><td>9–15</td><td>GIN index 1 — include authors</td><td><span class="tag t-imp">IMP</span> Expression phải KHỚP CHÍNH XÁC với WHERE clause trong query UC05: <code>to_tsvector('english', coalesce(title,'') || ' ' || coalesce(abstract,'') || ' ' || coalesce(authors,''))</code>. Nếu khác 1 chỗ → PostgreSQL không dùng index → seq scan.</td></tr>
+<tr><td>17–23</td><td>GIN index 2 — NO authors</td><td><span class="tag t-imp">IMP</span> Khác index 1: không có authors. Phải khớp với WHERE clause UC12: <code>to_tsvector('english', coalesce(title,'') || ' ' || coalesce(abstract,''))</code>. 2 indexes riêng vì 2 expressions khác nhau.</td></tr>
+<tr><td>-</td><td>Tại sao cần 2 GIN index riêng?</td><td><span class="tag t-why">WHY</span> Không thể dùng chung 1 index vì: UC05 dùng <code>plainto_tsquery</code> với authors (tìm tên người), UC12 dùng <code>phraseto_tsquery</code> không cần authors (keyword là topic, không phải tên người). 2 use cases khác nhau → 2 indexes tối ưu khác nhau.</td></tr>
+<tr><td>25</td><td>idx_paper_published_at</td><td>Default sort của paper list: <code>ORDER BY published_at DESC</code>. Không có index → PostgreSQL sort toàn bộ bảng mỗi query = O(N log N). Với index = O(1) lookup + ordered scan.</td></tr>
+<tr><td>26</td><td>idx_paper_status ON paper(processing_status)</td><td>RetryScheduler query: <code>WHERE processing_status='FAILED' AND retryCount&lt;3</code>. Index trên processing_status cho phép PostgreSQL jump thẳng đến FAILED papers thay vì scan toàn bảng.</td></tr>
+<tr><td>27</td><td>idx_topic_user_active ON topic(user_id, is_active)</td><td>Composite index. Scheduler query: <code>WHERE user_id=? AND is_active=true</code>. Composite index hiệu quả hơn 2 single-column indexes vì query filter cả 2 columns cùng lúc.</td></tr>
+<tr><td>-</td><td>FAVORITE không có index riêng</td><td><span class="tag t-why">WHY</span> UNIQUE constraint <code>(user_id, paper_id)</code> từ V3 đã tự tạo B-tree index. Không khai báo thêm để tránh PostgreSQL maintain 2 indexes vật lý giống nhau = tốn storage và CPU khi INSERT/UPDATE.</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+</main>
+</div>
+
+<script>
+// Toggle annotation panel
+function toggleAnn(btn) {
+  btn.classList.toggle('open');
+  const panel = btn.parentElement.nextElementSibling;
+  if (panel && panel.classList.contains('ann-panel')) {
+    panel.classList.toggle('open');
+  }
+  const arrow = btn.querySelector('.arr');
+  if (arrow) arrow.textContent = panel.classList.contains('open') ? '▼' : '▶';
+}
+
+// Sidebar active on scroll
+const links = document.querySelectorAll('aside a');
+const sections = document.querySelectorAll('section[id]');
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(en => {
+    if (en.isIntersecting) {
+      links.forEach(l => l.classList.remove('on'));
+      const a = document.querySelector(`aside a[href="#${en.target.id}"]`);
+      if (a) a.classList.add('on');
+    }
+  });
+}, { rootMargin: '-5% 0px -85% 0px' });
+sections.forEach(s => obs.observe(s));
+
+links.forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    document.querySelector(a.getAttribute('href'))?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+});
+</script>
+</body>
+</html>
