@@ -123,7 +123,7 @@ Query `FAVORITE` join `PAPER`. Trả `PagedResponse<PaperSummaryDto>`, sort `FAV
 1. `@Scheduled(cron = "0 0 6 * * *")`.
 2. Query `TOPIC` có `is_active = true`.
 3. Tách keywords (max 5, comma-split, trim).
-4. Gọi arXiv API: **URL bắt buộc thêm `sortBy=submittedDate&sortOrder=descending`** để lấy paper mới nhất (mặc định arXiv sort theo relevance, không theo ngày). Max `max-results-per-keyword` papers. Delay 350ms.
+4. Gọi arXiv API: **URL bắt buộc thêm `sortBy=submittedDate&sortOrder=descending`** để lấy paper mới nhất (mặc định arXiv sort theo relevance, không theo ngày). Max `max-results-per-keyword` papers. Delay 1500ms (arXiv rate limit ~1 req/s).
 5. Timeout 30s. Lỗi tạm thời: retry exponential backoff max 2 lần. Lỗi vĩnh viễn: bỏ keyword, log.
 6. Hợp nhất, khử trùng theo `arxiv_id`.
 7. `INSERT INTO paper … ON CONFLICT (arxiv_id) DO NOTHING`. Paper mới: `PENDING`, `retry_count = 0`.
@@ -231,8 +231,11 @@ Dùng index `idx_pt_stats (topic_id, paper_id)` + `idx_paper_published_at`.
 ### UC17: Admin — Quản lý Paper lỗi
 **Yêu cầu:** `role = ADMIN`.
 
-- `GET /admin/papers?status=FAILED` — trả `PagedResponse` với `arxiv_id`, `retry_count`, `last_retry_at`, `last_error`.
-- `POST /admin/papers/{id}/reset-retry` — set `retry_count = 0`, `processing_status = PENDING`, `last_error = null`.
+- `GET /admin/papers/failed` — trả `PagedResponse` với `arxiv_id`, `retry_count`, `last_retry_at`, `last_error`.
+- `POST /admin/papers/{id}/reset` — set `retry_count = 0`, `last_error = null` (giữ `processing_status = FAILED` để RetryScheduler pick up).
+- `POST /admin/papers/reset-all-failed` — bulk reset tất cả paper FAILED.
+- `POST /admin/pipeline/trigger` — trigger Main Pipeline thủ công (async).
+- `POST /admin/pipeline/retry` — trigger RetryScheduler thủ công.
 
 **Ngoại lệ:** Không phải ADMIN → 403. Paper không tồn tại → 404.
 

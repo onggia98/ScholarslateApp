@@ -1,0 +1,35 @@
+services:
+  - type: web
+    name: scholarslate-backend
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    region: singapore
+
+    healthCheckPath: /api/actuator/health
+
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+
+      # Database — lấy từ Neon (JDBC format)
+      - key: JDBC_DATABASE_URL
+        sync: false          # Set thủ công trên Render dashboard
+      - key: JDBC_DATABASE_USERNAME
+        sync: false
+      - key: JDBC_DATABASE_PASSWORD
+        sync: false
+
+      # Security
+      - key: JWT_SECRET
+        sync: false          # openssl rand -base64 32
+
+      # AI APIs
+      - key: GROQ_API_KEY
+        sync: false
+      - key: HUGGINGFACE_API_KEY
+        sync: false
+
+      # CORS — URL frontend Vercel
+      - key: FRONTEND_URL
+        sync: false

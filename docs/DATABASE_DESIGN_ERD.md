@@ -5,7 +5,7 @@ Thiết kế CSDL phục vụ hệ thống theo dõi, xử lý, tóm tắt và g
 
 Các nguyên tắc chính:
 - Tất cả thực thể chính dùng `UUID` làm khóa chính (UUID v4 trong phạm vi đồ án; khuyến nghị nâng lên UUID v7 khi production để giảm index fragmentation).
-- Cột `embedding` dùng kiểu `vector(384)` của `pgvector`, tương ứng model `sentence-transformers/all-MiniLM-L6-v2`. Dimension được cố định ở tầng schema; mọi thay đổi model đều yêu cầu migration toàn bộ dữ liệu embedding.
+- Cột `embedding` dùng kiểu `vector(384)` của `pgvector`, tương ứng model `BAAI/bge-small-en-v1.5` (384 dims, feature-extraction). Dimension được cố định ở tầng schema; mọi thay đổi model đều yêu cầu migration toàn bộ dữ liệu embedding.
 - Thiết kế ưu tiên tính nhất quán với pipeline xử lý nền và các use case đã mô tả.
 - Mọi dữ liệu nghiệp vụ của người dùng phải được cô lập theo `user_id`.
 - `PAPER_TOPIC` là bảng liên kết nhiều-nhiều dùng khóa chính tổng hợp, không tạo `id` riêng.

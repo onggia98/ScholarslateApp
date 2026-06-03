@@ -54,8 +54,11 @@ Keywords: comma-separated, trim, lowercase, VARCHAR(255), max 5 keyword, validat
 - UC14 — real-time, HNSW, cosine distance < 0.5, `ef_search = 128` (global HikariCP), cached 1h. UI-only, không tạo notification.
 
 ### 2.7. Admin (UC17)
-- `GET /admin/papers?status=FAILED` — xem paper stuck.
-- `POST /admin/papers/{id}/reset-retry` — reset về PENDING.
+- `GET /admin/papers/failed` — xem paper FAILED (paged).
+- `POST /admin/papers/{id}/reset` — reset retryCount=0 để RetryScheduler pick up lại.
+- `POST /admin/papers/reset-all-failed` — bulk reset tất cả paper FAILED.
+- `POST /admin/pipeline/trigger` — trigger Main Pipeline thủ công (async, Virtual Thread).
+- `POST /admin/pipeline/retry` — trigger RetryScheduler thủ công.
 - Yêu cầu `role = ADMIN`.
 
 ---
@@ -65,7 +68,7 @@ Keywords: comma-separated, trim, lowercase, VARCHAR(255), max 5 keyword, validat
 ### 3.1. Fetch Paper (UC10)
 - 6AM, thread pool độc lập.
 - Topic `is_active = true`. Keywords max 5.
-- arXiv API: **`sortBy=submittedDate&sortOrder=descending`** bắt buộc. Max 10 paper/keyword. Delay 350ms, timeout 30s, retry 2× exponential.
+- arXiv API: **`sortBy=submittedDate&sortOrder=descending`** bắt buộc. Max 10 paper/keyword. Delay 1500ms (arXiv rate limit ~1 req/s), timeout 30s, retry 2× exponential backoff.
 - UPSERT: `INSERT … ON CONFLICT (arxiv_id) DO NOTHING`.
 
 ### 3.2. AI Processing (UC11)
@@ -111,8 +114,8 @@ Keywords: comma-separated, trim, lowercase, VARCHAR(255), max 5 keyword, validat
 
 | Vấn đề | Quyết định |
 |---|---|
-| Embedding model | `all-MiniLM-L6-v2` → `vector(384)`. Cố định. |
-| pgvector JPA | `hypersistence-utils-hibernate-65` v3.8.3 (SB 3.3.x / Hibernate 6.5). |
+| Embedding model | `BAAI/bge-small-en-v1.5` → `vector(384)`. Cố định. |
+| pgvector JPA | Custom `VectorUserType` (implements `UserType<float[]>` + PGobject). Spring Boot 4.0.6 / Hibernate 7.x. |
 | JWT | jjwt 0.12.6, HMAC-SHA256, TTL 24h. |
 | HNSW index | Day-1 bắt buộc (m=16, ef_construction=64). ef_search=128 qua HikariCP connection-init-sql. |
 | UC05 Search | `plainto_tsquery` + `idx_paper_fts_search` (title+abstract+authors). AND logic linh hoạt. |
@@ -122,13 +125,13 @@ Keywords: comma-separated, trim, lowercase, VARCHAR(255), max 5 keyword, validat
 | UPSERT bắt buộc | `INSERT … ON CONFLICT (arxiv_id) DO NOTHING`. Không dùng `save()`/`saveAll()`. |
 | arXiv sort | Bắt buộc `sortBy=submittedDate&sortOrder=descending` trong API URL. |
 | Groq validation | `response_format: json_object`. Validate `quality_score ∈ [0.0,10.0]` + `summary` ≤ 2000 ký tự. Transient retry 1× sau 5s cho 5xx/timeout. |
-| Groq concurrency | Resilience4j RateLimiter tại GroqApiClient, hard limit 28 req/min. |
-| MapStruct embedding | `@Mapping(target="embedding", ignore=true)`. Unit test `assertNull(dto.getEmbedding())`. |
+| Groq concurrency | ThreadPoolTaskScheduler poolSize=3. Delay 2s/call. Free tier ~30 RPM. |
+| Manual mapper | `@Component` PaperMapper — không dùng MapStruct. Embedding không có trong PaperResponse. |
 | REQUIRES_NEW isolation | Outer method không có `@Transactional`. HikariCP pool-size = 20. |
 | FAVORITE delete | `DELETE /papers/{paperId}/favorite`, derive user_id từ JWT. Không cần favoriteId. |
 | FAVORITE index | Không khai báo riêng — auto từ UNIQUE constraint. |
 | Admin bootstrap | V5__seed_admin.sql. Không có endpoint tạo ADMIN. |
-| Admin dead-letter | UC17: GET+POST `/admin/papers`. Field `last_retry_at` trong PAPER. |
+| Admin dead-letter | UC17: `GET /admin/papers/failed`, `POST /admin/papers/{id}/reset`, `POST /admin/papers/reset-all-failed`. Field `last_retry_at` trong PAPER. |
 | quality_score constraint | DB CHECK `quality_score IS NULL OR [0.0, 10.0]` + app validation. |
 | PagedResponse chuẩn | `{content, page, size, totalElements, totalPages, last}` cho mọi API list. |
 | UC15 time bound | `published_at >= NOW() - INTERVAL '2 years'`. Index `idx_pt_stats (topic_id, paper_id)`. |

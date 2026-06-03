@@ -1,7 +1,7 @@
 # Mô tả chi tiết ERD — Hệ thống Paper Tracker
 
 ## 1. Triết lý thiết kế
-Sử dụng PostgreSQL + `pgvector` cho AI features. Ưu tiên toàn vẹn dữ liệu, HNSW Day-1, dễ triển khai với Spring Boot 3.3.x.
+Sử dụng PostgreSQL + `pgvector` cho AI features. Ưu tiên toàn vẹn dữ liệu, HNSW Day-1, dễ triển khai với Spring Boot 4.0.6.
 
 Phạm vi: JWT auth only, không retry thủ công, hard delete TOPIC, max 10 topic/5 keyword/10 paper.
 
@@ -29,7 +29,7 @@ private UserRole role = UserRole.USER;
 
 ### Bảng PAPER
 - `id` UUID, `arxiv_id` UNIQUE, `title`, `abstract` (TEXT — **tên cột thực tế là `abstract`, không phải `abstract_text`**), `authors`.
-- `embedding`: `vector(384)`. Map bằng `@Type(VectorType.class)` với `hypersistence-utils-hibernate-65 v3.8.3`.
+- `embedding`: `vector(384)`. Map bằng `@Type(VectorUserType.class)` — custom `UserType<float[]>` dùng `PGobject` (không dùng hypersistence-utils, không tương thích Spring Boot 4.x / Hibernate 7.x).
 - `quality_score`: float, validate ∈ [0.0, 10.0] ở cả app layer và DB CHECK constraint.
 - `original_paper_id`: FK tự tham chiếu → PAPER.id (`ON DELETE SET NULL`).
 - `last_retry_at`: TIMESTAMP NULL — cập nhật mỗi khi Retry Scheduler xử lý paper.
@@ -86,7 +86,7 @@ List<Paper> findRecommendations(
 ### 3.1. Fetch paper theo keyword
 1. Load topics `is_active = true`.
 2. Parse keywords (max 5, comma-split).
-3. Gọi arXiv API với **`sortBy=submittedDate&sortOrder=descending`** — bắt buộc để lấy paper mới nhất. Delay 350ms.
+3. Gọi arXiv API với **`sortBy=submittedDate&sortOrder=descending`** — bắt buộc để lấy paper mới nhất. Delay 1500ms (arXiv rate limit ~1 req/s; 350ms gây 429).
 4. Hợp nhất, khử trùng theo `arxiv_id`.
 5. `INSERT INTO paper … ON CONFLICT (arxiv_id) DO NOTHING`. Paper mới: `PENDING`, `retry_count = 0`, `is_duplicate = false`.
 
@@ -286,13 +286,17 @@ VALUES (
 
 ## 9. Gợi ý triển khai kỹ thuật
 
-### pgvector + Spring Boot 3.3.x
-```xml
-<dependency>
-    <groupId>io.hypersistence</groupId>
-    <artifactId>hypersistence-utils-hibernate-65</artifactId>
-    <version>3.8.3</version>
-</dependency>
+### pgvector + Spring Boot 4.0.6 / Hibernate 7.x
+Dùng custom `VectorUserType` (implements `UserType<float[]>`) thay vì hypersistence-utils.
+hypersistence-utils-hibernate-65/70 không tương thích Hibernate 7.x — gây `NoSuchBeanDefinitionException` lúc startup.
+
+```java
+// converter/VectorUserType.java
+public class VectorUserType implements UserType<float[]> {
+    @Override public int getSqlType() { return Types.OTHER; }
+    // nullSafeSet: dùng PGobject với type="vector"
+    // nullSafeGet: rs.getString(position) → parseVector()
+}
 ```
 
 ### ef_search — cấu hình global (không dùng SET LOCAL trong @Query)
@@ -332,13 +336,21 @@ if (resp.getSummary().length() > 2000)
     throw new GroqValidationException("summary too long");
 ```
 
-### MapStruct — enforce ignore embedding
+### Manual mapper — không expose embedding
 ```java
-@Mapping(target = "embedding", ignore = true)
-PaperDto toDto(Paper paper);
-
-// Unit test bắt buộc
-assertNull(paperMapper.toDto(paper).getEmbedding());
+// mapper/PaperMapper.java — @Component, KHÔNG dùng MapStruct
+@Component
+public class PaperMapper {
+    public PaperResponse toResponse(Paper paper, boolean isFavorite) {
+        // embedding không có trong PaperResponse → tự động không được map
+        return PaperResponse.builder()
+            .id(paper.getId())
+            .title(paper.getTitle())
+            // ... các field khác, không include embedding
+            .isFavorite(isFavorite)
+            .build();
+    }
+}
 ```
 
 ### REQUIRES_NEW — tránh connection pool exhaustion

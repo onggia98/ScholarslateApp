@@ -157,7 +157,7 @@ Tóm tắt nhanh:
 | `JWT_SECRET` | Chuỗi 256-bit base64 (`openssl rand -base64 32`) | ✅ |
 | `GROQ_API_KEY` | API key từ Groq console | ✅ |
 | `HUGGINGFACE_API_KEY` | Token từ HuggingFace | ✅ |
-| `FRONTEND_URL` | URL frontend production (cho CORS, ví dụ: `https://your-app.vercel.app`) | Nên có |
+| `FRONTEND_URL` | URL frontend production (cho CORS, ví dụ: `https://your-app.vercel.app`) — **Bắt buộc**, thiếu → CORS block toàn bộ request từ frontend | ✅ |
 
 ---
 
@@ -221,10 +221,11 @@ PAPER ──(self-ref)── PAPER (original_paper_id)
 ### Admin (🔒 ADMIN role)
 | Method | Endpoint | Mô tả |
 |---|---|---|
-| POST | `/api/admin/pipeline/trigger` | Trigger fetch + AI pipeline |
-| POST | `/api/admin/pipeline/retry` | Retry FAILED papers |
-| GET | `/api/admin/papers/failed` | Danh sách paper lỗi |
-| GET | `/api/admin/stats` | Thống kê hệ thống |
+| GET | `/api/admin/papers/failed` | Danh sách paper lỗi (paged) |
+| POST | `/api/admin/papers/{id}/reset` | Reset 1 paper FAILED |
+| POST | `/api/admin/papers/reset-all-failed` | Bulk reset tất cả FAILED |
+| POST | `/api/admin/pipeline/trigger` | Trigger Main Pipeline thủ công |
+| POST | `/api/admin/pipeline/retry` | Trigger RetryScheduler thủ công |
 
 ### System
 | Method | Endpoint | Mô tả |

@@ -9,18 +9,19 @@ Phạm vi và giới hạn:
 - User không có chức năng retry thủ công pipeline AI; mọi retry do Retry Scheduler xử lý tự động.
 - Xóa topic là hard delete. Bản ghi `PAPER_TOPIC` liên quan bị xóa cascade. Dữ liệu `PAPER` không bị xóa.
 - Giới hạn đồ án: tối đa 10 topic/user, 5 keyword/topic, 10 paper/keyword/lần fetch.
-- Embedding model cố định: `sentence-transformers/all-MiniLM-L6-v2` → `vector(384)`.
+- Embedding model cố định: `BAAI/bge-small-en-v1.5` → `vector(384)`.
 
 ---
 
 ## 2. Tech Stack
 
 ### Frontend
-- ReactJS (Vite + TypeScript), Tailwind CSS, React Functional Components + Hooks, Axios với JWT interceptor.
+- React 19 (Vite 6 + TypeScript 5), Tailwind CSS v4, React Router v7, Fetch API (không dùng Axios).
 
 ### Backend
-- **Spring Boot 4.0.x** (Hibernate 7.x) — pin ở mức minor để đảm bảo tương thích dependency.
-- Spring Security 6 (JWT stateless), Spring Data JPA + Hibernate 7.x, MapStruct, Spring Cache + Caffeine.
+- **Spring Boot 4.0.6**, Java 21 (Hibernate 7.x).
+- Spring Security 6 (JWT stateless), Spring Data JPA + Hibernate 7.x, Spring Cache + Caffeine.
+- Manual `@Component` mapper (không dùng MapStruct — không tương thích Spring Boot 4.x).
 
 ### Database
 - PostgreSQL 15+ với extension `pgvector`.
@@ -29,19 +30,15 @@ Phạm vi và giới hạn:
 ### AI & External API
 | Thành phần | Service | Ghi chú |
 |---|---|---|
-| Embedding | HuggingFace Inference API — `all-MiniLM-L6-v2` | Output: `vector(384)`. Batch max 32. Retry 1 lần sau 30s nếu nhận 503 |
-| Summary + Score | Groq API — `llama3-8b-8192` | Single call cho cả summary + quality_score. Free tier ~30 RPM |
-| Paper Fetch | arXiv API (Atom/XML) | Rate limit 3 req/s. Delay 350ms. **Bắt buộc thêm `sortBy=submittedDate&sortOrder=descending`** để lấy paper mới nhất |
+| Embedding | HuggingFace Inference API — `BAAI/bge-small-en-v1.5` | Output: `vector(384)`. Batch max 32. Retry 1 lần sau 30s nếu nhận 503 |
+| Summary + Score | Groq API — `llama-3.1-8b-instant` | Single call cho cả summary + quality_score. Free tier ~30 RPM |
+| Paper Fetch | arXiv API (Atom/XML) | Rate limit ~1 req/s. Delay 1500ms. **Bắt buộc thêm `sortBy=submittedDate&sortOrder=descending`** để lấy paper mới nhất |
 
 ### Dependencies bổ sung quan trọng
 
 ```xml
-<!-- pgvector JPA mapping — Spring Boot 4.0.x / Hibernate 7.x -->
-<dependency>
-    <groupId>io.hypersistence</groupId>
-    <artifactId>hypersistence-utils-hibernate-70</artifactId>
-    <version>3.15.2</version>
-</dependency>
+<!-- pgvector JPA mapping: dùng custom VectorUserType (implements Hibernate UserType<float[]>)
+     thay vì hypersistence-utils — không tương thích Spring Boot 4.x / Hibernate 7.x -->
 
 <!-- JWT -->
 <dependency><groupId>io.jsonwebtoken</groupId><artifactId>jjwt-api</artifactId><version>0.12.6</version></dependency>
@@ -51,8 +48,8 @@ Phạm vi và giới hạn:
 
 ### Kiến trúc backend
 - Phân lớp: `Controller → DTO → Service → Repository → Entity`.
-- MapStruct: **bắt buộc** `@Mapping(target = "embedding", ignore = true)` trong tất cả Paper mapper. Unit test `assertNull(dto.getEmbedding())`.
-- `@ControllerAdvice` cho exception tập trung.
+- Manual `@Component` mapper: `PaperMapper`, `TopicMapper`, `NotificationMapper` — không expose `embedding` ra DTO.
+- `@ControllerAdvice` (`GlobalExceptionHandler`) cho exception tập trung.
 
 ---
 
@@ -90,7 +87,7 @@ Phạm vi và giới hạn:
 - UNIQUE `(user_id, name)`. `keywords`: VARCHAR(255), comma-separated, max 5.
 
 ### PAPER
-- `embedding` kiểu `vector(384)`, map bằng `@Type(VectorType.class)` với hypersistence-utils.
+- `embedding` kiểu `vector(384)`, map bằng `@Type(VectorUserType.class)` (custom `UserType<float[]>` + `PGobject`).
 - `original_paper_id` FK tự tham chiếu (`ON DELETE SET NULL`).
 - `last_retry_at`: timestamp lần Retry Scheduler xử lý gần nhất.
 - API list mặc định **chỉ trả `processing_status = 'DONE'`**.
@@ -131,7 +128,7 @@ public class SchedulerConfig implements SchedulingConfigurer {
 
 1. Lấy danh sách `TOPIC` đang `is_active = true`.
 2. Tách `keywords` của từng topic (max 5, parse bằng dấu phẩy).
-3. Gọi arXiv API theo từng keyword, lấy tối đa `max-results-per-keyword` paper. **URL phải bao gồm `sortBy=submittedDate&sortOrder=descending`** để đảm bảo lấy paper mới nhất. Delay 350ms giữa các request.
+3. Gọi arXiv API theo từng keyword, lấy tối đa `max-results-per-keyword` paper. **URL phải bao gồm `sortBy=submittedDate&sortOrder=descending`** để đảm bảo lấy paper mới nhất. Delay 1500ms giữa các request.
 4. Timeout mỗi request arXiv: 30 giây.
 5. Lỗi tạm thời (timeout, 5xx, 429): retry với exponential backoff, tối đa 2 lần.
 6. Lỗi vĩnh viễn (4xx trừ 429): bỏ keyword, ghi log.
@@ -149,7 +146,7 @@ public class SchedulerConfig implements SchedulingConfigurer {
 
 > **Transaction boundary:** mỗi paper trong `@Transactional(propagation = REQUIRES_NEW)`. Method orchestrate batch KHÔNG có `@Transactional` để tránh connection pool exhaustion với HikariCP.
 >
-> **Groq concurrency risk:** Retry Scheduler có thể overlap với Main Pipeline trong edge case (HuggingFace cold start kéo dài). Resilience4j RateLimiter tại `GroqApiClient` với hard limit 28 req/min là guard toàn cục.
+> **Groq concurrency:** SchedulerConfig dùng ThreadPoolTaskScheduler `poolSize=3` — Main và Retry có thể chạy đồng thời. Delay 2s/call + free tier ~30 RPM là giới hạn thực tế.
 
 ### 6.3. Retry Pipeline
 `@Scheduled(fixedDelay = 1800000)` — mỗi 30 phút tính từ khi run trước kết thúc.
@@ -264,25 +261,24 @@ jwt:
 scheduler:
   arxiv:
     max-results-per-keyword: 10
-    request-delay-ms: 350
+    request-delay-ms: 1500            # 1.5s — arXiv rate limit ~1 req/s
     timeout-seconds: 30
     # Bắt buộc thêm params này vào arXiv API URL
     sort-by: submittedDate
     sort-order: descending
   groq:
     call-delay-ms: 2000
-    rate-limit-rpm: 28
     transient-retry-delay-ms: 5000   # Retry 1 lần sau 5s cho 5xx/timeout
   retry:
     max-attempts: 3
 
 ai:
   huggingface:
-    model: sentence-transformers/all-MiniLM-L6-v2
+    model: BAAI/bge-small-en-v1.5     # feature-extraction, 384 dims
     batch-size: 32
     retry-wait-on-503-ms: 30000
   groq:
-    model: llama3-8b-8192
+    model: llama-3.1-8b-instant
     max-summary-length: 2000
 
 recommendation:

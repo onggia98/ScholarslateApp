@@ -4,6 +4,8 @@
 # Chạy: chmod +x test-api.sh && ./test-api.sh
 # ============================================================
 
+# Đổi BASE_URL khi migrate sang Render:
+# BASE="https://<app-name>.onrender.com/api"
 BASE="https://scholarslateapp-production.up.railway.app/api"
 GREEN='\033[0;32m'
 RED='\033[0;31m'
@@ -152,11 +154,11 @@ check "PATCH /notifications/read-all" "$R" "$(cat /tmp/b)"
 # ── 6. ADMIN ──────────────────────────────────────────────
 echo -e "\n${YELLOW}── Admin ──${NC}"
 
-R=$(curl -s -o /tmp/b -w "%{http_code}" "$BASE/admin/stats/trend" -H "$ADMIN_AUTH")
-check "GET /admin/stats/trend" "$R" "$(cat /tmp/b)"
-
 R=$(curl -s -o /tmp/b -w "%{http_code}" "$BASE/admin/papers/failed" -H "$ADMIN_AUTH")
 check "GET /admin/papers/failed" "$R" "$(cat /tmp/b)"
+
+R=$(curl -s -o /tmp/b -w "%{http_code}" -X POST "$BASE/admin/pipeline/trigger" -H "$ADMIN_AUTH")
+check "POST /admin/pipeline/trigger" "$R" "$(cat /tmp/b)"
 
 R=$(curl -s -o /tmp/b -w "%{http_code}" -X POST "$BASE/admin/pipeline/retry" -H "$ADMIN_AUTH")
 check "POST /admin/pipeline/retry" "$R" "$(cat /tmp/b)"
@@ -167,8 +169,8 @@ echo -e "\n${YELLOW}── Auth Protection (phải trả 401) ──${NC}"
 R=$(curl -s -o /tmp/b -w "%{http_code}" "$BASE/topics")
 check "GET /topics without token → 401" "$R" "$(cat /tmp/b)" "401"
 
-R=$(curl -s -o /tmp/b -w "%{http_code}" "$BASE/admin/stats/trend" -H "$AUTH")
-check "GET /admin/stats/trend with USER token → 403" "$R" "$(cat /tmp/b)" "403"
+R=$(curl -s -o /tmp/b -w "%{http_code}" "$BASE/admin/papers/failed" -H "$AUTH")
+check "GET /admin/papers/failed with USER token → 403" "$R" "$(cat /tmp/b)" "403"
 
 # ── SUMMARY ───────────────────────────────────────────────
 echo ""
